@@ -226,7 +226,7 @@ svg text{pointer-events:none;font-family:"Segoe UI Variable","Segoe UI",system-u
 .note{font-size:12px;color:var(--dp-faint)}
 code{font:12px/1.3 Consolas,"Cascadia Mono",monospace;background:#f1f3f4;border-radius:5px;padding:1px 4px}
 #w-info{width:380px}
-#w-legend{right:28px;bottom:28px;width:340px}
+#w-legend{right:28px;bottom:28px;width:400px}
 #w-area{right:28px;top:96px;width:440px}
 #w-check{left:calc(var(--side-w) + 44px);top:96px;width:440px}
 #w-help{left:calc(var(--side-w) + 60px);top:120px;width:410px}
@@ -271,7 +271,7 @@ tr.tot td{font-weight:600;border-bottom:0}
         <div id="flowTypes"></div></div></div>
   </div>
   <div class="side-foot">
-    <button class="fbtn" data-win="w-legend" title="Легенда"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="4" y="5" width="4" height="4" rx="1"/><rect x="4" y="15" width="4" height="4" rx="1"/><path d="M11 7h9M11 17h9"/></svg><span>Легенда</span></button>
+    <button class="fbtn" data-win="w-legend" title="Площади помещений"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="4" y="5" width="4" height="4" rx="1"/><rect x="4" y="15" width="4" height="4" rx="1"/><path d="M11 7h9M11 17h9"/></svg><span>Площади помещений</span></button>
     <button class="fbtn" data-win="w-area" title="Площади"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"/></svg><span>Площади</span></button>
     <button class="fbtn" data-win="w-check" title="Проверка"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.3 7.5 9.5 4.3-1.2 7.5-4.9 7.5-9.5V6L12 3Z"/><path d="m8.8 12.2 2.3 2.3 4.3-4.6"/></svg><span>Проверка</span></button>
     <button class="fbtn" data-win="w-help" title="Как читать"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6"/><circle cx="12" cy="17.2" r=".6" fill="currentColor"/></svg><span>Как читать</span></button>
@@ -300,7 +300,7 @@ tr.tot td{font-weight:600;border-bottom:0}
 </div>
 
 <section class="win glass" id="w-info" hidden><div class="win-head"><div class="t" id="infoT"></div><button class="x" title="Закрыть"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="m3 3 8 8M11 3l-8 8"/></svg></button></div><div class="win-body" id="infoB"></div></section>
-<section class="win glass" id="w-legend" hidden><div class="win-head"><div class="t">Легенда</div><button class="x" title="Закрыть"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="m3 3 8 8M11 3l-8 8"/></svg></button></div><div class="win-body"><div class="card"><div class="leg" id="legend"></div></div></div></section>
+<section class="win glass" id="w-legend" hidden><div class="win-head"><div class="t">Площади помещений<small id="legT"></small></div><button class="x" title="Закрыть"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="m3 3 8 8M11 3l-8 8"/></svg></button></div><div class="win-body" id="legend"></div></section>
 <section class="win glass" id="w-area" hidden><div class="win-head"><div class="t">Площади<small id="sumTitle"></small></div><button class="x" title="Закрыть"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="m3 3 8 8M11 3l-8 8"/></svg></button></div><div class="win-body" id="sumB"></div></section>
 <section class="win glass" id="w-check" hidden><div class="win-head"><div class="t">Проверка<small id="chkTitle"></small></div><button class="x" title="Закрыть"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="m3 3 8 8M11 3l-8 8"/></svg></button></div><div class="win-body" id="chkB"></div></section>
 <section class="win glass" id="w-help" hidden><div class="win-head"><div class="t">Как читать</div><button class="x" title="Закрыть"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="m3 3 8 8M11 3l-8 8"/></svg></button></div><div class="win-body">
@@ -342,7 +342,7 @@ const LIGHT={z2:1,z3:1,z4:1,z5:1,z6:1};
 // библиотека: пособие к СНиП 2.08.02-89, п. 3.115, табл. 26; Ф = 1 800 000, [М = 1 800, М = 1 980], м²
 const PROG={
   abon:{n:"Абонемент (читатели + сотрудники)",a:[678,747.8]},
-  avan:{n:"Авансал (читатели + сотрудники)",a:[450,495.5]},
+  avan:{n:"Аванзал (читатели + сотрудники)",a:[450,495.5]},
   cat:{n:"Каталоги, сотрудники каталогов, справочно-библиографический отдел",a:[503,521]},
   readU:{n:"Читальные залы учебного отделения",a:[1728,1900.8]},
   group:{n:"Помещения групповых занятий",a:[792,871.2]},
@@ -444,15 +444,15 @@ L("1",21,25.2,29.4,37.8,"z1","ctrl","Контроль","Пункт контро�
 L("1",-3,12.6,21,29.4,"z1","cloak","Гардероб","Гардероб читателей","У входа, до контроля (п. 3.108). Не входит в табл. 26.");
 L("1",12.6,21,12.6,21,"z1","cloak","Гардероб","Гардероб читателей","Вторая часть гардероба — между вестибюлем и лекционным залом.");
 L("1",12.6,21,21,29.4,"z1","bags","Портфели","Камера хранения портфелей","Сдача портфелей до контроля (табл. 26: 0,05 м² на место).",{p:"serv"});
-L("1",21,25.2,-1,21,"cor","hall0","Холл","Доконтрольный холл: абонементы и лекционный зал",
-  "Связывает вестибюль с абонементами и лекционным залом без прохода через контроль (п. 3.108); стеклянная стена в атриум.");
-L("1",-3,21,-1,9.6,"z2","lect","Лекционный зал 150","Лекционный зал на 150 мест",
-  "П. 3.103: при контингенте ≥ 7 500 студентов — 150 мест; доконтрольная зона (п. 3.108); без естественного света допустимо (СН РК п. 5.4.6.4); выходы в фойе и наружу.",{nl:true});
+L("1",21,25.2,9.6,21,"cor","hall0","Холл","Доконтрольный холл к лекционному залу",
+  "Связывает вестибюль с фойе и лекционным залом без прохода через контроль (п. 3.108).");
+L("1",-3,25.2,-1,9.6,"z2","lect","Лекционный зал","Лекционный зал (≈ 180 мест)",
+  "Увеличен до оси Б4 по эскизу архитектора (≈ 260 м²): п. 3.103 требует не меньше 150 мест при ≥ 7 500 студентах. Доконтрольная зона (п. 3.108); без естественного света допустимо (СН РК п. 5.4.6.4); выходы в фойе, холл и наружу.",{nl:true});
 L("1",4.2,21,9.6,12.6,"cor","foyer","Фойе","Фойе лекционного зала: санузлы, ЛК-1","Кулуар перед лекционным залом, связь с санузлами и выходом ЛК-1.");
 L("1",25.2,54.6,-1,12.6,"z1","abon","Абонементы","Абонементы учебной, научной и художественной литературы",
-  "Доконтрольная зона (п. 3.108) вдоль ЮЮВ-фасада, стекло в атриум; выдача у служебного коридора; выход наружу.",{p:"abon"});
+  "Вход из атриума, за контролем — по решению архитектора (п. 3.108 рекомендует абонементы до контроля; отступление). Вдоль ЮЮВ-фасада; выдача у служебного коридора; выход наружу.",{p:"abon"});
 L("1",25.2,58.8,12.6,16.8,"z1","abon","","Абонементы учебной, научной и художественной литературы",
-  "Часть абонемента вдоль атриума, пункт выдачи у служебного коридора.",{p:"abon"});
+  "Часть абонемента, открытая в атриум: здесь вход читателей и пункт выдачи у служебного коридора.",{p:"abon"});
 L("1",58.8,63,12.6,16.8,"cor","svcor1","","Служебный коридор: связь со служебным входом","Продолжение служебного коридора к служебному входу.");
 L("1",25.2,63,33.6,37.8,"cor","gal","Холл за контролем","Холл за контролем — галерея к каталогам, лифтам и служебному коридору",
   "Ось движения читателей за контролем вдоль атриума.");
@@ -537,8 +537,8 @@ ENTR.push(["LIB",2,1.2,"Переход (резерв)","*","2"]);
 FL.push({v:"*",f:"1",t:"stu",p:[["LIB",11,42],["LIB",17,36.5],["LIB",23,33.6],["LIB",27,35.7],["LIB",29.4,40.5]]});
 FL.push({v:"*",f:"1",t:"stu",p:[["LIB",23,33.6],["LIB",27,31],["LIB",33,24]]});
 FL.push({v:"*",f:"1",t:"stu",p:[["LIB",27,35.7],["LIB",40,35.7],["LIB",40,42]]});
-FL.push({v:"*",f:"1",t:"stu",p:[["LIB",17,36.5],["LIB",19.5,28],["LIB",23,20],["LIB",23,6],["LIB",33,6]]});
-FL.push({v:"*",f:"1",t:"stu",p:[["LIB",23,6],["LIB",17,6]]});
+FL.push({v:"*",f:"1",t:"stu",p:[["LIB",17,36.5],["LIB",19.5,28],["LIB",23,20],["LIB",23,11.1],["LIB",17,11.1],["LIB",17,6]]});
+FL.push({v:"*",f:"1",t:"stu",p:[["LIB",33,24],["LIB",36,16],["LIB",40,8]]});
 FL.push({v:"*",f:"1",t:"staff",p:[["LIB",67.2,-3],["LIB",67.2,8],["LIB",64,14.7],["LIB",60.9,20]]});
 FL.push({v:"*",f:"1",t:"cargo",p:[["LIB",89,12.4],["LIB",80,12.4],["LIB",73,16],["LIB",69,26.5]]});
 FL.push({v:"*",f:"1",t:"cargo",p:[["LIB",66,27.3],["LIB",60.9,27.3],["LIB",60.9,14.7],["LIB",56,14.7]]});
@@ -807,7 +807,7 @@ function render(){
   }
   const here=BK.filter(c=>has(c,S.f)).map(c=>BLD[c].n.toLowerCase()).join(", ");
   document.getElementById("cap").textContent=VN[S.v]+" · "+FN[S.f]+" · "+here+(VAR[S.v].length||COMMON.length?"":" · зоны не заполнены (заготовка)");
-  summary();check();syncButtons();
+  summary();check();roomAreas();syncButtons();
 }
 function show(b,isD,isO,x,y){
   const g=geom(b),z=ZONES[b.z],other=S.v==="V1"?"V2":"V1",fc=facade(b);
@@ -882,16 +882,29 @@ document.getElementById("cols").onchange=e=>{S.cols=e.target.checked;render();};
 document.getElementById("flows").onchange=e=>{S.flows=e.target.checked;render();};
 {const box=document.getElementById("flowTypes");for(const t in FT_){const b=document.createElement("button");b.className="ft";b.dataset.ft=t;
   b.innerHTML=`<i style="background:${FT_[t].c}"></i>${FT_[t].n}`;b.onclick=()=>{S.ft[t]=!S.ft[t];render();};box.appendChild(b);}}
-{const lg=document.getElementById("legend"),add=(i,s)=>lg.insertAdjacentHTML("beforeend",`<i style="${i}"></i><span>${s}</span>`);
-  for(const z in ZONES)add(`background:${ZONES[z].c}`,ZONES[z].n);
-  add("background:repeating-linear-gradient(45deg,#5DA9E9 0 3px,#d81b60 3px 4.5px);outline:1.5px solid #d81b60","<b>Стоит по-разному</b> — в обоих вариантах, но в разных зданиях или на разных этажах");
-  add("background:#5DA9E9;outline:1.5px dashed #d81b60","<b>Только в этом варианте</b>");
-  add("width:9px;height:9px;border-radius:1px;margin-left:5px;background:#2c3c37","Колонна 500 × 500 в узле сетки 8,4 × 8,4");
-  add("width:9px;height:9px;border-radius:1px;margin-left:5px;background:#8c6f86","Колонна по контуру — косые грани, скругления");
-  add("height:0;border-top:1.5px dashed #6f7a85;border-radius:0","Ось сетки: Р — ректорат, Б — библиотека");
-  add("background:repeating-linear-gradient(-45deg,#f4f5f6 0 3px,#dcdfe3 3px 4px);outline:1px solid #d5d9de","Кровля здания, которого на этаже нет");
-  add("height:0;border-top:2px dashed #2c3c37;border-radius:0","Грань без стены: проход из перехода (2 этаж); переход над проездом (1 этаж)");
-  for(const t in FT_)add(`height:3px;background:${FT_[t].c}`,"Поток: "+FT_[t].n.toLowerCase());}
+// окно «Площади помещений»: помещения текущего этажа и сводка по этажам (м² брутто, черновик)
+function roomAreas(){
+  const all=blocks(S.v).filter(b=>!b.bad&&geom(b).area>.5),here=all.filter(b=>b.f===S.f),sw=z=>`<i style="display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;background:${ZONES[z].c}"></i>`;
+  const ord={z1:1,z2:2,z3:3,z4:4,z5:5,z6:6,z7:7,cor:8,core:9};
+  let h="";
+  for(const c of BK){const bs=here.filter(b=>(b.in||b.c)===c);if(!bs.length)continue;const m=new Map();
+    for(const b of bs){const r=m.get(b.n)||{z:b.z,a:0};r.a+=geom(b).area;m.set(b.n,r);}
+    const rows=[...m.entries()].sort((p,q)=>(ord[p[1].z]-ord[q[1].z])||(q[1].a-p[1].a));
+    h+=`<div class="card"><div class="lbl">${BLD[c].n} · ${S.f} этаж</div><table><tr><th>Помещение</th><th>м²</th></tr>`+
+      rows.map(([n,r])=>`<tr><td>${sw(r.z)}${n}</td><td>${fmt(r.a)}</td></tr>`).join("")+
+      `<tr class="tot"><td>Итого этаж</td><td>${fmt(bs.reduce((s,b)=>s+geom(b).area,0))}</td></tr></table></div>`;}
+  // сводка по зданию: группы табл. 26 и прочие площади по этажам
+  for(const c of BK){const fl=BLD[c].floors,bs=all.filter(b=>(b.in||b.c)===c);if(!bs.length)continue;const g=new Map();
+    const grp=b=>b.p?(b.p==="store"&&/открытого/i.test(b.n)?"Фонд открытого доступа":b.p==="store"?"Закрытое книгохранилище":PROG[b.p].n):b.z==="core"?(/Санузл/.test(b.n)?"Санузлы":"Лестничные клетки, лифты"):/Атриум/.test(b.n)?"Атриум":b.z==="cor"?"Коридоры, холлы":b.n;
+    for(const b of bs){const k=grp(b),r=g.get(k)||{z:b.z,a:{}};r.a[b.f]=(r.a[b.f]||0)+geom(b).area;g.set(k,r);}
+    const tot={};for(const b of bs)tot[b.f]=(tot[b.f]||0)+geom(b).area;
+    h+=`<div class="card"><div class="lbl">${BLD[c].n}: все этажи</div><table><tr><th>Помещения</th>${fl.map(f=>`<th>${f} эт.</th>`).join("")}<th>Всего</th></tr>`+
+      [...g.entries()].sort((p,q)=>(ord[p[1].z]-ord[q[1].z])).map(([k,r])=>`<tr><td>${sw(r.z)}${k}</td>${fl.map(f=>`<td>${r.a[f]?fmt(r.a[f]):"—"}</td>`).join("")}<td>${fmt(Object.values(r.a).reduce((s,x)=>s+x,0))}</td></tr>`).join("")+
+      `<tr class="tot"><td>Итого</td>${fl.map(f=>`<td>${fmt(tot[f]||0)}</td>`).join("")}<td>${fmt(Object.values(tot).reduce((s,x)=>s+x,0))}</td></tr></table></div>`;}
+  h+=`<p class="note" style="margin:10px 4px 0">Площади — брутто внутри контура, черновик; цвет — функциональная зона. Полезная ≈ 0,88 от брутто.</p>`;
+  document.getElementById("legend").innerHTML=h||'<div class="card"><p class="note">На этаже нет помещений.</p></div>';
+  document.getElementById("legT").textContent="«"+VN[S.v]+"» · "+S.f+" этаж";
+}
 // начальное состояние из адреса: #v=V2&f=2&grid=0&cols=0&flows=0&diff=1&side=open&legend=0&check=1&help=1
 {const h=new URLSearchParams(location.hash.slice(1));if(VN[h.get("v")])S.v=h.get("v");if(FN[h.get("f")])S.f=h.get("f");
   for(const k of ["grid","cols","flows"])if(h.get(k)==="0")S[k]=false;
