@@ -366,7 +366,7 @@ const A_=(c,x,d)=>typeof x==="number"?x:ax(c,x,d);
 // блок-прямоугольник в осях здания c на этаже f: u0…u1, v0…v1 — метры или имена осей; обрезается по контуру здания
 // z — код зоны, k — ключ (строка или массив; одинаковая функция в двух вариантах — одинаковый ключ), s — подпись, n — название, w — почему здесь
 // o — опции: {nl:true} без дневного света по норме · {ori:["С","СВ","В","ЮВ"]} нужный фасад, сторона ±30° · {p:"readU"} группа табл. 26
-//            {xc:[["LIB",u0,u1,v0,v1]]} оставить только часть внутри этого прямоугольника · {pg:[[[u,v],…]]} — и внутри этих выпуклых многоугольников (косые помещения) · {in:"BR"} блок в осях c, а лежит в здании in
+//            {xc:[["LIB",u0,u1,v0,v1]]} оставить только часть внутри этого прямоугольника · {pg:[[[u,v],…]]} — и внутри этих выпуклых многоугольников (косые помещения) · {jn:true} — без белой обводки (части одного помещения) · {in:"BR"} блок в осях c, а лежит в здании in
 function R(c,f,u0,u1,v0,v1,z,k,s,n,w,o){
   f=String(f);const b=Object.assign({c,f,z,k:[].concat(k||n||s||"?"),s:s||"",n:n||s||"",w:w||""},o||{});
   const bad=m=>{b.err=(b.err?b.err+"; ":`«${b.n||"без названия"}» (${c}, этаж ${f}): `)+m;b.bad=true;};   // ошибка разметки — в окне «Проверка» своего варианта
@@ -605,7 +605,7 @@ function render(){
     const rawD=b.k.some(k=>dk.has(k))&&b.z!=="cor"&&b.z!=="core";
     const rawO=!rawD&&both()&&b.k.every(k=>ONLY.has(k))&&b.z!=="cor"&&b.z!=="core";
     const isD=S.diff&&rawD, isO=S.diff&&rawO;
-    const e=el("polygon",{points:pts(g.poly),fill:isD?`url(#dz-${b.z})`:ZONES[b.z].c,stroke:isD||isO?"#d81b60":"#ffffff","stroke-width":isD?.6:isO?.45:.25,style:"cursor:pointer"},gZ);
+    const e=el("polygon",{points:pts(g.poly),fill:isD?`url(#dz-${b.z})`:ZONES[b.z].c,stroke:isD||isO?"#d81b60":b.jn?ZONES[b.z].c:"#ffffff","stroke-width":isD?.6:isO?.45:.25,style:"cursor:pointer"},gZ);
     if(S.sel===b){e.setAttribute("stroke","#2c3c37");e.setAttribute("stroke-width",".8");}
     if(isO)e.setAttribute("stroke-dasharray","1.2 .7");
     if(S.diff&&S.only&&!isD&&!isO&&b.z!=="cor")e.setAttribute("opacity",.22);
