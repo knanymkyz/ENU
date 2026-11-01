@@ -1,0 +1,1061 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Библиотека ЕНУ, вариант А3</title>
+<!--
+Что это: заготовка зонирования корпуса «Ректорат + библиотека» (проект 207, кампус ЕНУ, Астана) для нейросети-исполнителя.
+  Контуры, этажи, переход, сетка осей и колонны уже внесены из модели; зоны пустые — их заполняет исполнитель.
+  Оформление — в стиле DP Hub (белая основа, неоморфизм того, что нажимается, мятное стекло меню и окон), как FEN_Zoning_v3.html.
+Когда использовать: передать исполнителю вместе с ADM_LIB_Zoning_BRIEF.md (тот же текст задания — ниже).
+Чем создано: Claude Code (АйДан), 2026-10-28. Геометрия — модель «Ректорат-административный блок» (Revit 2026), скрипт src/adm_template_data.py;
+  движок и оформление — из FEN_Zoning_v3.html, обобщены на три здания.
+
+==================== ЗАДАНИЕ ИСПОЛНИТЕЛЮ ====================
+## 1. Что от тебя нужно
+
+Заполнить в HTML **только раздел 3 «ЗОНИРОВАНИЕ»**: блоки зон, коридоры, ядра, входы, потоки — по этажам, в одном или двух вариантах. Разделы 1 (данные из модели), 2 (справочники) и 4 (движок, оформление) **не менять**. Детальной планировки не нужно: зоны, коридоры, ядра. У каждого блока — короткая подпись, полное название и **обоснование «почему здесь»** со ссылкой на норму, ТЗ или правило ниже. Если чего-то не хватает или правила противоречат — не выбирай молча: напиши в отчёте.
+
+## 2. Габариты и этажность (из модели, не менять)
+
+| Здание | Пятно | Этажи | Отметки | Кровля |
+|---|---|---|---|---|
+| Ректорат (южный, малый контур) | 1 333,0 м² | 1–3 | 1-й ±0,000 (h 6,0), 2-й +6,000, 3-й +10,500 (h 4,5) | +15,000 |
+| Библиотека (северный, большой контур) | 3 836,1 м² | 1–4 | то же + 4-й +15,000 | +19,500 |
+| Надземный переход | 129,2 м² | только 2 | пол +6,000 | +10,500 |
+
+- Углы контуров скруглены дугами R 5 м (два угла ректората — R 3 м).
+- Наружные стены — газоблок 200 мм, **наружная грань по контуру**; плиты 200 мм на −100 от уровня (условные, при пролёте 8,4 м будут толще).
+- **Переход** — 10 м шириной, соединяет северный угол ректората с юго-западным углом библиотеки на **2 этаже**. Примыкание к каждому зданию ≈ 12,9 м: дуга скругления 7,4 м — стен на 2 этаже нет, это проход в здание; прямой участок 5,5 м — по фасаду здания (стена в модели есть). Окон у перехода — только две длинные стороны по 16,6 м (СВ и ЮЗ). Под переходом на 1 этаже — **проезд** (≈ 5,7 м до низа), здания на 1 этаже разделены.
+- **Каркас** (предложение, в HTML — слои «Сетка осей» и «Колонны»): у каждого здания своя сетка, шаг 8,4 × 8,4 м, ориентация по длинным прямым фасадам (25,55° к осям модели); оси ректората Р1–Р5 / РА–РЖ, библиотеки Б1–Б11 / БА–БЖ; колонны 500 × 500, первые оси в 250 мм от прямых фасадов (колонна заподлицо с наружной гранью); на косых гранях — колонны по контуру. Ректорат 32 колонны, библиотека 73. Зоны и коридоры привязывай к осям.
+- Подвал не решён — не используй.
+
+## 3. Программа
+
+**Библиотека** — расчёт по пособию к СНиП 2.08.02-89 «Проектирование высших учебных заведений», табл. 26 (формулы дал архитектор). Фонд Ф = 1 800 000 ед. хранения; читательских мест М = 1 800 **или** 1 980 (уточняется). Площади помещений таблицы, м²:
+
+| Группа | М = 1 800 | М = 1 980 |
+|---|---:|---:|
+| Абонемент (читатели + сотрудники) | 678 | 747,8 |
+| Авансал (читатели + сотрудники) | 450 | 495,5 |
+| Каталоги, сотрудники каталогов, справочно-библиографический отдел | 503 | 521 |
+| Читальные залы учебного отделения | 1 728 | 1 900,8 |
+| Помещения групповых занятий | 792 | 871,2 |
+| Читальные залы научного отделения | 2 700 | 2 970 |
+| Аудиовизуальные залы, крупноформатная литература, редкие книги | 900 | 990 |
+| Книгохранилище: основное 2 700, компактное 450, открытый доступ 1 800, сотрудники 52 | 5 002 | 5 002 |
+| Обработка и служебные: МБА 78, комплектование 78, служебный каталог 112,5, лаборатории копирования и реставрации 360, служебно-производственные 540, хранение портфелей 90 / 99 | 1 258,5 | 1 267,5 |
+| **Итого по таблице** | **14 011,5** | **14 765,8** |
+
+Без лекционного зала, вестибюля, гардероба, санузлов, лестниц, коридоров, техники. ПЗ заказчика — 7 400 м² (вдвое меньше нормы) — расхождение решает архитектор; ориентир для раскладки — табл. 26.
+Ориентация (там же, п. 3.116): читательские помещения — В, С, ЮВ, СВ; книгохранение — С. Читальные залы — акустическая отделка (п. 3.117).
+
+**Ректорат** — ПЗ 5 500 м²; ТЗ п. 15: административное ядро 3 этажа, 1-й 6 м, типовой 4,5 м. На контуре 3 этажа дают ≈ 4 000 м² брутто — **дефицит ≈ 1 500**, покажи, что не помещается. Состава помещений ректората в документах нет — предложи по функциональным зонам ведущего (ректор и проректоры с приёмными, учёный совет / конференц-зал, учебное управление, отделы: кадры, бухгалтерия, международный, юридический, канцелярия, архив) и пометь как допущение.
+
+**Функциональные зоны ведущего** (на каждое здание): 1 Общественная (вестибюль, ресепшен, охрана, гардероб, зоны ожидания, выставочные пространства) · 2 Учебная · 3 Учебно-лабораторная · 4 Научно-исследовательская · 5 Административно-преподавательская (в т.ч. переговорные) · 6 Студенческая и рекреационная (коворкинги, самостоятельная работа, групповые) · 7 Вспомогательная и инженерно-техническая (санузлы, кладовые, серверные, венткамеры, электрощитовые, ПУИ, технические коридоры). В HTML зоны уже заданы цветами — используй коды z1–z7, коридоры `cor`, ядра `core`.
+
+## 4. Правила планировки (обязательные)
+
+1. **Дневной свет.** Помещение, которому нужен свет (аудитории и залы меньше 100 мест, читальные залы, групповые, кабинеты, лаборатории, компьютерные), должно иметь грань на **наружном фасаде**. В глубине без фасада — только то, что допускается без естественного освещения: актовые и конференц-залы, лекционные на 100+ мест, кулуары, кладовые, санузлы, техника, книгохранилище, приборные (пособие к СНиП 2.08.02-89 п. 3.40; СН РК 3.02-07-2014 п. 5.4.6.4) — такому блоку ставь `{nl:true}` и пиши в `w`, какая норма это допускает. Учебным помещениям глубже 8 м п. 3.41 **рекомендует** смешанный свет (верхний с боковым), а верхний свет есть только на последнем этаже — ниже держи глубину от окна ≤ 8 м или объясни. Самопроверка в HTML ловит помещения без фасада (ошибка) и глубину > 8 м (предупреждение).
+2. **Ядра по образцу** (учебные блоки IT University): лестничные клетки Н1 с воздушной зоной ≈ 3,5 × 7,5 м — не меньше двух на здание, в разных концах; блок санузлов одним участком ≈ 9 × 7,5 м (М ≈ 20, Ж ≈ 18, МГН ≈ 6, ПУИ ≈ 3 м², шлюз) на каждом этаже; тех. помещение и кроссовая ≈ 18 м² у ядра. Пути эвакуации проверь по нормам РК и опиши допущения.
+3. **Лифтовой узел** — один шаг осей на всю глубину участка: шахты у фасада, перед ними **карман ожидания** в стороне от потока коридора. В библиотеке — книгоподъёмник / грузовой лифт между книгохранилищем и выдачей.
+4. **Коридоры** продуманы: непрерывные, без пустых холлов и «открытых» остатков; между коридорами — участки, в которые вписываются помещения зоны. Вход в здание и переход — на оси коридоров. Не ставь ядро туда, где улица/коридор упирается в здание.
+5. **Ничего сверх программы**: без рекреаций-карманов, кафе, музеев «от себя» — только программа выше и зоны ведущего.
+6. **Переход на 2 этаже** — галерея-коридор между зданиями; в зданиях на 2 этаже в местах примыкания — холлы, не помещения.
+7. Площади — брутто зон, черновик; ТЭП ведёт другой специалист — не выдавай цифры за окончательные.
+
+## 5. Правила оформления
+
+- Оболочка в стиле DP Hub (белая основа, неоморфизм того, что нажимается, мятное стекло меню и окон) уже готова — **не меняй CSS и движок**.
+- Цвета зон фиксированы (раздел 2). Подпись блока `s` — коротко (≤ 16 знаков), полное название `n`, обоснование `w` — 1–3 предложения со ссылкой на норму, ТЗ или правило.
+- Два варианта (необязательно): V1 — твоё предложение, V2 — альтернатива; одинаковые функции помечай одинаковым ключом `k` — переключатель «Отличия» покажет, что стоит по-разному.
+
+## 6. Схема данных (раздел 3 HTML)
+
+```js
+// прямоугольник в осях здания: u — вдоль сетки от оси 1 (Р1 / Б1), v — от оси А (РА / БА), метры; обрезается по контуру
+R("LIB","1", 0, 16.8, 0, 7.5, "z1","vest","Вестибюль","Вестибюль, ресепшен","Почему здесь…")
+// то же между осями (имена осей из AX)
+RG("ADM","2","Р2","Р4","РД","РЖ", "z5","rector","Ректор","Ректор и приёмная","…")
+// переход: оси от его южного угла, u 0…11,9, v 0…21,1
+R("BR","2", 0, 12, 0, 22, "cor","bridge","Переход","Галерея-переход","…")
+```
+
+Координаты `u`, `v` — метры или имена осей, в том числе со сдвигом: `"Б2+1.5"`, `"БЖ+0.25"`. `u` — по цифровым осям, `v` — по буквенным. Ключ `k` — строка или массив строк.
+
+Опции последним аргументом:
+
+| Опция | Что делает |
+|---|---|
+| `{nl:true}` | помещению по норме можно без дневного света — проверка света его пропускает; норму назвать в `w` |
+| `{ori:["С","СВ","В","ЮВ"]}` | нужный фасад — проверка предупредит, если у блока нет фасада, смотрящего на одну из этих сторон ±30° (читальные залы, книгохранение — п. 3.116). Стороны света в окне блока — по 16 румбам: корпус повёрнут на 25,5°, его фасады смотрят на ССЗ, ВСВ, ЮЮВ, ЗЮЗ |
+| `{p:"readU"}` | группа табл. 26 — блок попадёт в сверку программы библиотеки (`abon`, `avan`, `cat`, `readU`, `group`, `readS`, `av`, `store`, `serv`) |
+| `{xc:[["LIB",u0,u1,v0,v1]]}` | оставить от блока только часть внутри этого прямоугольника (вырез по соседнему коридору) |
+| `{in:"BR"}` | блок задан в осях одного здания, а лежит в другом |
+
+Блоки, одинаковые в обоих вариантах, — в `COMMON`; варианты — `V1`, `V2`. Входы — `ENTR`, потоки — `FL`, вертикальные связи — `MARKS`, примечания — `NOTES`, свои подписи зданий — `LABELS` (форматы — в комментариях раздела 3).
+
+## 7. Самопроверка и сдача
+
+Кнопка «Проверка» (функция `selfCheck("V1")`): ошибок 0 — нет наложений, каждый этаж каждого здания заполнен блоками на ≥ 99 %, нет помещений без фасада, которым нужен свет. Предупреждения (глубина, ориентация, пустое обоснование) — разобрать и объяснить в отчёте. Окно «Площади» — суммы по зонам и зданиям и сверка с табл. 26. Пути эвакуации проверка не смотрит — опиши их сам.
+
+Сдать: тот же HTML + отчёт: что решено, допущения, что не поместилось, противоречия.
+==============================================================
+-->
+<style>
+:root{
+ --dp-bg:#ffffff;--dp-face:linear-gradient(145deg,#ffffff 0%,#f5f6f7 100%);--dp-face-hover:linear-gradient(145deg,#ffffff 0%,#f8f9fa 100%);
+ --dp-well:#f1f2f4;--dp-ink:#2c3c37;--dp-muted:#5a6470;--dp-faint:#646d78;--dp-line:#e8eaed;
+ --dp-accent:#304f49;--dp-accent-face:linear-gradient(135deg,#4d7d70 0%,#2f5149 100%);--dp-accent-fill:linear-gradient(90deg,#6f9a88 0%,#3f685d 100%);
+ --neo-rgb:58,64,74;
+ --neo-1:-3px -3px 8px #fff,3px 4px 10px rgba(var(--neo-rgb),.13),0 1px 2px rgba(var(--neo-rgb),.08),inset 0 1px 0 rgba(255,255,255,.95);
+ --neo-2:-6px -6px 14px #fff,6px 8px 18px rgba(var(--neo-rgb),.12),0 2px 4px rgba(var(--neo-rgb),.06),inset 0 1px 0 rgba(255,255,255,.95);
+ --neo-in:inset 2px 3px 6px rgba(var(--neo-rgb),.14),inset -2px -2px 5px rgba(255,255,255,.95),inset 0 0 0 1px rgba(var(--neo-rgb),.04);
+ --neo-accent:0 8px 18px -6px rgba(47,90,79,.55),0 2px 4px rgba(47,81,73,.25),inset 0 1px 0 rgba(255,255,255,.22),inset 0 -1px 0 rgba(0,0,0,.15);
+ --glass-fill:linear-gradient(160deg,rgba(236,248,241,.44) 0%,rgba(222,240,230,.18) 48%,rgba(230,245,237,.30) 100%);
+ --glass-sheen:linear-gradient(118deg,rgba(255,255,255,.5) 0%,rgba(255,255,255,.12) 26%,rgba(255,255,255,0) 40%),radial-gradient(120% 60% at 0% 0%,rgba(255,255,255,.45) 0%,rgba(255,255,255,0) 55%);
+ --glass-grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .2 0 0 0 0 .32 0 0 0 0 .26 0 0 0 .06 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+ --glass:var(--glass-sheen),var(--glass-grain),var(--glass-fill);
+ --glass-dense:var(--glass-sheen),var(--glass-grain),linear-gradient(160deg,rgba(240,250,244,.66) 0%,rgba(230,245,237,.48) 100%);
+ --glass-filter:blur(40px) saturate(200%) brightness(1.1);
+ --glass-rim:inset 0 1px 0 rgba(255,255,255,.95),inset 1px 0 0 rgba(255,255,255,.55),inset -1px 0 0 rgba(255,255,255,.3),inset 0 -1px 0 rgba(255,255,255,.4),inset 0 0 28px rgba(255,255,255,.28);
+ --glass-edge:rgba(255,255,255,.72);
+ --glass-lift:0 0 0 .5px rgba(40,80,60,.16),0 2px 6px -2px rgba(30,45,40,.08),0 18px 44px -14px rgba(30,45,40,.22),0 40px 80px -30px rgba(30,45,40,.18);
+ --glass-lift-sm:0 0 0 .5px rgba(40,80,60,.16),0 2px 4px -1px rgba(30,45,40,.08),0 12px 26px -10px rgba(30,45,40,.22);
+ --glass-card-shadow:0 1px 2px rgba(var(--neo-rgb),.07),0 8px 22px -8px rgba(var(--neo-rgb),.22);
+ --glass-card-shadow-hover:0 1px 2px rgba(var(--neo-rgb),.08),0 12px 28px -8px rgba(var(--neo-rgb),.28);
+ --diff:#d81b60;--bad:#b03a2e;--warn:#c98a16;
+ --side-w:76px;--side-open:300px;
+}
+@media (prefers-reduced-transparency:reduce){:root{--glass-fill:linear-gradient(165deg,#fff,#f6f9f7);--glass-filter:none}}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--dp-bg);color:var(--dp-ink);font:14px/1.45 "Segoe UI Variable","Segoe UI",system-ui,sans-serif;overflow:hidden}
+button{font:inherit;color:inherit}
+svg text{pointer-events:none;font-family:"Segoe UI Variable","Segoe UI",system-ui,sans-serif}
+.glass{border:1px solid var(--glass-edge);background:var(--glass);backdrop-filter:var(--glass-filter);-webkit-backdrop-filter:var(--glass-filter);box-shadow:var(--glass-lift),var(--glass-rim);color:var(--dp-ink)}
+.glass-dense{border:1px solid var(--glass-edge);background:var(--glass-dense);backdrop-filter:var(--glass-filter);-webkit-backdrop-filter:var(--glass-filter);box-shadow:var(--glass-lift-sm),var(--glass-rim);color:var(--dp-ink)}
+
+/* ───── Рабочая область: заголовок и плита плана ───── */
+#work{position:absolute;inset:0 0 0 calc(var(--side-w) + 28px);display:flex;flex-direction:column;padding:14px 24px 24px 10px}
+.top{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;padding:6px 16px 14px}
+.top .acts{display:flex;gap:12px}
+.crumb{font-size:12px;color:var(--dp-faint)}
+.top h1{margin:2px 0 0;font-size:20px;font-weight:600;color:var(--dp-ink)}
+.cap{font-size:12.5px;color:var(--dp-muted);margin-top:2px}
+.pill{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 16px;border:0;border-radius:22px;background:var(--dp-face);box-shadow:var(--neo-1);color:var(--dp-accent);font-weight:500;cursor:pointer;white-space:nowrap}
+.pill:hover{box-shadow:var(--neo-2)}
+.pill.on,.pill:active{background:var(--dp-well);box-shadow:var(--neo-in)}
+.pill svg{width:17px;height:17px}
+.cnt{display:inline-grid;place-items:center;min-width:22px;height:20px;padding:0 7px;border-radius:10px;background:var(--dp-accent-fill);color:#fff;font-size:11.5px;font-weight:600}
+.cnt.bad{background:var(--bad)}.cnt.warn{background:var(--warn)}.cnt.idle{background:#c5cbd1}
+.slab{position:relative;flex:1;border-radius:24px;background:var(--dp-face);box-shadow:var(--neo-2);overflow:hidden;touch-action:none}
+#svg{width:100%;height:100%;display:block;cursor:grab}
+#svg.drag{cursor:grabbing}
+.nav{position:absolute;right:16px;top:16px;display:flex;flex-direction:column;gap:10px}
+.neo-btn{width:42px;height:42px;border:0;border-radius:21px;background:var(--dp-face);box-shadow:var(--neo-1);color:var(--dp-accent);cursor:pointer;display:grid;place-items:center}
+.neo-btn:hover{background:var(--dp-face-hover);box-shadow:var(--neo-2)}
+.neo-btn:active{background:var(--dp-well);box-shadow:var(--neo-in)}
+.neo-btn svg{width:18px;height:18px}
+#north{position:absolute;right:70px;top:18px;width:24px;height:36px;pointer-events:none}
+#scale{position:absolute;left:20px;bottom:16px;font-size:11.5px;color:var(--dp-muted);pointer-events:none}
+#scale i{display:block;height:6px;border:1.5px solid var(--dp-ink);border-top:0;margin-top:3px;border-radius:0 0 2px 2px}
+
+/* ───── Боковое меню: стекло поверх плана ───── */
+#side{position:fixed;left:14px;top:14px;bottom:14px;width:var(--side-w);border-radius:24px;z-index:20;display:flex;flex-direction:column;overflow:hidden;transition:width .26s cubic-bezier(.3,.7,.2,1)}
+#side.open{width:var(--side-open)}
+.brand{height:46px;margin:16px 12px 10px;border:0;border-radius:23px;background:#fff;box-shadow:var(--glass-card-shadow);cursor:pointer;display:flex;align-items:center;justify-content:center;color:#24423b;font:600 15px/1 Bahnschrift,"Bahnschrift SemiBold","Segoe UI",sans-serif;letter-spacing:.14em;white-space:nowrap;overflow:hidden}
+.brand i{font:italic 400 17px/1 "Sitka Text","Sitka Small",Georgia,serif;color:#3f685d;letter-spacing:0;margin:0 .06em}
+.brand .full{display:none}#side.open .brand .full{display:inline}#side.open .brand .mono{display:none}
+.brand:hover{box-shadow:var(--glass-card-shadow-hover)}
+.side-scroll{flex:1;overflow-y:auto;overflow-x:hidden;padding:4px 12px 8px;scrollbar-width:thin;scrollbar-color:rgba(var(--neo-rgb),.25) transparent}
+.grp{display:flex;gap:10px;align-items:flex-start;padding:6px 0}
+.g-ico{flex:0 0 50px;height:40px;border:0;border-radius:14px;background:transparent;color:var(--dp-accent);display:grid;place-items:center;cursor:pointer}
+.g-ico:hover{background:rgba(255,255,255,.55)}
+.g-ico svg{width:19px;height:19px}
+.g-body{flex:1;min-width:0;display:none}
+#side.open .g-body{display:block}
+#side.open .g-ico{flex-basis:28px;height:28px;margin-top:-1px;cursor:default;background:none}
+.g-body h4{margin:4px 0 6px;font-size:11.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--dp-faint)}
+.seg{display:flex;flex-wrap:wrap;gap:4px}
+.opt{border:0;background:transparent;color:var(--dp-muted);padding:7px 11px;border-radius:14px;cursor:pointer;font-size:13px;text-align:left}
+.opt:hover{background:rgba(255,255,255,.55)}
+.opt.on{background:#fff;box-shadow:var(--glass-card-shadow);color:var(--dp-accent);font-weight:600}
+.opt:disabled{opacity:.35;cursor:default}
+.seg.floors .opt{min-width:36px;text-align:center;padding:7px 0}
+.sw-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:5px 2px;font-size:13px;color:var(--dp-ink);cursor:pointer}
+.sw-row.dim{color:var(--dp-faint)}
+.switch{appearance:none;-webkit-appearance:none;flex:0 0 38px;width:38px;height:22px;margin:0;border-radius:11px;background:rgba(var(--neo-rgb),.18);position:relative;cursor:pointer;transition:background .2s}
+.switch::after{content:"";position:absolute;left:2px;top:2px;width:18px;height:18px;border-radius:9px;background:linear-gradient(145deg,#fff,#eef2ef);box-shadow:0 1px 3px rgba(var(--neo-rgb),.35);transition:left .2s}
+.switch:checked{background:var(--dp-accent-fill)}
+.switch:checked::after{left:18px}
+.switch:disabled{opacity:.4;cursor:default}
+.ft{display:flex;align-items:center;gap:8px;width:100%;border:0;background:transparent;border-radius:12px;padding:5px 8px;font-size:12.5px;color:var(--dp-faint);cursor:pointer;text-align:left}
+.ft i{flex:0 0 18px;height:3px;border-radius:2px;opacity:.45}
+.ft.on{background:#fff;box-shadow:var(--glass-card-shadow);color:var(--dp-ink)}
+.ft.on i{opacity:1}
+/* свёрнутое меню: этажи столбиком всегда под рукой */
+.rail-floors{display:flex;flex-direction:column;gap:4px;align-items:center;padding:6px 0}
+#side.open .rail-floors{display:none}
+.rail-floors .opt{width:44px;text-align:center;padding:7px 0}
+.side-foot{padding:8px 12px 14px;display:flex;flex-direction:column;gap:6px;border-top:1px solid rgba(255,255,255,.6)}
+.fbtn{display:flex;align-items:center;gap:12px;height:42px;border:0;border-radius:21px;background:transparent;color:var(--dp-accent);cursor:pointer;padding:0 14px;white-space:nowrap;overflow:hidden}
+.fbtn svg{flex:0 0 19px;width:19px;height:19px}
+.fbtn span{display:none;color:var(--dp-ink);font-size:13.5px}
+#side.open .fbtn span{display:inline}
+.fbtn:hover{background:rgba(255,255,255,.55)}
+.fbtn.on{background:#fff;box-shadow:var(--glass-card-shadow)}
+
+/* ───── Окна: стекло, без затемнения фона ───── */
+.win{position:fixed;z-index:40;width:360px;max-width:calc(100vw - 28px);max-height:calc(100vh - 40px);border-radius:22px;display:flex;flex-direction:column}
+.win[hidden]{display:none}
+.win-head{display:flex;align-items:flex-start;gap:10px;padding:14px 12px 8px 18px;cursor:move;user-select:none}
+.win-head .t{flex:1;font-weight:600;font-size:15px;line-height:1.3}
+.win-head .t small{display:block;font-weight:400;font-size:12px;color:var(--dp-muted);margin-top:2px}
+.x{flex:0 0 30px;width:30px;height:30px;border:0;border-radius:15px;background:#fff;box-shadow:var(--glass-card-shadow);cursor:pointer;color:var(--dp-ink);display:grid;place-items:center}
+.x:hover{box-shadow:var(--glass-card-shadow-hover)}
+.x svg{width:13px;height:13px}
+.win-body{overflow:auto;padding:2px 14px 16px;scrollbar-width:thin}
+.card{background:#fff;border-radius:14px;box-shadow:var(--glass-card-shadow);padding:10px 12px;margin-top:8px;font-size:13px}
+.card p{margin:4px 0}
+.card .lbl{font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--dp-faint);margin-bottom:4px}
+.card.oth{box-shadow:var(--glass-card-shadow),inset 3px 0 0 var(--diff)}
+.chip{display:inline-block;padding:2px 9px;border-radius:10px;font-size:11.5px;color:#1d2622;margin:2px 4px 0 0;background:#eef0f2}
+.chip.diff{background:var(--diff);color:#fff}
+.meta{font-size:12px;color:var(--dp-muted)}
+.note{font-size:12px;color:var(--dp-faint)}
+code{font:12px/1.3 Consolas,"Cascadia Mono",monospace;background:#f1f3f4;border-radius:5px;padding:1px 4px}
+#w-info{width:380px}
+#w-legend{right:28px;bottom:28px;width:400px}
+#w-area{right:28px;top:96px;width:440px}
+#w-check{left:calc(var(--side-w) + 44px);top:96px;width:440px}
+#w-help{left:calc(var(--side-w) + 60px);top:120px;width:410px}
+.leg{display:grid;grid-template-columns:22px 1fr;gap:6px 10px;align-items:center;font-size:12.5px}
+.leg i{display:block;width:20px;height:12px;border-radius:4px}
+table{border-collapse:collapse;width:100%;font-size:12.5px}
+td,th{padding:5px 4px;border-bottom:1px solid var(--dp-line);text-align:right;font-weight:400}
+th{color:var(--dp-faint);font-size:11.5px}
+td:first-child,th:first-child{text-align:left}
+tr.tot td{font-weight:600;border-bottom:0}
+.neg{color:var(--bad)}.pos{color:#3f685d}.wrn{color:var(--warn)}
+.iss{display:flex;gap:9px;align-items:flex-start;padding:7px 4px;border-bottom:1px solid var(--dp-line);font-size:12.5px;border-radius:8px}
+.iss:last-child{border-bottom:0}
+.iss.go{cursor:pointer}.iss.go:hover{background:rgba(77,125,112,.07)}
+.dot{flex:0 0 8px;height:8px;border-radius:4px;margin-top:6px}
+.dot.e{background:var(--bad)}.dot.w{background:var(--warn)}
+#tip{position:fixed;z-index:60;pointer-events:none;padding:6px 11px;border-radius:12px;font-size:12.5px;max-width:280px}
+#tip[hidden]{display:none}
+@media (max-width:760px){#work{padding:10px 10px 12px 4px}.top h1{font-size:17px}.top .pill span{display:none}.win{width:calc(100vw - 28px)!important;left:14px!important;right:auto!important}}
+</style>
+</head>
+<body>
+<nav id="side" class="glass" aria-label="Настройки плана">
+  <button class="brand" id="brand" title="Развернуть меню"><span class="mono">D<i>&amp;</i>P</span><span class="full">DAN<i>&amp;</i>PARTNERS</span></button>
+  <div class="side-scroll">
+    <div class="grp"><button class="g-ico" title="Вариант"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="11" height="11" rx="2.5"/><rect x="10" y="9" width="11" height="11" rx="2.5"/></svg></button>
+      <div class="g-body"><h4>Вариант</h4><div class="seg" id="vars"></div></div></div>
+    <div class="grp"><button class="g-ico" title="Этаж"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 3 8l9 5 9-5-9-5Z"/><path d="m3 13 9 5 9-5"/><path d="m3 17.5 9 5 9-5" opacity=".55"/></svg></button>
+      <div class="g-body"><h4>Этаж</h4><div class="seg floors"><button class="opt" data-f="0" title="Подвал">П</button><button class="opt" data-f="1">1</button><button class="opt" data-f="2">2</button><button class="opt" data-f="3">3</button><button class="opt" data-f="4">4</button></div></div></div>
+    <div class="rail-floors"><button class="opt" data-f="4">4</button><button class="opt" data-f="3">3</button><button class="opt" data-f="2">2</button><button class="opt" data-f="1">1</button><button class="opt" data-f="0" title="Подвал">П</button></div>
+    <div class="grp"><button class="g-ico" title="Каркас"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v18M16 3v18M3 8h18M3 16h18" opacity=".6"/><rect x="6.5" y="6.5" width="3" height="3" rx=".6" fill="currentColor"/><rect x="14.5" y="14.5" width="3" height="3" rx=".6" fill="currentColor"/></svg></button>
+      <div class="g-body"><h4>Каркас</h4>
+        <label class="sw-row"><span>Сетка осей</span><input type="checkbox" class="switch" id="grid" checked></label>
+        <label class="sw-row"><span>Колонны</span><input type="checkbox" class="switch" id="cols" checked></label></div></div>
+    <div class="grp"><button class="g-ico" title="Отличия вариантов"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M12 4v16"/><path d="m14.5 8 5 5M14.5 12.5l5 5" opacity=".7"/></svg></button>
+      <div class="g-body"><h4>Отличия вариантов</h4>
+        <label class="sw-row" id="diffRow"><span>Показать</span><input type="checkbox" class="switch" id="showDiff"></label>
+        <label class="sw-row" id="onlyRow"><span>Только отличия</span><input type="checkbox" class="switch" id="onlyDiff"></label></div></div>
+    <div class="grp"><button class="g-ico" title="Потоки"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h12"/><path d="m12 4 3 3-3 3"/><path d="M21 17H9"/><path d="m12 14-3 3 3 3"/></svg></button>
+      <div class="g-body"><h4>Потоки</h4>
+        <label class="sw-row"><span>Показать слой</span><input type="checkbox" class="switch" id="flows" checked></label>
+        <div id="flowTypes"></div></div></div>
+  </div>
+  <div class="side-foot">
+    <button class="fbtn" data-win="w-legend" title="Площади помещений"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="4" y="5" width="4" height="4" rx="1"/><rect x="4" y="15" width="4" height="4" rx="1"/><path d="M11 7h9M11 17h9"/></svg><span>Площади помещений</span></button>
+    <button class="fbtn" data-win="w-area" title="Площади"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"/></svg><span>Площади</span></button>
+    <button class="fbtn" data-win="w-check" title="Проверка"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.3 7.5 9.5 4.3-1.2 7.5-4.9 7.5-9.5V6L12 3Z"/><path d="m8.8 12.2 2.3 2.3 4.3-4.6"/></svg><span>Проверка</span></button>
+    <button class="fbtn" data-win="w-help" title="Как читать"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6"/><circle cx="12" cy="17.2" r=".6" fill="currentColor"/></svg><span>Как читать</span></button>
+    <button class="fbtn" id="collapse" title="Развернуть меню"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path id="colPath" d="m10 7 5 5-5 5"/></svg><span>Свернуть меню</span></button>
+  </div>
+</nav>
+
+<div id="work">
+  <div class="top">
+    <div><div class="crumb">Проект 207 · кампус ЕНУ · корпус «Ректорат + библиотека»</div><h1>Зонирование ректората и библиотеки</h1><div class="cap" id="cap"></div></div>
+    <div class="acts">
+      <button class="pill" data-win="w-check" title="Самопроверка варианта"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.3 7.5 9.5 4.3-1.2 7.5-4.9 7.5-9.5V6L12 3Z"/><path d="m8.8 12.2 2.3 2.3 4.3-4.6"/></svg><span>Проверка</span><b class="cnt idle" id="chkCnt">—</b></button>
+      <button class="pill" data-win="w-area" title="Площади варианта"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"/></svg><span>Площади</span></button>
+    </div>
+  </div>
+  <div class="slab" id="stage">
+    <svg id="svg" xmlns="http://www.w3.org/2000/svg"></svg>
+    <svg id="north" viewBox="-6 -9 12 17"><path d="M0,-4 L2.2,4 L0,2.6 L-2.2,4 z" fill="#2c3c37"/><text x="0" y="-5" font-size="5" text-anchor="middle" font-weight="700" fill="#2c3c37">С</text></svg>
+    <div class="nav">
+      <button class="neo-btn" id="zin" title="Приблизить"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+      <button class="neo-btn" id="zout" title="Отдалить"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/></svg></button>
+      <button class="neo-btn" id="zfit" title="Весь план"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V5h4M20 9V5h-4M4 15v4h4M20 15v4h-4"/></svg></button>
+    </div>
+    <div id="scale"></div>
+  </div>
+</div>
+
+<section class="win glass" id="w-info" hidden><div class="win-head"><div class="t" id="infoT"></div><button class="x" title="Закрыть"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="m3 3 8 8M11 3l-8 8"/></svg></button></div><div class="win-body" id="infoB"></div></section>
+<section class="win glass" id="w-legend" hidden><div class="win-head"><div class="t">Площади помещений<small id="legT"></small></div><button class="x" title="Закрыть"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="m3 3 8 8M11 3l-8 8"/></svg></button></div><div class="win-body" id="legend"></div></section>
+<section class="win glass" id="w-area" hidden><div class="win-head"><div class="t">Площади<small id="sumTitle"></small></div><button class="x" title="Закрыть"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="m3 3 8 8M11 3l-8 8"/></svg></button></div><div class="win-body" id="sumB"></div></section>
+<section class="win glass" id="w-check" hidden><div class="win-head"><div class="t">Проверка<small id="chkTitle"></small></div><button class="x" title="Закрыть"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="m3 3 8 8M11 3l-8 8"/></svg></button></div><div class="win-body" id="chkB"></div></section>
+<section class="win glass" id="w-help" hidden><div class="win-head"><div class="t">Как читать</div><button class="x" title="Закрыть"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="m3 3 8 8M11 3l-8 8"/></svg></button></div><div class="win-body">
+  <div class="card"><p>Это <b>заготовка</b>: контуры зданий, этажи, переход, оси и колонны — из модели Revit; зоны заполняет исполнитель по заданию в начале файла (то же — в <code>ADM_LIB_Zoning_BRIEF.md</code>).</p></div>
+  <div class="card"><p>Слева — меню: вариант, этаж, каркас, отличия, потоки. Щелчок по «D&amp;P» или по значку раздела разворачивает меню, номера этажей видны и в свёрнутом.</p></div>
+  <div class="card"><p>План: колесо мыши — масштаб у курсора, перетаскивание — сдвиг, двумя пальцами — масштаб на сенсоре; кнопки справа — приблизить, отдалить, весь план. Север — вверх (ось Y модели). Наведение — название зоны, щелчок — окно: почему зона здесь, на какие стороны света у неё фасад, где она в другом варианте.</p></div>
+  <div class="card"><p>Штрихпунктир с марками — оси сетки 8,4 × 8,4 м: <b>Р</b> — ректорат, <b>Б</b> — библиотека. Квадраты 500 × 500 — колонны: тёмные — в узлах сетки, лиловые — по контуру (косые грани и скругления). Серая штриховка — кровля здания, которого на этом этаже нет. На 1 этаже пунктир — переход над проездом; на 2 этаже пунктир на скруглениях — проходы из перехода в здания, стен там нет.</p></div>
+  <div class="card"><p>«Отличия → показать» (когда заполнены оба варианта): <b style="color:var(--diff)">розовая штриховка</b> — помещение стоит в вариантах по-разному; <span style="color:var(--diff)">пунктирная рамка</span> — есть только в этом варианте.</p></div>
+  <div class="card"><p>«Проверка» — наложения блоков, заполнение каждого этажа, дневной свет и ориентация; щелчок по строке ведёт к месту на плане. Число на кнопке — ошибки (красное) или предупреждения (жёлтое).</p></div>
+  <div class="card"><p>Окна перетаскиваются за шапку. Нужный вид открывается ссылкой: <code>#v=V2&amp;f=2&amp;diff=1&amp;grid=0</code>.</p></div></div></section>
+<div id="tip" class="glass-dense" hidden></div>
+
+<script>
+"use strict";
+// ════════════ РАЗДЕЛ 1. ДАННЫЕ ИЗ МОДЕЛИ — НЕ МЕНЯТЬ ════════════
+// Revit 2026, модель «Ректорат-административный блок», 2026-10-28. Координаты — мм, оси модели (x — восток, y — север).
+// P — контуры зданий по наружной грани стен (дуги разбиты на отрезки): ADM — ректорат, LIB — библиотека, BR — надземный переход.
+// FR — система осей здания: O — начало (узел Р1/РА у ректората, Б1/БА у библиотеки; у перехода — его южный угол), u, v — орты (u вдоль осей-букв, 25,55° к оси x).
+// AX — оси сетки 8,4 × 8,4, метры от начала: U — цифровые (Р1…, Б1…), V — буквенные (РА…, БА…).
+// COLS — колонны 500 × 500: [u, v, "g" — в узле сетки | "c" — по контуру]. AREA — площадь пятна, м². OPEN — грани без стен на этаже (проходы из перехода в здания).
+const P={"ADM":[[831277,-103272],[831058,-103384],[830845,-103506],[830638,-103638],[830438,-103780],[830245,-103932],[830060,-104093],[829883,-104263],[829715,-104441],[829555,-104628],[829405,-104822],[829264,-105023],[829134,-105231],[829014,-105445],[828904,-105664],[828806,-105889],[828719,-106118],[828642,-106352],[828578,-106589],[828525,-106828],[828484,-107070],[828455,-107314],[828438,-107559],[828433,-107804],[828440,-108050],[828459,-108294],[828490,-108538],[828533,-108779],[828588,-109018],[828655,-109255],[828732,-109487],[828822,-109716],[828922,-109940],[839544,-132158],[839654,-132374],[839774,-132585],[839904,-132790],[840044,-132988],[840194,-133179],[840353,-133362],[840520,-133538],[840696,-133705],[840879,-133864],[841070,-134013],[841268,-134153],[841473,-134283],[841684,-134404],[841900,-134513],[842122,-134613],[842348,-134701],[842578,-134778],[842811,-134844],[866299,-140876],[866484,-140917],[866671,-140947],[866859,-140964],[867048,-140970],[867237,-140964],[867425,-140946],[867612,-140916],[867796,-140875],[867978,-140822],[868155,-140758],[868329,-140682],[868497,-140596],[868659,-140499],[868816,-140393],[868964,-140276],[869106,-140151],[869239,-140017],[869364,-139874],[874707,-133370],[874825,-133217],[874932,-133057],[875029,-132890],[875115,-132718],[875190,-132540],[875253,-132358],[875305,-132172],[875344,-131983],[875371,-131792],[875386,-131600],[875388,-131407],[875378,-131214],[875356,-131023],[875321,-130833],[875275,-130646],[875216,-130462],[875146,-130282],[875064,-130108],[874971,-129939],[855378,-96805],[855247,-96596],[855106,-96393],[854954,-96197],[854794,-96009],[854624,-95830],[854446,-95659],[854260,-95496],[854065,-95344],[853864,-95201],[853655,-95068],[853441,-94946],[853220,-94834],[852994,-94734],[852764,-94644],[852530,-94567],[852291,-94501],[852050,-94446],[851807,-94404],[851562,-94374],[851315,-94356],[851068,-94350],[850821,-94357],[850575,-94375],[850330,-94406],[850086,-94449],[849845,-94504],[849607,-94570],[849373,-94648],[849143,-94738],[848917,-94839]],"LIB":[[841989,-84851],[910036,-52320],[910255,-52209],[910468,-52087],[910674,-51955],[910874,-51813],[911067,-51661],[911252,-51500],[911430,-51330],[911598,-51152],[911758,-50965],[911908,-50771],[912048,-50570],[912179,-50362],[912299,-50148],[912408,-49928],[912507,-49704],[912594,-49474],[912670,-49241],[912735,-49004],[912787,-48764],[912828,-48522],[912857,-48279],[912874,-48034],[912879,-47789],[912872,-47543],[912853,-47299],[912822,-47055],[912779,-46814],[912724,-46574],[912658,-46338],[912580,-46105],[912491,-45877],[912390,-45653],[898009,-15570],[897895,-15345],[897769,-15127],[897633,-14915],[897486,-14710],[897329,-14514],[897163,-14325],[896987,-14144],[896802,-13973],[896609,-13812],[896408,-13660],[896199,-13519],[895984,-13388],[895762,-13268],[895535,-13160],[895302,-13063],[895065,-12978],[894824,-12905],[894580,-12845],[894332,-12796],[894083,-12761],[893832,-12738],[893581,-12727],[893329,-12729],[893078,-12744],[892827,-12772],[892578,-12812],[846164,-21496],[845924,-21547],[845687,-21610],[845453,-21684],[845223,-21770],[844998,-21867],[844777,-21974],[844562,-22093],[844354,-22222],[844152,-22361],[843956,-22510],[843769,-22668],[843589,-22835],[843418,-23011],[843255,-23195],[843102,-23386],[842959,-23585],[842825,-23791],[842702,-24003],[842589,-24221],[842487,-24444],[842396,-24672],[842316,-24904],[828894,-67382],[828796,-67604],[828709,-67831],[828634,-68062],[828570,-68296],[828517,-68533],[828476,-68773],[828446,-69014],[828428,-69256],[828422,-69499],[828428,-69742],[828446,-69984],[828475,-70225],[828516,-70464],[828569,-70701],[828633,-70936],[828708,-71167],[828794,-71394],[828892,-71616],[829000,-71834],[829118,-72046],[835528,-82885],[835659,-83094],[835800,-83297],[835952,-83493],[836112,-83680],[836282,-83860],[836460,-84031],[836646,-84193],[836841,-84346],[837042,-84489],[837250,-84622],[837465,-84744],[837686,-84856],[837911,-84956],[838142,-85045],[838376,-85123],[838614,-85189],[838856,-85244],[839099,-85286],[839344,-85316],[839591,-85334],[839838,-85340],[840085,-85333],[840331,-85315],[840576,-85284],[840820,-85241],[841061,-85186],[841298,-85120],[841533,-85042],[841763,-84952]],"BR":[[855378,-96805],[846916,-82495],[841989,-84851],[841763,-84952],[841533,-85042],[841298,-85120],[841061,-85186],[840820,-85241],[840576,-85284],[840331,-85315],[840085,-85333],[839838,-85340],[839591,-85334],[839344,-85316],[839099,-85286],[838856,-85244],[838614,-85189],[838376,-85123],[838142,-85045],[837911,-84956],[837686,-84856],[837465,-84744],[837250,-84622],[837042,-84489],[836841,-84346],[836646,-84193],[836460,-84031],[836282,-83860],[836112,-83680],[835952,-83493],[835800,-83297],[835659,-83094],[835528,-82885],[843990,-97195],[848917,-94839],[849143,-94738],[849373,-94648],[849607,-94570],[849845,-94504],[850086,-94449],[850330,-94406],[850575,-94375],[850821,-94357],[851068,-94350],[851315,-94356],[851562,-94374],[851807,-94404],[852050,-94446],[852291,-94501],[852530,-94567],[852764,-94644],[852994,-94734],[853220,-94834],[853441,-94946],[853655,-95068],[853864,-95201],[854065,-95344],[854260,-95496],[854446,-95659],[854624,-95830],[854794,-96009],[854954,-96197],[855106,-96393],[855247,-96596]]};
+const FR={"ADM":{"O":[848836.8,-151017.8],"u":[0.9022062,0.4313049],"v":[-0.4313049,0.9022062]},"LIB":{"O":[838428.2,-86275.8],"u":[0.9022062,0.4313049],"v":[-0.4313049,0.9022062]},"BR":{"O":[844637.6,-101939.6],"u":[0.9022062,0.4313049],"v":[-0.4313049,0.9022062]}};
+const AX={"ADM":{"U":[["Р1",0.0],["Р2",8.4],["Р3",16.8],["Р4",25.2],["Р5",33.6]],"V":[["РА",0.0],["РБ",8.4],["РВ",16.8],["РГ",25.2],["РД",33.6],["РЕ",42.0],["РЖ",50.4]]},"LIB":{"U":[["Б1",0.0],["Б2",8.4],["Б3",16.8],["Б4",25.2],["Б5",33.6],["Б6",42.0],["Б7",50.4],["Б8",58.8],["Б9",67.2],["Б10",75.6],["Б11",84.0]],"V":[["БА",0.0],["ББ",8.4],["БВ",16.8],["БГ",25.2],["БД",33.6],["БЕ",42.0],["БЖ",50.4]]}};
+const COLS={"ADM":[[8.4,16.8,"g"],[8.4,25.2,"g"],[8.4,33.6,"g"],[8.4,42.0,"g"],[16.8,8.4,"g"],[16.8,16.8,"g"],[16.8,25.2,"g"],[16.8,33.6,"g"],[16.8,42.0,"g"],[25.2,8.4,"g"],[25.2,16.8,"g"],[25.2,25.2,"g"],[25.2,33.6,"g"],[25.2,42.0,"g"],[8.4,50.4,"c"],[16.8,50.4,"c"],[3.272,50.163,"c"],[0.237,47.128,"c"],[-0.0,25.2,"c"],[-0.0,33.6,"c"],[-0.0,42.0,"c"],[0.238,19.545,"c"],[8.561,11.635,"c"],[16.961,4.599,"c"],[12.194,8.592,"c"],[25.094,2.303,"c"],[32.363,8.378,"c"],[31.621,16.778,"c"],[30.879,25.178,"c"],[30.138,33.578,"c"],[29.396,41.978,"c"],[25.78,50.163,"c"]],"LIB":[[8.4,8.4,"g"],[8.4,16.8,"g"],[8.4,25.2,"g"],[16.8,8.4,"g"],[16.8,16.8,"g"],[16.8,25.2,"g"],[16.8,33.6,"g"],[25.2,8.4,"g"],[25.2,16.8,"g"],[25.2,25.2,"g"],[25.2,33.6,"g"],[25.2,42.0,"g"],[33.6,8.4,"g"],[33.6,16.8,"g"],[33.6,25.2,"g"],[33.6,33.6,"g"],[33.6,42.0,"g"],[33.6,50.4,"g"],[42.0,8.4,"g"],[42.0,16.8,"g"],[42.0,25.2,"g"],[42.0,33.6,"g"],[42.0,42.0,"g"],[50.4,8.4,"g"],[50.4,16.8,"g"],[50.4,25.2,"g"],[50.4,33.6,"g"],[50.4,42.0,"g"],[58.8,8.4,"g"],[58.8,16.8,"g"],[58.8,25.2,"g"],[58.8,33.6,"g"],[58.8,42.0,"g"],[67.2,8.4,"g"],[67.2,16.8,"g"],[67.2,25.2,"g"],[67.2,33.6,"g"],[67.2,42.0,"g"],[75.6,8.4,"g"],[75.6,16.8,"g"],[75.6,25.2,"g"],[75.6,33.6,"g"],[8.4,-0.0,"c"],[16.8,-0.0,"c"],[25.2,-0.0,"c"],[33.6,-0.0,"c"],[42.0,-0.0,"c"],[50.4,-0.0,"c"],[58.8,-0.0,"c"],[67.2,-0.0,"c"],[75.6,-0.0,"c"],[80.728,0.237,"c"],[83.763,3.272,"c"],[84.0,8.4,"c"],[84.0,16.8,"c"],[84.0,25.2,"c"],[84.0,33.6,"c"],[83.763,39.57,"c"],[41.935,52.976,"c"],[50.335,50.732,"c"],[58.735,48.489,"c"],[67.135,46.246,"c"],[75.535,44.002,"c"],[33.602,55.026,"c"],[0.183,21.472,"c"],[8.583,30.453,"c"],[16.983,39.434,"c"],[25.383,48.414,"c"],[3.509,25.029,"c"],[11.366,33.429,"c"],[-1.266,8.422,"c"],[-2.008,16.822,"c"],[0.19,1.696,"c"]]};
+const AREA={"ADM":1333.0,"LIB":3836.1,"BR":129.2};
+const OPEN=[{"f":"2","pts":[[855378,-96805],[855247,-96596],[855106,-96393],[854954,-96197],[854794,-96009],[854624,-95830],[854446,-95659],[854260,-95496],[854065,-95344],[853864,-95201],[853655,-95068],[853441,-94946],[853220,-94834],[852994,-94734],[852764,-94644],[852530,-94567],[852291,-94501],[852050,-94446],[851807,-94404],[851562,-94374],[851315,-94356],[851068,-94350],[850821,-94357],[850575,-94375],[850330,-94406],[850086,-94449],[849845,-94504],[849607,-94570],[849373,-94648],[849143,-94738],[848917,-94839]]},{"f":"2","pts":[[841989,-84851],[841763,-84952],[841533,-85042],[841298,-85120],[841061,-85186],[840820,-85241],[840576,-85284],[840331,-85315],[840085,-85333],[839838,-85340],[839591,-85334],[839344,-85316],[839099,-85286],[838856,-85244],[838614,-85189],[838376,-85123],[838142,-85045],[837911,-84956],[837686,-84856],[837465,-84744],[837250,-84622],[837042,-84489],[836841,-84346],[836646,-84193],[836460,-84031],[836282,-83860],[836112,-83680],[835952,-83493],[835800,-83297],[835659,-83094],[835528,-82885]]}];
+
+// ════════════ РАЗДЕЛ 2. СПРАВОЧНИКИ И ПОМОЩНИКИ — НЕ МЕНЯТЬ ════════════
+const BLD={ADM:{n:"Ректорат",floors:["1","2","3"]},LIB:{n:"Библиотека",floors:["0","1","2","3","4"]},BR:{n:"Надземный переход",floors:["2"]}};
+const FN={"0":"Подвал −4,500 (h 4,5 — допущение)","1":"1 этаж ±0,000 (h 6,0)","2":"2 этаж +6,000 (h 4,5)","3":"3 этаж +10,500 (h 4,5)","4":"4 этаж +15,000 (h 4,5)"};
+const ZONES={
+  z1:{n:"1 Общественная",c:"#F2C14E"}, z2:{n:"2 Учебная",c:"#5DA9E9"}, z3:{n:"3 Учебно-лабораторная",c:"#3CC0A8"},
+  z4:{n:"4 Научно-исследовательская",c:"#9B7FD6"}, z5:{n:"5 Административно-преподавательская",c:"#F08A6B"},
+  z6:{n:"6 Студенческая и рекреационная",c:"#9CCC65"}, z7:{n:"7 Вспомогательная и инженерно-техническая",c:"#A9AFB6"},
+  cor:{n:"Коридоры, холлы, галерея перехода",c:"#ECE6DC"}, core:{n:"Ядра: ЛК, шахты лифтов, санузлы, техника",c:"#45474B"}
+};
+// зоны, которым по умолчанию нужен дневной свет (пособие к СНиП 2.08.02-89 п. 3.40); исключение — опция {nl:true} с обоснованием в w
+const LIGHT={z2:1,z3:1,z4:1,z5:1,z6:1};
+// библиотека: пособие к СНиП 2.08.02-89, п. 3.115, табл. 26; Ф = 1 800 000, [М = 1 800, М = 1 980], м²
+const PROG={
+  abon:{n:"Абонемент (читатели + сотрудники)",a:[678,747.8]},
+  avan:{n:"Аванзал (читатели + сотрудники)",a:[450,495.5]},
+  cat:{n:"Каталоги, сотрудники каталогов, справочно-библиографический отдел",a:[503,521]},
+  readU:{n:"Читальные залы учебного отделения",a:[1728,1900.8]},
+  group:{n:"Помещения групповых занятий",a:[792,871.2]},
+  readS:{n:"Читальные залы научного отделения",a:[2700,2970]},
+  av:{n:"Аудиовизуальные залы, крупноформатная литература, редкие книги",a:[900,990]},
+  store:{n:"Книгохранилище: основное, компактное, открытый доступ, сотрудники",a:[5002,5002]},
+  serv:{n:"Обработка и служебные (МБА, комплектование, служебный каталог, копирование и реставрация, служебно-производственные, портфели)",a:[1258.5,1267.5]}
+};
+const PZ={ADM:5500,LIB:7400};   // ПЗ заказчика, м²
+const FT_={stu:{n:"Читатели и студенты",c:"#1565C0",w:.55,d:""},staff:{n:"Сотрудники",c:"#2E7D32",w:.45,d:"1.6 .7"},
+  guest:{n:"Посетители ректората",c:"#8E24AA",w:.45,d:".4 .7"},cargo:{n:"Книги и грузы",c:"#EF6C00",w:.55,d:""}};
+
+// координата оси: "Б2" → 8.4; со сдвигом "Б2+1.5", "БВ-0.25"; d — "U" (цифровые оси) или "V" (буквенные)
+function ax(c,name,d){
+  const m=String(name).trim().match(/^([^+\-−\s]+)\s*(?:([+\-−])\s*(\d+(?:[.,]\d+)?))?$/);
+  if(!m||!AX[c])return NaN;
+  const a=(d?AX[c][d]:[...AX[c].U,...AX[c].V]).find(q=>q[0]===m[1]);if(!a)return NaN;
+  return a[1]+(m[2]?(m[2]==="+"?1:-1)*parseFloat(m[3].replace(",",".")):0);
+}
+const A_=(c,x,d)=>typeof x==="number"?x:ax(c,x,d);
+// блок-прямоугольник в осях здания c на этаже f: u0…u1, v0…v1 — метры или имена осей; обрезается по контуру здания
+// z — код зоны, k — ключ (строка или массив; одинаковая функция в двух вариантах — одинаковый ключ), s — подпись, n — название, w — почему здесь
+// o — опции: {nl:true} без дневного света по норме · {ori:["С","СВ","В","ЮВ"]} нужный фасад, сторона ±30° · {p:"readU"} группа табл. 26
+//            {xc:[["LIB",u0,u1,v0,v1]]} оставить только часть внутри этого прямоугольника · {pg:[[[u,v],…]]} — и внутри этих выпуклых многоугольников (косые помещения) · {jn:true} — без белой обводки (части одного помещения) · {in:"BR"} блок в осях c, а лежит в здании in
+function R(c,f,u0,u1,v0,v1,z,k,s,n,w,o){
+  f=String(f);const b=Object.assign({c,f,z,k:[].concat(k||n||s||"?"),s:s||"",n:n||s||"",w:w||""},o||{});
+  const bad=m=>{b.err=(b.err?b.err+"; ":`«${b.n||"без названия"}» (${c}, этаж ${f}): `)+m;b.bad=true;};   // ошибка разметки — в окне «Проверка» своего варианта
+  const box=b.in||c;
+  if(!BLD[c]||!BLD[box])bad(`здание «${BLD[c]?box:c}» — нет такого (ADM, LIB, BR)`);
+  else if(!BLD[box].floors.includes(f))bad(`у здания «${BLD[box].n}» нет этажа ${f} (есть ${BLD[box].floors.join(", ")})`);
+  if(!ZONES[z])bad(`зона «${z}» — нет такой (z1…z7, cor, core)`);
+  if(b.p&&!PROG[b.p])bad(`группа табл. 26 «${b.p}» — нет такой (${Object.keys(PROG).join(", ")})`);
+  if(!b.bad){const u=[A_(c,u0,"U"),A_(c,u1,"U")],v=[A_(c,v0,"V"),A_(c,v1,"V")];
+    if([...u,...v].some(x=>!Number.isFinite(x)))bad("координаты или имена осей не распознаны (u — цифровые оси, v — буквенные)");
+    else{b.u=u.sort((p,q)=>p-q);b.v=v.sort((p,q)=>p-q);}}
+  return b;
+}
+const RG=R;   // то же, запись между осями: RG("LIB","2","Б2","Б4","БВ","БГ", …)
+
+// ════════════ РАЗДЕЛ 3. ЗОНИРОВАНИЕ — ЗАПОЛНЯЕТ ИСПОЛНИТЕЛЬ ════════════
+// Исполнитель: Claude Code (агент А3), 01.11.2026. ВАРИАНТ А3 — «кольца по контуру» 2К, исправленные по отчёту А1 и системе А3 (agents/A3/SYSTEM.md).
+// Главное отличие от 2К: нет атриума; два лифтовых узла (СЗ и ЮВ); ЛК-1 ≥ 3,8 × 7,8 в чистоте; зоны безопасности МГН у ЛК и лифтов;
+// на 1 этаже гардероб 22,5 × 10,5, лекционный зал у юга, каталоги и СБО с окнами, одна зона за контролем; подвал: хранение в поясах у коридора.
+// Ссылки: «п. 3.xxx» — пособие к СНиП 2.08.02-89; «СН РК» — СН РК 3.02-07-2014; СП РК — по файлам коллеги (review_AiDan).
+const VN={V1:"Вариант А3 — кольца по контуру, два лифтовых узла",V2:"—"};
+const COMMON=[],V1=[],V2=[],ENTR=[],FL=[],MARKS=[],NOTES=[],LABELS=[];
+const L=(f,u0,u1,v0,v1,z,k,s,n,w,o)=>V1.push(R("LIB",f,u0,u1,v0,v1,z,k,s,n,w,o));
+const ORI={ori:["С","СВ","В","ЮВ"]};
+const LF=["1","2","3","4"], LF0=["0","1","2","3","4"], UP=["2","3","4"];
+
+// ── линии, параллельные фасадам (как в 2К): d — расстояние внутрь от фасада, м ──
+const solve=(a1,b1,c1,a2,b2,c2)=>{const D=a1*b2-a2*b1;return [(c1*b2-c2*b1)/D,(a1*c2-a2*c1)/D];};
+const Q=d=>{const SW=[(d-14.833+0.6855*d)/0.7281,d], SE=[84.2-d,d], NE=[84.2-d,(62.059-d-0.2552*(84.2-d))/0.967],
+  NW=solve(0.7281,-0.6855,d-14.833,-0.2552,-0.967,d-62.059);return {SW,SE,NE,NW};};
+const sideP=(s,d0,d1)=>{const a=Q(d0),b=Q(d1);
+  return s==="S"?[a.SW,a.SE,b.SE,b.SW]:s==="E"?[a.SE,a.NE,b.NE,b.SE]:s==="N"?[a.NE,a.NW,b.NW,b.NE]:[a.NW,a.SW,b.SW,b.NW];};
+const quad=d=>{const q=Q(d);return [q.SW,q.SE,q.NE,q.NW];};
+const TDIR=[0.6855,0.7281],TNRM=[0.7281,-0.6855];      // t — вдоль ЗСЗ-фасада
+const strip=(t0,t1)=>[[t0*TDIR[0]-40*TNRM[0],t0*TDIR[1]-40*TNRM[1]],[t1*TDIR[0]-40*TNRM[0],t1*TDIR[1]-40*TNRM[1]],[t1*TDIR[0]+40*TNRM[0],t1*TDIR[1]+40*TNRM[1]],[t0*TDIR[0]+40*TNRM[0],t0*TDIR[1]+40*TNRM[1]]];
+const NDIR=[0.967,-0.2552],NNRM=[0.2552,0.967];        // tN — вдоль С-фасада
+const stripN=(t0,t1)=>[[t0*NDIR[0]-150*NNRM[0],t0*NDIR[1]-150*NNRM[1]],[t1*NDIR[0]-150*NNRM[0],t1*NDIR[1]-150*NNRM[1]],[t1*NDIR[0]+150*NNRM[0],t1*NDIR[1]+150*NNRM[1]],[t0*NDIR[0]+150*NNRM[0],t0*NDIR[1]+150*NNRM[1]]];
+const PB=(f,box,pgs,z,k,s,n,w,o)=>L(f,box[0],box[1],box[2],box[3],z,k,s,n,w,Object.assign({},o||{},{pg:pgs}));
+const ALL=[-5,90,-5,60];
+const BAND=-3, CI=8.4, CO=11.4, OI=17.4;   // фасад · коридор 8,4–11,4 · открытый доступ 11,4–17,4 · хранилище > 17,4
+const J={jn:true}, NL={nl:true};
+const WS=(t0,t1)=>[sideP("W",BAND,CI),strip(t0,t1)];      // полоса у ЗСЗ-фасада
+const WC_=(t0,t1)=>[sideP("W",CI,CO),strip(t0,t1)];       // западный коридор
+const WO=(t0,t1,d0,d1)=>[sideP("W",d0||CO,d1||OI),strip(t0,t1)]; // западный пояс ОД
+const NSt=(t0,t1)=>[sideP("N",BAND,CI),stripN(t0,t1)];     // полоса у С-фасада
+const NC=(t0,t1)=>[sideP("N",CI,CO),stripN(t0,t1)];       // северный коридор
+const NO=[sideP("N",CO,OI)];                              // северный пояс ОД
+const SO=[sideP("S",CO,OI)];                              // южный пояс ОД
+const EO=[sideP("E",CO,OI)];                              // восточный пояс ОД
+const QC=[quad(CO)], QO=[quad(OI)];
+const pocketW="Световой карман: окно в наружной стене, открыт в коридор на всю ширину; участки коридора между источниками света ≤ 24 м (СП РК 3.02-107 п. 4.3.3.1, п. 3.13); служит и зоной отдыха (решение архитектора).";
+
+// ═════════ ЯДРА — на всех этажах в одном месте ═════════
+for(const f of LF0){
+  const b=f==="0";
+  L(f,-3,6.6,12.6,16.8,"core","st1","ЛК-1","Лестничная клетка Л1 (ЗЮЗ), марши 1,6 м",
+    b?"Обособленный выход из подвала наружу, глухая перегородка 1-го типа до промежуточной площадки 1–2 эт. (СН РК 3.02-07 п. 5.3.2.5; ТР-405 п. 185).":
+    "8,7 × 4,2 м брутто → ≈ 8,2 × 3,8 в чистоте ≥ 7,8 × 3,8 (2 марша 15 + 15, на 1 эт. 3 марша 14 + 13 + 13, ступень 150 × 300 — устраняет А1 Е-1). Окно в ЗЮЗ-фасаде на каждом этаже (п. 5.3.2.7), выход прямо наружу; остеклённая дверь в холл — источник света (п. 3.13).");
+  L(f,50.4,54.6,-1,8.4,"core","st4","ЛК-4","Лестничная клетка Л1 (ЮЮВ), марши 1,6 м",
+    b?"Обособленный выход из подвала (п. 5.3.2.5).":"8,6 × 4,2 м брутто; окно в ЮЮВ-фасаде; выход наружу. На 1 этаже — только дверь наружу (нет обхода контроля). Рядом карман 4,2 м ≥ ½ глубины ЛК.");
+  PB(f,[42,46.2,-5,60],QO,"core","score","Служ. ядро","Служебное ядро: 2 книгоподъёмника, грузовой лифт, ЛК-5 (Н2, подпор)",
+    "Между отсеками хранилища, от подвала до 4 этажа (V2_TASK § 4): книги из хранилищ к выдачам этажей, к реставрации и от обработки. В подвале лифты ядра открываются в тамбур-шлюз с подпором внутри ядра (ТР-405 п. 178).",NL);
+  PB(f,ALL,[sideP("W",14.2,OI),strip(46,52)],"core","liftA","Лифты А",b?"Приямки пассажирских лифтов узла А (без остановки в подвале)":"Лифтовой узел А: 2 лифта МГН ≥ 1 600 кг (шахты 3,1 × 3,2)",
+    b?"Лифты читателей в подвал не опускаются — тамбур-шлюз не нужен (ТР-405 п. 178).":"Узел у СЗ части кольца; второй узел — Б на ЮВ: до лифта ≤ 50 м с любой точки (СП РК 3.02-107 п. 4.3.3.9: ≤ 60). Шахты граничат с холлом, зоной безопасности, хранилищем — не с залами (СН РК 3.02-07 п. 5.4.4.6).",NL);
+  L(f,69.6,72.8,14.4,17.4,"core","liftB","Лифт Б",b?"Приямок лифта Б (без остановки в подвале)":"Лифтовой узел Б: лифт МГН ≥ 1 600 кг (шахта 3,2 × 3,0)",
+    b?"Без остановки в подвале.":"ЮВ угол кольца; дверь в восточный коридор; рядом зона безопасности МГН Б. На 1 этаже открывается в служебную зону по пропуску.",NL);
+}
+for(const f of LF){
+  PB(f,ALL,NSt(40.4,44.6),"core","st2","ЛК-2","Лестничная клетка Л1 (С), марши 1,6 м","8,4 × 4,2 м брутто (≈ 7,9 × 3,8 в чистоте); окно в С-фасаде; выход наружу; рядом карман 4,2 м.");
+  PB(f,[-5,90,11.4,15.6],[sideP("E",BAND,CI)],"core","st3","ЛК-3","Лестничная клетка Л1 (ВСВ), марши 1,6 м","8,4 × 4,2 м брутто; окно в ВСВ-фасаде; выход наружу; остеклённая дверь — свет южному и восточному коридорам.");
+}
+// подвал: ЛК-2, ЛК-3 тоже спускаются — 4 обособленных выхода
+PB("0",ALL,NSt(40.4,44.6),"core","st2","ЛК-2","Лестничная клетка Л1 (С) — выход из подвала","Обособленный выход наружу, глухая перегородка 1-го типа (п. 5.3.2.5).");
+PB("0",[-5,90,11.4,15.6],[sideP("E",BAND,CI)],"core","st3","ЛК-3","Лестничная клетка Л1 (ВСВ) — выход из подвала","Обособленный выход наружу (п. 5.3.2.5); рядом станция пожаротушения — выход в ЛК с выходом наружу.");
+
+// ═════════ 2–4 ЭТАЖИ ═════════
+for(const f of UP){
+  const F2=f==="2",F3=f==="3",F4=f==="4";
+  const rd=F2?{z:"z6",p:"readU",s:"Чит. зал уч.",n:"Читальный зал учебного отделения"}:{z:"z4",p:"readS",s:"Чит. зал науч.",n:"Читальный зал научного отделения"};
+  const gr=F4?{z:"z4",p:"av",s:"Аудиовизуал.",n:"Зал аудиовизуального обслуживания и медиатека"}:{z:"z6",p:"group",s:"Групповые",n:"Кабинеты групповых занятий"};
+  const sv=F4?{z:"z4",p:"av",s:"Аудиовизуал.",n:"Зал аудиовизуального обслуживания"}:rd;   // юг 4 этажа — АВ-залы
+  const w100=F2?"≤ 100 мест по брутто (2,4 м² на место, п. 3.112).":"≤ 100 мест (3,0 м² на место, п. 3.112).";
+  // ── юг (ЮЮВ) ──
+  if(F2)L(f,-3,8.4,-1,8.4,"cor","brhall","Холл перехода","Холл примыкания надземного перехода (резерв)",
+    "Переход из ректората — 2 этаж, ЮЗ угол (закреплено); без поста — ректорат закрыт для посторонних, холл выходит прямо в зону за контролем. Стена и двери 1-го типа к переходу; переход не считается эвакуационным выходом (СП РК 3.02-107 п. 4.2.1.13; ТР-405 п. 186).");
+  else if(F3)L(f,-3,8.4,-1,8.4,"z6","buf","Буфет","Буфет читателей (за контролем) и зона отдыха",
+    "Решение архитектора: буфет можно, за контролем; мокрое над холлом перехода (2 эт.), не над хранилищем и залами (СП РК 3.02-120 п. 4.4.10.11). ЮЗ угол — не читальный зал, поэтому не входит в 20 % запада.");
+  else L(f,-3,8.4,-1,8.4,"z7","avfund","Фонд АВ","Фонд аудиовизуальных материалов и аппаратная",
+    "ЮЗ угол 4 этажа: хранение носителей и аппаратная АВ-залов, без постоянных читательских мест — не входит в 20 % запада; без дневного света допустимо (хранение, п. 5.4.6.5).",{p:"av",...NL});
+  L(f,8.4,25.2,-1,8.4,sv.z,sv.p+"S1",sv.s,sv.n,"ЮЮВ-фасад (п. 3.116); глубина 8,4 м от окна; "+w100,{p:sv.p,...ORI});
+  L(f,25.2,29.4,-1,8.4,"cor","pkS","Карман","Световой карман южного коридора · отдых",pocketW);
+  L(f,29.4,46.2,-1,8.4,sv.z,sv.p+"S2",sv.s,sv.n,"ЮЮВ-фасад; "+w100,{p:sv.p,...ORI});
+  L(f,46.2,50.4,-1,8.4,"cor","pk4","Карман","Коридор-карман у ЛК-4","Ширина 4,2 м ≥ ½ глубины ЛК (закреплено); окно — световой карман (п. 4.3.3.1).");
+  L(f,54.6,70,-1,8.4,rd.z,rd.p+"SE1",rd.s,rd.n,"ЮЮВ-фасад; "+w100,{p:rd.p,...ORI});
+  const se="ЮВ угол, окна ЮЮВ и ВСВ; карман 2К убран — южный коридор светится ЛК-4 и ЛК-3 (участок ≈ 21 м ≤ 24); "+w100;
+  L(f,70,75.8,-1,8.4,rd.z,rd.p+"SE2",rd.s,rd.n+" (ЮВ угол)",se,{p:rd.p,...ORI,...J});
+  L(f,75.8,90,-1,11.4,rd.z,rd.p+"SE2","",rd.n+" (ЮВ угол)",se,{p:rd.p,...ORI,...J});
+  // ── восток (ВСВ) ──
+  PB(f,[-5,90,15.6,31.2],[sideP("E",BAND,CI)],rd.z,rd.p+"E",rd.s,rd.n+" (В)","ВСВ-фасад — лучший для читальных (п. 3.116); санузлы-2 перенесены внутрь кольца; "+w100,{p:rd.p,...ORI});
+  PB(f,[-5,90,31.2,35.4],[sideP("E",BAND,CI)],"cor","pk3","Карман","Световой карман В · отдых",pocketW);
+  PB(f,[-5,90,35.4,60],[sideP("E",BAND,CI)],rd.z,rd.p+"NE",rd.s,rd.n+" (СВ угол)","СВ угол — зал на два фасада (эскиз архитектора); "+w100,{p:rd.p,...ORI,...J});
+  PB(f,ALL,NSt(58.7,120),rd.z,rd.p+"NE","",rd.n+" (СВ угол)","Часть зала СВ угла.",{p:rd.p,...ORI,...J});
+  // ── север (С) ──
+  const n2=F4?{z:"z4",p:"av",s:"Редкие книги",n:"Отдел редких книг: читальный зал"}:gr.p==="av"?rd:gr;
+  PB(f,ALL,NSt(48.8,58.7),n2.z,(F4?"rare":n2.p+"N2"),n2.s,n2.n,F4?"4 этаж (закреплено); С-фасад — не солнечный (п. 3.116); хранилище редких — за коридором, своё, за стенами 1-го типа (п. 5.3.1.30).":"С-фасад; рядом с учебными/научными залами.",{p:n2.p,...ORI});
+  PB(f,ALL,NSt(44.6,48.8),"cor","pk2","Карман","Коридор-карман у ЛК-2","Ширина 4,2 м ≥ ½ глубины ЛК; окно — световой карман (п. 4.3.3.1).");
+  PB(f,ALL,NSt(23,40.4),rd.z,rd.p+"N1",rd.s,rd.n+" (С)","С-фасад (п. 3.116); "+w100,{p:rd.p,...ORI});
+  // ── СЗ угол — световой карман и зона отдыха ──
+  PB(f,ALL,NSt(-60,23),"cor","pkNW","Карман · отдых","Световой карман СЗ угла и зона отдыха",pocketW+" Стык северного и западного коридоров.",J);
+  PB(f,[-5,90,8.4,60],WS(54.5,80),"cor","pkNW","","Световой карман СЗ угла и зона отдыха",pocketW,J);
+  // ── запад (ЗСЗ) ──
+  PB(f,[-5,90,20.3,60],WS(-30,24),"core","wc1","Санузлы","Санузлы (М, Ж, кабины МГН в М и Ж, ПУИ)",
+    "Стопкой на 1–4 эт. (на 1 эт. — до контроля); у западного окна — не читальное помещение, запад ≤ 20 %; не над хранилищем (MEMORY § 6).");
+  PB(f,[-5,90,8.4,60],WS(24,35),gr.z,gr.p+"W1",gr.s,gr.n+" (ЗСЗ)","ЗСЗ-фасад — запад: учтено в 20 % этажа (п. 4.4.10.9), затемнение окон.",{p:gr.p});
+  PB(f,[-5,90,8.4,60],WS(35,39),"cor","pkW","Карман","Световой карман на оси главного входа · отдых",pocketW);
+  PB(f,[-5,90,8.4,60],WS(39,54.5),gr.z,gr.p+"W2",gr.s,gr.n+" (ЗСЗ)","ЗСЗ-фасад — запад: учтено в 20 % этажа (п. 4.4.10.9).",{p:gr.p});
+  // ── ЗЮЗ: карман ЛК-1, зона безопасности ──
+  L(f,-3,6.6,8.4,12.6,"cor","pk1","Карман","Коридор-карман у ЛК-1 (окно ЗЮЗ)","Свет южному коридору и холлу ЛК-1 (п. 4.3.3.1); ширина 4,2 м ≥ ½ глубины ЛК.");
+  L(f,-3,6.6,16.8,20.3,"z7","szA1","Зона МГН","Зона безопасности МГН у ЛК-1",
+    "≈ 25 м² ≥ 15 м² (СП РК 3.06-101 п. 4.2.7: 4 колясочника × 2,65 + 6 × 0,75); у ЛК-1, не проходная; стены REI 90, перегородки REI 60, двери 1-го типа, подпор 20 Па, связь с пожарным постом.");
+  L(f,6.6,11,11.4,20.3,"cor","hallSW","Холл","Холл ЛК-1 и стык южного и западного коридоров","Без атриума (А1 Д-2 снят): проём между этажами не нужен; свет — окно кармана ЛК-1 и остеклённая дверь ЛК-1.");
+  // ── кольцевой коридор ──
+  PB(f,[6.6,90,-5,60],[sideP("S",CI,CO)],"cor","ringS","Коридор","Кольцевой коридор (Ю)","Путь эвакуации без тупиков; 3 м; аванзалом не считается (А1 А-2).");
+  PB(f,ALL,[sideP("E",CI,CO)],"cor","ringE","Коридор","Кольцевой коридор (В)","Параллелен ВСВ-фасаду.");
+  PB(f,ALL,[sideP("N",CI,CO)],"cor","ringN","Коридор","Кольцевой коридор (С)","Параллелен С-фасаду.");
+  PB(f,[-5,90,20.3,60],[sideP("W",CI,CO)],"cor","ringW","Коридор","Кольцевой коридор (ЗСЗ)","Параллелен ЗСЗ-фасаду.");
+  PB(f,[11,90,-5,20.3],[sideP("W",CI,CO)],"cor","ringW","","Кольцевой коридор (ЗСЗ)","Часть коридора у холла ЛК-1.");
+  // ── лифтовой узел А и зона безопасности А ──
+  PB(f,ALL,[sideP("W",CO,14.2),strip(46,52)],"cor","lhA","Лифт. холл А","Холл ожидания лифтов А","Карман 2,8 × 6 м в стороне от потока коридора (BRIEF правило 3; ≥ 1,3 глубины кабины).");
+  PB(f,ALL,WO(42,46),"z7","szA","Зона МГН","Зона безопасности МГН у лифтов А",
+    "24 м² ≥ 15 м² (СП РК 3.06-101 пп. 4.2.5–4.2.13); у лифтов МГН и напротив кармана ЛК; REI 90/60, двери 1-го типа, подпор, связь с постом.");
+  // ── ЮВ угол кольца: зона безопасности Б, лифт Б ──
+  PB(f,[66.8,72.8,11.4,14.4],QC,"z7","szB","Зона МГН","Зона безопасности МГН у лифта Б","18 м² ≥ 15 м²; у лифта МГН Б, рядом ЛК-3 и ЛК-4; REI 90/60, двери 1-го типа, подпор.");
+  PB(f,[66.8,69.6,14.4,17.4],QC,"core","shB","Тех. шахта","Техническая шахта (вентиляция, кабели)","У лифта Б.",NL);
+  // ── восточный пояс: санузлы-2 ──
+  PB(f,[-5,90,17.4,20.4],EO,"core","shE","ПУИ","ПУИ и инженерная шахта","Между лифтом Б и санузлами.",NL);
+  PB(f,[-5,90,20.4,28.6],EO,"core","wc2","Санузлы-2","Санузлы (М, Ж, кабины МГН, ПУИ)","Внутри кольца — ВСВ-фасад отдан залу; стопкой 1–4 эт.; не над хранилищем; шахты лифтов не рядом с залами.");
+  PB(f,[-5,90,28.6,60],EO,"core","shE2","Шахта","Вентиляционная шахта дымоудаления коридора","Механическое дымоудаление кольцевого коридора (СП РК 3.02-107 п. 4.2.2.61, по коллеге).",NL);
+  // ── центр ──
+  const oaW="Открытый доступ — книжный зал глубиной 6 м: стеллажи поперёк, места для просмотра; пункт выдачи у служебного ядра в этом же зале (пп. 3.113, 6.33); без дневного света — стеллажи (СП РК 2.04-104 табл. И.1, по коллеге).";
+  const vyd="Пункт выдачи и рабочие места сотрудников хранения у торца служебного ядра: книги — подъёмником из хранилища, выдача — в зал открытого доступа (п. 3.113; табл. 26 — сотрудники хранения).";
+  if(!F4){
+    PB(f,[11,21,-5,60],QC,"z6","oaSW","Открытый доступ","Открытый доступ (ЮЗ)",oaW,{p:"store",...NL,...J});
+    PB(f,[21,42,-5,60],SO,"z6","oaSW","","Открытый доступ (Ю)",oaW,{p:"store",...NL,...J});
+    PB(f,[21,31.5,-5,60],QO,"z6","oaSW","","Открытый доступ (Ю)",oaW,{p:"store",...NL,...J});
+    PB(f,[21,90,-5,60],WO(-30,42),"z6","oaSW","","Открытый доступ (З)",oaW,{p:"store",...NL,...J});
+    PB(f,[42,46.2,-5,60],SO,"z6","vydS","Выдача","Пункт выдачи (Ю) и рабочие места сотрудников хранения",vyd,{p:"store",...NL});
+    PB(f,[46.2,66.8,-5,60],SO,"z6","oaSE","Открытый доступ","Открытый доступ (ЮВ)",oaW,{p:"store",...NL});
+    PB(f,[21,90,-5,60],WO(52,80),"z6","oaN","","Открытый доступ (С)",oaW,{p:"store",...NL,...J});
+    PB(f,[-5,42,-5,60],NO,"z6","oaN","Открытый доступ","Открытый доступ (С)",oaW,{p:"store",...NL,...J});
+    PB(f,[42,46.2,-5,60],NO,"z6","vydN","Выдача","Пункт выдачи (С) и рабочие места сотрудников хранения",vyd,{p:"store",...NL});
+    PB(f,[46.2,90,-5,60],NO,"z6","oaNE","Открытый доступ","Открытый доступ (СВ)",oaW,{p:"store",...NL});
+    PB(f,[31.5,42,-5,60],QO,"z7","stW","Хранение-З","Основное книгохранилище, западный отсек","Без окон, в центре (п. 3.110); отсек ≤ 600 м² (п. 4.2.1.69); выходы в ядро и в открытый доступ (п. 5.3.1.29); двери EI 30.",{p:"store",...NL});
+    PB(f,[46.2,90,-5,60],QO,"z7","stE","Хранение-В","Основное книгохранилище, восточный отсек","Отсек ≤ 600 м²; выходы в ядро и в открытый доступ.",{p:"store",...NL});
+  } else {
+    const cw="4 этаж: с одного бока — компактное хранение (V2_TASK § 3), один отсек ≤ 600 м² (п. 4.2.1.69); выходы в южный и западный коридоры (п. 5.3.1.29).";
+    PB(f,[11,42,-5,60],[quad(CO),strip(-30,42)],"z7","comp","Компактное","Компактное хранение (передвижные стеллажи)",cw,{p:"store",...NL,...J});
+    PB(f,[11,42,-5,60],[quad(OI),strip(42,52)],"z7","comp","","Компактное хранение (передвижные стеллажи)",cw,{p:"store",...NL,...J});
+    PB(f,[11,42,-5,60],[quad(CO),strip(52,90)],"z7","comp","","Компактное хранение (передвижные стеллажи)",cw,{p:"store",...NL,...J});
+    PB(f,[42,46.2,-5,60],SO,"z6","vydS","Выдача","Пункт выдачи 4 этажа (Ю) и рабочие места сотрудников хранения",vyd,{p:"store",...NL});
+    PB(f,[42,46.2,-5,60],NO,"z6","vydN","Выдача","Пункт выдачи 4 этажа (С) и рабочие места сотрудников хранения",vyd,{p:"store",...NL});
+    PB(f,[46.2,58,-5,60],NO,"z7","rareSt","Хранилище редких","Хранилище редких книг — свой отсек","Стены и перекрытие 1-го типа, двери EI 60 (СН РК 3.02-07 п. 5.3.1.30; СП РК 3.02-107 п. 4.2.1.72); напротив читального зала редких книг.",{p:"av",...NL});
+    const mw="Основное хранение 4 этажа, отсек ≤ 600 м² (п. 4.2.1.69); выходы в южный коридор и в ядро.";
+    PB(f,[46.2,66.8,-5,60],QO,"z7","stE","Хранение-В","Основное книгохранилище 4 этажа",mw,{p:"store",...NL,...J});
+    PB(f,[46.2,66.8,-5,60],SO,"z7","stE","","Основное книгохранилище 4 этажа",mw,{p:"store",...NL,...J});
+    PB(f,[58,90,-5,60],NO,"z7","stE","","Основное книгохранилище 4 этажа",mw,{p:"store",...NL,...J});
+  }
+}
+
+// ═════════ 1 ЭТАЖ ═════════
+{const F="1";
+  // ── ЗОНА О (до контроля, п. 3.108) ──
+  const vw="Главный вход — середина ЗСЗ-фасада (закреплено); доконтрольная зона (п. 3.108): справочное бюро, запись читателей, выставки; из него — гардероб, лекционный зал, абонементы, санузел; на севере — пост контроля.";
+  PB(F,[-5,90,8.4,60],WS(24,41),"z1","vest","Вестибюль","Вестибюль: справочное бюро, запись читателей, выставки",vw,J);
+  PB(F,[-5,90,20.3,60],WC_(-30,41),"z1","vest","","Вестибюль",vw,J);
+  PB(F,[11,90,-5,20.3],[sideP("W",CI,CO)],"z1","vest","","Вестибюль",vw,J);
+  L(F,6.6,11,11.4,20.3,"z1","vest","","Вестибюль (холл у ЛК-1)",vw,J);
+  L(F,-3,6.6,16.8,20.3,"z1","vest","","Вестибюль (у окна ЗЮЗ)",vw,J);
+  PB(F,[-5,90,20.3,60],WS(-30,24),"core","wc1","Санузлы","Санузлы посетителей в доконтрольной зоне (М, Ж, кабины МГН)",
+    "Санузел в доконтрольной зоне 1 этажа (закреплено) — для вестибюля, гардероба, лекционного зала и абонементов; ≈ 70 м² — 16–18 приборов (пособие табл. 41).");
+  L(F,-3,6.6,8.4,12.6,"z5","guard","Пожарный пост","Пожарный пост и пост охраны (видеонаблюдение)",
+    "≥ 15 м², 1 этаж, окно ЗЮЗ, рядом ЛК-1 с выходом наружу (СП РК 2.02-101 пп. 5.1.3.10–5.1.3.12, по коллеге); вход из вестибюля.");
+  PB(F,[11,19.5,-5,60],QC,"z1","bags","Портфели","Хранение портфелей (рядом с гардеробом)",
+    "Табл. 26 — 90 м²; рядом с гардеробом и вестибюлем, до контроля (решение архитектора: при гардеробе); барьер в холл.",{p:"serv",...NL});
+  L(F,19.5,42,13.4,23.9,"z1","cloak","Гардероб","Гардероб читателей на 1 860 мест (15 рядов)",
+    "Метод архитектора: 22,5 × 10,5 м — барьер 0,65 + проход 1,0 + 15 рядов по 8,85 м × 124 места (7 крючков на 1 м с каждой стороны, СП РК 3.02-107 п. 4.3.2.4) = 1 860 ≥ 1 800 (закреплено). Барьер — в холл гардероба.",NL);
+  L(F,19.5,42,11.4,13.4,"z1","cloakH","Холл гардероба","Холл гардероба (очередь у барьера)","Уширение южного холла: очередь гардероба не перекрывает проход.");
+  PB(F,[6.6,64,-5,60],[sideP("S",CI,CO)],"z1","abonH","Холл абонементов","Холл абонементов и лекционного зала","Доконтрольная зона: из вестибюля к гардеробу, лекционному залу и абонементам (п. 3.108).");
+  L(F,42,64,11.4,13.4,"z1","avan","Аванзал","Аванзал абонементов (место ожидания у выдачи)","Табл. 26: аванзал — у выдачи; уширение сверх транзитной полосы холла.",{p:"avan"});
+  PB(F,[42,66.8,13.4,60],SO,"z7","abonF","Фонд абонем.","Фонд абонементов: стеллажи и рабочие места выдачи","Без окон — стеллажи; у служебного ядра: книги подъёмником прямо к выдаче абонементов.",{p:"abon",...NL});
+  const lw="Лекционный зал на 150 мест (п. 3.103; закреплено) — до контроля (п. 3.108), из холла абонементов; выходы: 2 двери в холл + дверь прямо наружу (ЮЮВ); дневной свет не обязателен (СН РК 3.02-07 п. 5.4.6.4), окна — с затемнением.";
+  L(F,-3,8.4,-1,8.4,"z2","lect","","Лекционный зал (150 мест)",lw,{...J,...NL});
+  L(F,8.4,25.2,-1,8.4,"z2","lect","Лекционный зал","Лекционный зал (150 мест)",lw,{...J,...NL});
+  L(F,25.2,29.4,-1,8.4,"cor","pkS","Карман","Световой карман холла абонементов",pocketW);
+  L(F,29.4,46.2,-1,8.4,"z1","abonU","Абонемент уч.","Абонемент учебной литературы","ЮЮВ-фасад, окна — рабочие места выдачи; до контроля (п. 3.108).",{p:"abon"});
+  L(F,46.2,50.4,-1,8.4,"z1","exS","Выход","Эвакуационный выход из холла абонементов (тамбур)","Выход наружу из зоны О (не через ЛК-4 — нет обхода контроля); остеклённая дверь — свет холлу.");
+  const aw="ЮЮВ-фасад; до контроля; тупик холла за выходом — 13,6 м ≤ 15 (СП РК 3.06-101 п. 4.2.4).";
+  L(F,54.6,75.8,-1,8.4,"z1","abonA","Абонемент науч. и худ.","Абонемент научной и художественной литературы",aw,{p:"abon",...J});
+  PB(F,[64,90,-5,60],[sideP("S",CI,CO)],"z1","abonA","","Абонемент научной и художественной литературы",aw,{p:"abon",...J});
+  PB(F,[64,66.8,11.4,13.4],QC,"z1","abonA","","Абонемент научной и художественной литературы",aw,{p:"abon",...J});
+  PB(F,[66.8,72.8,11.4,14.4],QC,"z1","abonA","","Абонемент научной и художественной литературы",aw,{p:"abon",...J});
+  PB(F,[66.8,69.6,14.4,17.4],QC,"z7","abonF2","Кладовая","Кладовая абонемента","Рядом с абонементом.",{p:"abon",...NL});
+  PB(F,[19.5,90,23.9,60],WO(-30,42),"z1","expo","Выставка","Выставочный зал (до контроля)","Выставки — доконтрольная зона (п. 3.108); за вестибюлем; без дневного света допустимо (выставочный).",NL);
+  // ── КОНТРОЛЬ ──
+  PB(F,[-5,90,8.4,60],WS(41,44),"z1","ctrl","Контроль","Пост контроля и справочная","Один пост на одну линию турникетов (п. 3.108); у турникетов — распашная аварийная створка ≥ 1,2 м с разблокировкой от пожарной сигнализации (СН РК 2.02-01 п. 5.2.2, по коллеге).");
+  PB(F,ALL,WC_(41,44),"z1","ctrl","","Турникеты контроля","Линия контроля поперёк западного коридора.");
+  // ── ЗОНА К (за контролем) ──
+  const kh="Холл за контролем: связывает турникеты, лифты А, каталоги, СБО, ЛК-2, МБА — одна непрерывная зона (п. 3.108; устраняет А1 В-1, В-2).";
+  PB(F,[-5,90,20.3,60],WC_(44,80),"cor","hallK","Холл за контр.","Холл за контролем (западный коридор)",kh,J);
+  PB(F,ALL,NC(-60,48.8),"cor","hallK","","Холл за контролем (северный коридор)",kh,J);
+  PB(F,ALL,NSt(44.6,48.8),"cor","hallK","","Холл за контролем у ЛК-2 (окно)",kh+" Окно — свет холлу.",J);
+  PB(F,ALL,NSt(-60,23),"cor","pkNW","Карман · ЭК","Световой карман СЗ угла: терминалы электронного каталога",pocketW+" Терминалы ЭК — без стен (решение архитектора: каталоги частично электронные).",J);
+  PB(F,[-5,90,8.4,60],WS(54.5,80),"cor","pkNW","","Световой карман СЗ угла: терминалы электронного каталога",pocketW,J);
+  PB(F,[-5,90,8.4,60],WS(44,54.5),"z1","cat","Каталоги","Читательские каталоги (карточные и электронные)","За контролем (п. 3.108); окна ЗСЗ — рабочие места библиографов (п. 3.40); часть каталога — электронная (решение архитектора).",{p:"cat"});
+  PB(F,ALL,NSt(23,40.4),"z1","sbo","СБО","Справочно-библиографический отдел","За контролем; С-фасад — рабочие места с дневным светом (п. 3.40; А1 Ж-2).",{p:"cat"});
+  PB(F,ALL,NSt(48.8,58.7),"z5","mba","МБА","Межбиблиотечный абонемент","1 этаж (решение архитектора); окна С; дверь читателей — из холла за контролем, служебная — в служебный коридор.",{p:"serv"});
+  PB(F,ALL,[sideP("W",CO,14.2),strip(46,52)],"cor","lhA","Лифт. холл А","Холл лифтов А (за контролем)","Лифты читателей — за контролем (п. 3.108).");
+  PB(F,ALL,WO(42,46),"core","wcK","Санузел","Санузел читателей за контролем (М, Ж, МГН)","Санузел за контролем 1 этажа (V2_TASK § 3; А1 З-7); в подвале под ним — венткамера, не хранение.");
+  PB(F,[21,90,-5,60],WO(52,80),"z1","expoK","Выставка нов.","Выставка новых поступлений (за контролем)","П. 3.108 — за контролем; без окон допустимо.",{...NL,...J});
+  PB(F,[-5,42,-5,60],NO,"z1","expoK","","Выставка новых поступлений (за контролем)","П. 3.108.",{...NL,...J});
+  // ── ЗОНА С (служебная, п. 3.109) ──
+  PB(F,ALL,NC(48.8,200),"cor","svcN","Служ. коридор","Служебный коридор (С)","Служебная зона: МБА, дирекция, ядро; от холла за контролем — дверь по пропуску.");
+  PB(F,ALL,[sideP("E",CI,CO)],"cor","svcE","Служ. коридор","Служебный коридор (В)","Служебный вход — приёмка — обработка — служебный каталог — дирекция, без читательских зон (п. 3.109).");
+  PB(F,[-5,90,31.2,35.4],[sideP("E",BAND,CI)],"cor","pk3","Карман","Служебный холл с окном","Свет служебному коридору (п. 4.3.3.1).");
+  L(F,75.8,90,-1,7.2,"z5","exped","Приёмка","Экспедиция: приём и распаковка поступлений","У служебного входа (п. 3.109); окна ЮЮВ/ВСВ.",{p:"serv"});
+  L(F,75.8,90,7.2,11.4,"z5","staffin","Служ. вход","Служебный вход: тамбур и пост","Отдельный служебный вход (п. 3.104; СП РК 3.02-120 п. 4.4.10.5); ведёт только в служебную зону.",{p:"serv"});
+  PB(F,[-5,90,15.6,22.8],[sideP("E",BAND,CI)],"z5","proc","Обработка","Отдел комплектования и обработки литературы","1 этаж, ≈ 8 м от служебного входа через коридор (решение архитектора); окна ВСВ; рядом служебный каталог.",{p:"serv"});
+  PB(F,[-5,90,22.8,31.2],[sideP("E",BAND,CI)],"z5","scat","Служ. каталог","Служебный каталог","1 этаж, закрытая служебная зона, рядом с обработкой и комплектованием (решение архитектора); окна ВСВ.",{p:"serv"});
+  PB(F,[-5,90,35.4,60],[sideP("E",BAND,CI)],"z5","dir","Дирекция","Дирекция и администрация, комната психологической разгрузки",
+    "1 этаж (закреплено: 1–2 эт.), СВ угол, окна ВСВ и С; служебная зона (п. 3.109; СН РК 3.02-08 п. 5.4.4.23).",{p:"serv",...J});
+  PB(F,ALL,NSt(58.7,120),"z5","dir","","Дирекция и администрация",".",{p:"serv",...J});
+  L(F,46.2,72.8,17.4,20.4,"cor","svcL","Служ. коридор","Служебный коридор к ядру","От восточного служебного коридора к служебному ядру: путь книги без проходных комнат (А1 Г-3, Г-4).",{pg:[quad(CO)]});
+  PB(F,[-5,90,20.4,28.6],EO,"core","wc2","Санузлы перс.","Санузлы и душевые персонала","Отдельно от посетителей (СН РК 3.02-07 п. 5.4.2.19); стопкой с санузлами-2.");
+  PB(F,[-5,90,28.6,60],EO,"z5","staffE","Персонал","Гардероб персонала и комната приёма пищи","При служебном входе (п. 3.109; СН РК 3.02-08 п. 5.4.4.29); в подвале под ним — не хранение.",{p:"serv",...NL});
+  PB(F,[46.2,90,20.4,60],QO,"z5","svc1","Служ.-произв.","Служебно-производственные: мастерские, кладовые, обменный фонд","Без постоянных рабочих мест — без окон допустимо (кладовые, п. 5.4.6.4); у ядра.",{p:"serv",...NL});
+  PB(F,[46.2,90,-5,60],NO,"z5","svc2","Служ.-произв.","Служебно-производственные (С): кладовые","Вход из служебного коридора.",{p:"serv",...NL});
+  PB(F,[42,46.2,-5,60],NO,"z5","svc2","","Служебно-производственные (С): кладовые","У торца ядра.",{p:"serv",...NL});
+  PB(F,[19.5,42,23.9,60],QO,"z5","svc3","Служ.-произв.","Служебно-производственные: склад, переплёт новых поступлений","Вход из служебного ядра; без постоянных рабочих мест.",{p:"serv",...NL});
+  NOTES.push({f:F,c:"LIB",u:6,v:30,t:"ЗОНА О (до контроля)"});
+  NOTES.push({f:F,c:"LIB",u:30,v:47,t:"ЗОНА К (за контролем)"});
+  NOTES.push({f:F,c:"LIB",u:66,v:36,t:"ЗОНА С (служебная)"});
+  NOTES.push({f:F,c:"LIB",u:20,v:41.5,t:"турникеты + аварийная створка"});
+  NOTES.push({f:F,c:"LIB",u:52,v:2,t:"ЛК-4: на 1 эт. только выход наружу"});
+}
+
+// ═════════ ПОДВАЛ ═════════
+{const F="0";
+  const bc="Коридор подвала по кольцу: связывает 4 обособленных выхода (ЛК-1…ЛК-4), служебное ядро и все помещения; тупиков нет.";
+  PB(F,[6.6,90,-5,60],[sideP("S",CI,CO)],"cor","bcor","Коридор подвала","Коридор подвала",bc);
+  PB(F,ALL,[sideP("E",CI,CO)],"cor","bcor","","Коридор подвала",bc);
+  PB(F,ALL,[sideP("N",CI,CO)],"cor","bcor","","Коридор подвала",bc);
+  PB(F,[-5,90,20.3,60],[sideP("W",CI,CO)],"cor","bcor","","Коридор подвала",bc);
+  PB(F,[11,90,-5,20.3],[sideP("W",CI,CO)],"cor","bcor","","Коридор подвала",bc);
+  L(F,6.6,11,11.4,20.3,"cor","bcor","","Коридор подвала у ЛК-1",bc);
+  const sp="Коридор к служебному ядру и лабораториям: у ядра — тамбур-шлюз грузового лифта и книгоподъёмников (ТР-405 п. 178).";
+  PB(F,[42,46.2,-5,60],SO,"cor","bspur","Коридор","Коридор к ядру (Ю)",sp);
+  PB(F,[42,46.2,-5,60],NO,"cor","bspur","","Коридор к ядру (С)",sp);
+  PB(F,[39,42,-5,60],QC,"cor","bspur","","Коридор вдоль ядра",sp);
+  L(F,46.2,72.8,17.4,20.4,"cor","bspur","","Коридор к реставрации",sp,{pg:[quad(CO)]});
+  const sw="Основное хранение в подвале (п. 3.110; разрешено архитектором): отсек ≤ 600 м² (п. 4.2.1.69), двумя дверями прямо в коридор подвала (п. 5.3.1.29; А1 Е-3); двери EI 30; без окон, дымоудаление (выбор А1, расхождение 5); рядом только сухие помещения.";
+  PB(F,[11,21,-5,60],QC,"z7","bst1","Хранение П-1","Основное книгохранилище, подвал, отсек П-1",sw,{p:"store",...NL,...J});
+  PB(F,[21,39,-5,60],SO,"z7","bst1","","Основное книгохранилище, подвал, отсек П-1",sw,{p:"store",...NL,...J});
+  PB(F,[46.2,66.8,-5,60],SO,"z7","bst2","Хранение П-2","Основное книгохранилище, подвал, отсек П-2",sw,{p:"store",...NL,...J});
+  PB(F,[66.8,72.8,11.4,14.4],QC,"z7","bst2","","Основное книгохранилище, подвал, отсек П-2",sw,{p:"store",...NL,...J});
+  PB(F,[66.8,69.6,14.4,17.4],QC,"z7","bst2","","Основное книгохранилище, подвал, отсек П-2",sw,{p:"store",...NL,...J});
+  PB(F,[46.2,90,-5,60],NO,"z7","bst3","Хранение П-3","Основное книгохранилище, подвал, отсек П-3",sw,{p:"store",...NL});
+  PB(F,[21,90,-5,60],WO(-30,42),"z7","bst4","Хранение П-4","Основное книгохранилище, подвал, отсек П-4",sw,{p:"store",...NL,...J});
+  PB(F,[-5,39,-5,60],NO,"z7","bst4","","Основное книгохранилище, подвал, отсек П-4",sw,{p:"store",...NL,...J});
+  PB(F,[21,90,-5,60],WO(52,80),"z7","bst4","","Основное книгохранилище, подвал, отсек П-4",sw,{p:"store",...NL,...J});
+  L(F,29.4,50.4,-1,8.4,"z7","bst5","Хранение П-5","Основное книгохранилище, подвал, отсек П-5 (Ю)",sw,{p:"store",...NL});
+  L(F,54.6,75.8,-1,8.4,"z7","bst6","Хранение П-6","Основное книгохранилище, подвал, отсек П-6 (Ю)",sw,{p:"store",...NL});
+  PB(F,[-5,90,15.6,31.2],[sideP("E",BAND,CI)],"z7","bst7","Хранение П-7","Основное книгохранилище, подвал, отсек П-7 (В)",sw,{p:"store",...NL});
+  PB(F,ALL,NSt(23,40.4),"z7","bst8","Хранение П-8","Основное книгохранилище, подвал, отсек П-8 (С)",sw,{p:"store",...NL});
+  PB(F,ALL,NSt(44.6,58.7),"z7","bst9","Хранение П-9","Основное книгохранилище, подвал, отсек П-9 (С)",sw,{p:"store",...NL});
+  PB(F,[-5,90,8.4,60],WS(24,39),"z7","bst10","Хранение П-10","Основное книгохранилище, подвал, отсек П-10 (З)",sw,{p:"store",...NL});
+  // лаборатории — у ядра
+  PB(F,[21,39,-5,60],QO,"z5","copy","Копирование","Лаборатория микрофотокопирования и репродуцирования",
+    "Рядом с реставрацией через ядро и с хранением (п. 3.110); в подвале без окон допустимо (СН РК 3.02-07 п. 5.4.6.4, абз. 1); дверь в коридор вдоль ядра.",{p:"serv",...NL});
+  PB(F,[46.2,90,20.4,60],QO,"z5","rest","Реставрация","Лаборатория гигиены и реставрации книг, переплётная",
+    "У ядра (п. 3.110); вытяжка из переплётной; дверь в коридор к реставрации; под санузлами-2 — не она (там насосная).",{p:"serv",...NL});
+  PB(F,[-5,90,20.4,28.6],EO,"z7","sewer","Канализ.","Канализационная насосная (под санузлами-2)","Под санузлами, гидроизоляция; от хранения — стеной и коридором.",NL);
+  PB(F,[-5,90,28.6,60],EO,"z7","sewer","","Канализационная насосная (под санузлами-2)","Часть.",{...NL});
+  // техника — по периметру; вода и электрощитовая — дальше от хранения
+  L(F,-3,8.4,-1,8.4,"z7","itp","ИТП","ИТП, водомерный узел, хоз.-питьевая насосная","Помещения с водой — в ЮЗ углу, у ЗЮЗ-выхода; под лекционным залом — виброизоляция (СН РК 3.02-07 п. 5.1.10).",NL);
+  L(F,8.4,29.4,-1,8.4,"z7","vent","Венткамеры","Приточно-вытяжные венткамеры (Ю)","Сухие; под лекционным залом и карманом — виброизоляция.",NL);
+  L(F,-3,6.6,8.4,12.6,"z7","ventP","Подпор","Венткамера подпора ЛК и зон безопасности","У ЛК-1.",NL);
+  L(F,-3,6.6,16.8,20.3,"z7","techS","Кладовая","Техническая кладовая","Сухое.",NL);
+  PB(F,[-5,90,20.3,60],WS(-30,24),"z7","sewer1","Канализ.","Канализационная насосная (под санузлами-1)","Под санузлами; вдали от хранения.",NL);
+  PB(F,[-5,90,8.4,60],WS(39,54.5),"z7","serv","Серверная","Серверная и слаботочные системы","Сухое.",NL);
+  PB(F,ALL,NSt(-60,23),"z7","elec","Электрощитовая","Электрощитовая, ВРУ","СЗ угол: ≥ 9 м от хранения (через коридор и серверную) — решение архитектора; отдельный противопожарный отсек.",{...NL,...J});
+  PB(F,[-5,90,8.4,60],WS(54.5,80),"z7","elec","","Электрощитовая, ВРУ","Часть.",{...NL,...J});
+  PB(F,[-5,90,31.2,35.4],[sideP("E",BAND,CI)],"z7","techE","Кладовая","Техническая кладовая (В)","Сухое.",NL);
+  PB(F,[-5,90,35.4,60],[sideP("E",BAND,CI)],"z7","ventNE","Венткамеры","Венткамеры (СВ), кондиционирование хранилищ","Сухие; очистка воздуха хранилищ, шестикратный обмен (СН РК 3.02-07 п. 5.5.1.14).",{...NL,...J});
+  PB(F,ALL,NSt(58.7,120),"z7","ventNE","","Венткамеры (СВ)","Часть.",{...NL,...J});
+  L(F,75.8,90,-1,11.4,"z7","fire","АУПТ","Станция пожаротушения (спринклеры во всём здании, газ — хранилища), пожарная насосная",
+    "АУПТ во всём здании (выбор А1, расхождение 1); выход в ЛК-3 с выходом наружу (А1 И-2).",NL);
+  PB(F,ALL,WO(42,46),"z7","ventW","Венткамера","Венткамера (под санузлом 1 эт.)","Сухое; под санузлом за контролем — не хранение.",NL);
+  PB(F,ALL,[sideP("W",CO,14.2),strip(46,52)],"z7","ventW","","Венткамера","Часть.",NL);
+  NOTES.push({f:F,c:"LIB",u:44,v:3,t:"противопожарная перегородка 1-го типа по оси ядра: 2 секции < 3 000 м²"});
+  NOTES.push({f:F,c:"LIB",u:30,v:10,t:"4 обособленных выхода · до выхода ≤ 40 м"});
+}
+
+// ═════════ входы, вертикали, примечания ═════════
+ENTR.push(["LIB",14.1,38.3,"Главный вход","*"]);
+ENTR.push(["LIB",85.2,9.3,"Служебный вход","*"]);
+ENTR.push(["LIB",-2.6,14.7,"Выход ЛК-1","*"]);
+ENTR.push(["LIB",52.5,-1.3,"Выход ЛК-4","*"]);
+ENTR.push(["LIB",48.3,-1.3,"Выход из холла абонементов","*"]);
+ENTR.push(["LIB",12,-1.3,"Выход из лекционного зала","*"]);
+ENTR.push(["LIB",58.9,49.2,"Выход ЛК-2","*"]);
+ENTR.push(["LIB",85.2,13.5,"Выход ЛК-3","*"]);
+ENTR.push(["LIB",2,1.2,"Переход (резерв)","*","2"]);
+for(const [u,v] of [[-2.6,14.7],[52.5,-1.3],[58.9,49.2],[85.2,13.5]])ENTR.push(["LIB",u,v,"Выход из подвала (обособл.)","*","0"]);
+MARKS.push(["LIB",44.1,26],["LIB",31.5,38.5],["LIB",71.2,15.9]);
+FL.push({v:"V1",f:"1",t:"stu",p:[["LIB",14.1,38.3],["LIB",12,33],["LIB",9,17],["LIB",12,10],["LIB",30,10],["LIB",30,12.5]]});
+FL.push({v:"V1",f:"1",t:"stu",p:[["LIB",14.1,38.3],["LIB",17,36],["LIB",24,43],["LIB",30,43],["LIB",31,40]]});
+FL.push({v:"V1",f:"1",t:"cargo",p:[["LIB",85.2,9.3],["LIB",80,9.3],["LIB",74.3,12],["LIB",74.3,18.9],["LIB",46.2,18.9]]});
+FL.push({v:"V1",f:"1",t:"staff",p:[["LIB",85.2,9.3],["LIB",74.3,12],["LIB",74.3,33],["LIB",72,37]]});
+for(const f of UP){
+  NOTES.push({f,c:"LIB",u:16,v:10.2,t:"☀ ЛК-1 ↔ карман Ю: 18,6 м ≤ 24"});
+  NOTES.push({f,c:"LIB",u:37,v:10.2,t:"☀ карман Ю ↔ карман ЛК-4: 16,8 м"});
+  NOTES.push({f,c:"LIB",u:63,v:10.2,t:"☀ ЛК-4 ↔ ЛК-3: ≈ 21 м"});
+  NOTES.push({f,c:"LIB",u:74.3,v:24,t:"☀ ЛК-3 ↔ карман В: 15,6 м"});
+  NOTES.push({f,c:"LIB",u:60,v:39.5,t:"☀ карман В ↔ карман ЛК-2: ≈ 17 м"});
+  NOTES.push({f,c:"LIB",u:38,v:45,t:"☀ ЛК-2 ↔ карман СЗ: ≈ 17 м"});
+  NOTES.push({f,c:"LIB",u:20,v:31,t:"☀ СЗ ↔ карман у входа ↔ холл ЛК-1: 15,5 / 22 м"});
+  NOTES.push({f,c:"LIB",u:56,v:12.8,t:"до ЛК ≤ 35 м (норма 50) · тупиков нет · до лифта ≤ 50 м"});
+}
+
+// ════════════ РАЗДЕЛ 4. ДВИЖОК — НЕ МЕНЯТЬ ════════════
+const VAR={V1,V2};
+const BK=["ADM","LIB","BR"];
+// ---------- геометрия ----------
+function area(p){let s=0;for(let i=0;i<p.length;i++){const a=p[i],b=p[(i+1)%p.length];s+=a[0]*b[1]-b[0]*a[1];}return s/2;}
+function isect(p,q,a,b){const r=[q[0]-p[0],q[1]-p[1]],s=[b[0]-a[0],b[1]-a[1]];const d=r[0]*s[1]-r[1]*s[0];if(Math.abs(d)<1e-12)return q;const t=((a[0]-p[0])*s[1]-(a[1]-p[1])*s[0])/d;return [p[0]+t*r[0],p[1]+t*r[1]];}
+function clip(subj,cp){ // Сазерленд–Ходжмен: cp выпуклый
+  const sg=area(cp)>0?1:-1;let out=subj.slice();
+  for(let i=0;i<cp.length&&out.length;i++){
+    const a=cp[i],b=cp[(i+1)%cp.length],inp=out;out=[];
+    const ins=p=>sg*((b[0]-a[0])*(p[1]-a[1])-(b[1]-a[1])*(p[0]-a[0]))>=-1e-9;
+    for(let j=0;j<inp.length;j++){const cur=inp[j],prv=inp[(j+inp.length-1)%inp.length];
+      if(ins(cur)){if(!ins(prv))out.push(isect(prv,cur,a,b));out.push(cur);}else if(ins(prv))out.push(isect(prv,cur,a,b));}
+  }
+  return out;
+}
+function centroid(p){let a=0,x=0,y=0;for(let i=0;i<p.length;i++){const q=p[i],r=p[(i+1)%p.length],c=q[0]*r[1]-r[0]*q[1];a+=c;x+=(q[0]+r[0])*c;y+=(q[1]+r[1])*c;}a/=2;return Math.abs(a)<1e-9?p[0]:[x/(6*a),y/(6*a)];}
+function pip(P,q){let c=false;for(let i=0,j=P.length-1;i<P.length;j=i++){const a=P[i],b=P[j];if((a[1]>q[1])!==(b[1]>q[1])&&q[0]<a[0]+(q[1]-a[1])*(b[0]-a[0])/(b[1]-a[1]))c=!c;}return c;}
+function dSeg(q,a,b){const ab=[b[0]-a[0],b[1]-a[1]],L2=ab[0]*ab[0]+ab[1]*ab[1];const t=L2?Math.max(0,Math.min(1,((q[0]-a[0])*ab[0]+(q[1]-a[1])*ab[1])/L2)):0;return Math.hypot(q[0]-a[0]-ab[0]*t,q[1]-a[1]-ab[1]*t);}
+function dLine(pl,q){let m=Infinity;for(let i=0;i+1<pl.length;i++)m=Math.min(m,dSeg(q,pl[i],pl[i+1]));return m;}
+const bbox=p=>{const xs=p.map(q=>q[0]),ys=p.map(q=>q[1]);return [Math.min(...xs),Math.min(...ys),Math.max(...xs),Math.max(...ys)];};
+const PAD=14000;
+let gx0=Infinity,gx1=-Infinity,gy0=Infinity,gy1=-Infinity;
+for(const c of BK)for(const p of P[c]){gx0=Math.min(gx0,p[0]);gx1=Math.max(gx1,p[0]);gy0=Math.min(gy0,p[1]);gy1=Math.max(gy1,p[1]);}
+const OX=gx0-PAD,OY=gy1+PAD,VW=(gx1-gx0+2*PAD)/1000,VH=(gy1-gy0+2*PAD)/1000;
+const G2S=p=>[(p[0]-OX)/1000,(OY-p[1])/1000];
+const L2G=(fr,a,b)=>[fr.O[0]+(fr.u[0]*a+fr.v[0]*b)*1000, fr.O[1]+(fr.u[1]*a+fr.v[1]*b)*1000];
+const loc=(c,a,b)=>G2S(L2G(FR[c],a,b));
+const G2L=(c,p)=>{const fr=FR[c],dx=p[0]-fr.O[0],dy=p[1]-fr.O[1];return [(dx*fr.u[0]+dy*fr.u[1])/1000,(dx*fr.v[0]+dy*fr.v[1])/1000];};
+const nrmA=d=>{if(d>90)d-=180;if(d<-90)d+=180;return d;};
+const angU=fr=>nrmA(Math.atan2(-fr.u[1],fr.u[0])*180/Math.PI);
+const angV=fr=>nrmA(Math.atan2(-fr.v[1],fr.v[0])*180/Math.PI);
+const rectOf=(c,u0,u1,v0,v1)=>[loc(c,u0,v0),loc(c,u1,v0),loc(c,u1,v1),loc(c,u0,v1)];
+const SP={},EXT={},FA={};
+for(const c of BK){SP[c]=P[c].map(G2S);const L=P[c].map(p=>G2L(c,p)),us=L.map(q=>q[0]),vs=L.map(q=>q[1]);
+  EXT[c]={u0:Math.min(...us),u1:Math.max(...us),v0:Math.min(...vs),v1:Math.max(...vs)};FA[c]=Math.abs(area(SP[c]));}
+const OPS={};for(const o of OPEN)(OPS[o.f]=OPS[o.f]||[]).push(o.pts.map(G2S));
+// длинная ось перехода (для подписи)
+const BR_ANG=(()=>{const p=SP.BR,c=centroid(p);let sxx=0,syy=0,sxy=0;for(const q of p){const x=q[0]-c[0],y=q[1]-c[1];sxx+=x*x;syy+=y*y;sxy+=x*y;}return nrmA(.5*Math.atan2(2*sxy,sxx-syy)*180/Math.PI);})();
+// стороны света — 16 румбов: корпус повёрнут на 25,5°, и его фасады легли бы на границы восьми
+const DIR=["С","ССВ","СВ","ВСВ","В","ВЮВ","ЮВ","ЮЮВ","Ю","ЮЮЗ","ЮЗ","ЗЮЗ","З","ЗСЗ","СЗ","ССЗ"],AZ={};DIR.forEach((d,i)=>AZ[d]=i*22.5);
+const compass=n=>{let az=Math.atan2(n[0],-n[1])*180/Math.PI;if(az<0)az+=360;return DIR[Math.round(az/22.5)%16];};
+const azDist=(a,b)=>{const d=Math.abs(a-b)%360;return d>180?360-d:d;};
+// фасад здания на этаже: грани контура, кроме общих с соседним зданием этого этажа (примыкание перехода: дуга и прямой участок)
+const FS={},NBc={};
+const NB=(c,f)=>NBc[c+f]||(NBc[c+f]=BK.filter(o=>o!==c&&has(o,f)).map(o=>[...SP[o],SP[o][0]]));
+function facadeSegs(c,f){const key=c+f;if(FS[key])return FS[key];const sp=SP[c],out=[],nb=NB(c,f);
+  for(let i=0;i<sp.length;i++){const a=sp[i],b=sp[(i+1)%sp.length],L=Math.hypot(b[0]-a[0],b[1]-a[1]);if(L<1e-6)continue;
+    const m=[(a[0]+b[0])/2,(a[1]+b[1])/2];if(nb.some(pl=>dLine(pl,m)<.15))continue;
+    let n=[(b[1]-a[1])/L,-(b[0]-a[0])/L];if(pip(sp,[m[0]+n[0]*.1,m[1]+n[1]*.1]))n=[-n[0],-n[1]];
+    out.push({a,b,d:compass(n),bb:[Math.min(a[0],b[0])-.1,Math.min(a[1],b[1])-.1,Math.max(a[0],b[0])+.1,Math.max(a[1],b[1])+.1]});}
+  return FS[key]=out;}
+function geom(b){
+  if(b.g)return b.g;
+  const box=b.in||b.c;let poly=clip(SP[box],rectOf(b.c,b.u[0],b.u[1],b.v[0],b.v[1]));
+  for(const x of (b.xc||[]))if(poly.length)poly=clip(poly,rectOf(...x));
+  for(const q of (b.pg||[]))if(poly.length)poly=clip(poly,q.map(([a,c])=>loc(b.c,a,c)));
+  const ar=poly.length>2?Math.abs(area(poly)):0;
+  let lu=b.u[1]-b.u[0],lv=b.v[1]-b.v[0];
+  if(poly.length>2){const L=poly.map(q=>{const w=[q[0]*1000+OX,OY-q[1]*1000];return G2L(b.c,w);});const us=L.map(q=>q[0]),vs=L.map(q=>q[1]);
+    lu=Math.min(lu,Math.max(...us)-Math.min(...us));lv=Math.min(lv,Math.max(...vs)-Math.min(...vs));}
+  b.g={poly,area:ar,cen:poly.length>2?centroid(poly):null,ang:lu>=lv?angU(FR[b.c]):angV(FR[b.c]),len:Math.max(lu,lv),dep:Math.min(Math.min(lu,lv),ar/Math.max(lu,lv,1e-6)*1.2)};
+  return b.g;
+}
+// фасад блока: длина его граней на наружном фасаде и стороны света
+function facade(b){if(b.fc)return b.fc;const g=geom(b),segs=facadeSegs(b.in||b.c,b.f),nb=NB(b.in||b.c,b.f),p=g.poly,dirs={},smp=[];let len=0;
+  for(let i=0;i<p.length;i++){const a=p[i],c=p[(i+1)%p.length],L=Math.hypot(c[0]-a[0],c[1]-a[1]);if(L<1e-6)continue;const n=Math.max(1,Math.round(L/.25));
+    for(let j=0;j<n;j++){const t=(j+.5)/n,q=[a[0]+(c[0]-a[0])*t,a[1]+(c[1]-a[1])*t];
+      for(const s of segs){if(q[0]<s.bb[0]||q[0]>s.bb[2]||q[1]<s.bb[1]||q[1]>s.bb[3])continue;
+        if(dSeg(q,s.a,s.b)<.06){if(nb.some(pl=>dLine(pl,q)<.1))break;len+=L/n;dirs[s.d]=(dirs[s.d]||0)+L/n;smp.push(q);break;}}}}
+  return b.fc={len,dirs,smp};}
+// глубина: наибольшее расстояние от точки блока до его окон
+function depth(b){if(b.dp!=null)return b.dp;const fc=facade(b),g=geom(b);if(!fc.smp.length)return b.dp=Infinity;
+  const [x0,y0,x1,y1]=bbox(g.poly);let mx=0;
+  for(let x=x0+.5;x<x1;x+=1)for(let y=y0+.5;y<y1;y+=1){if(!pip(g.poly,[x,y]))continue;let m=Infinity;for(const s of fc.smp){const d=Math.hypot(s[0]-x,s[1]-y);if(d<m)m=d;}if(m>mx)mx=m;}
+  return b.dp=mx;}
+const blocks=v=>[...COMMON,...VAR[v]];
+const where=b=>`${BLD[b.in||b.c]?BLD[b.in||b.c].n:b.c}, ${b.f==="0"?"подвал":b.f+" этаж"}`;
+const dirTxt=fc=>Object.entries(fc.dirs).filter(e=>e[1]>=.5).sort((a,b)=>b[1]-a[1]).map(e=>`${e[0]} ${e[1].toFixed(1).replace(".",",")} м`).join(" · ");
+
+// ---------- самопроверка: selfCheck("V1") → {errors, warnings, coverage, ok} ----------
+function selfCheck(v){
+  v=v||S.v;const list=blocks(v),ok=list.filter(b=>!b.bad),E=[],Wn=[],cov=[];
+  const add=(arr,t,b,f)=>arr.push({t,i:b?list.indexOf(b):-1,f:b?b.f:f||null});
+  for(const b of list)if(b.bad)E.push({t:"Разметка: "+b.err,i:-1,f:null});
+  for(const c of BK)for(const f of BLD[c].floors){
+    const bs=ok.filter(b=>(b.in||b.c)===c&&b.f===f),s=bs.reduce((a,b)=>a+geom(b).area,0),pct=s/FA[c]*100;cov.push({c,f,pct,n:bs.length});
+    if(!bs.length)add(Wn,`${BLD[c].n}, ${f==="0"?"подвал":f+" этаж"}: не заполнен`,null,f);
+    else if(pct<99)add(E,`${BLD[c].n}, ${f==="0"?"подвал":f+" этаж"}: блоками занято ${pct.toFixed(1).replace(".",",")} % пятна — нужно ≥ 99 %, без пустых остатков`,null,f);
+    else if(pct>100.5)add(E,`${BLD[c].n}, ${f==="0"?"подвал":f+" этаж"}: сумма блоков ${pct.toFixed(1).replace(".",",")} % пятна — блоки накладываются`,null,f);
+  }
+  const grp={};for(const b of ok){const g=geom(b);if(g.area<.5){add(Wn,`«${b.n}» (${where(b)}): после обрезки по контуру от блока ничего не осталось`,b);continue;}(grp[(b.in||b.c)+b.f]=grp[(b.in||b.c)+b.f]||[]).push(b);}
+  for(const k in grp){const a=grp[k],bb=a.map(b=>bbox(geom(b).poly));
+    for(let i=0;i<a.length;i++)for(let j=i+1;j<a.length;j++){const p=bb[i],q=bb[j];if(p[0]>=q[2]||q[0]>=p[2]||p[1]>=q[3]||q[1]>=p[3])continue;
+      let x=clip(geom(a[i]).poly,rectOf(a[j].c,a[j].u[0],a[j].u[1],a[j].v[0],a[j].v[1]));for(const r of (a[j].xc||[]))if(x.length)x=clip(x,rectOf(...r));for(const q of (a[j].pg||[]))if(x.length)x=clip(x,q.map(([u,v])=>loc(a[j].c,u,v)));
+      const ar=x.length>2?Math.abs(area(x)):0;if(ar>.3)add(E,`Наложение ${ar.toFixed(1).replace(".",",")} м²: «${a[i].n}» и «${a[j].n}» (${where(a[i])})`,a[i]);}}
+  for(const b of ok){if(geom(b).area<.5)continue;const fc=facade(b),top=BLD[b.in||b.c].floors.slice(-1)[0]===b.f;
+    if(LIGHT[b.z]&&!b.nl){
+      if(fc.len<1.2)add(E,`«${b.n}» (${where(b)}): нет наружного фасада, а помещению нужен дневной свет (п. 3.40). Перенести к фасаду или, если норма допускает без света, {nl:true} и обоснование в w`,b);
+      else if((b.z==="z2"||b.z==="z3")&&!top){const d=depth(b);if(d>8.5)add(Wn,`«${b.n}» (${where(b)}): до ${d.toFixed(0)} м от окна — п. 3.41 рекомендует смешанный свет при глубине > 8 м, а верхний свет есть только на последнем этаже`,b);}}
+    if(b.ori){const hit=Object.entries(fc.dirs).some(([d,L])=>L>=3&&b.ori.some(o=>AZ[o]!=null&&azDist(AZ[d],AZ[o])<=30));if(!hit)add(Wn,`«${b.n}» (${where(b)}): нужен фасад на ${b.ori.join(", ")}, а у блока — ${dirTxt(fc)||"фасада нет"}`,b);}
+    if(!b.w)add(Wn,`«${b.n}» (${where(b)}): нет обоснования w`,b);
+  }
+  return {v,blocks:list.length,errors:E,warnings:Wn,coverage:cov,ok:E.length===0&&list.length>0};
+}
+
+// ---------- состояние, навигация ----------
+const S={v:"V1",f:"1",grid:true,cols:true,flows:true,ft:{},diff:false,only:false,sel:null};for(const t in FT_)S.ft[t]=true;
+const svg=document.getElementById("svg"), stage=document.getElementById("stage"), tip=document.getElementById("tip");
+let VB={x:0,y:0,w:VW,h:VH};
+function fit(){const r=stage.getBoundingClientRect(),k=Math.max(VW/r.width,VH/r.height)*1.04;VB={w:r.width*k,h:r.height*k,x:0,y:0};VB.x=(VW-VB.w)/2;VB.y=(VH-VB.h)/2;applyVB();}
+function applyVB(){svg.setAttribute("viewBox",`${VB.x} ${VB.y} ${VB.w} ${VB.h}`);scaleBar();}
+function toSvg(cx,cy){const r=svg.getBoundingClientRect();return [VB.x+(cx-r.left)/r.width*VB.w, VB.y+(cy-r.top)/r.height*VB.h];}
+function zoomAt(k,cx,cy){const [px,py]=toSvg(cx,cy);const nw=Math.min(Math.max(VB.w*k,8),VW*3),kk=nw/VB.w;VB.x=px-(px-VB.x)*kk;VB.y=py-(py-VB.y)*kk;VB.w=nw;VB.h*=kk;applyVB();}
+function scaleBar(){const r=svg.getBoundingClientRect();if(!r.width)return;const mpp=VB.w/r.width;let m=[1,2,5,10,20,50,100].find(x=>x/mpp>=70)||100;
+  document.getElementById("scale").innerHTML=`${m} м<i style="width:${(m/mpp).toFixed(0)}px"></i>`;}
+svg.addEventListener("wheel",e=>{e.preventDefault();zoomAt(e.deltaY>0?1.18:1/1.18,e.clientX,e.clientY);},{passive:false});
+const ptr=new Map();let drag=null,moved=false,pinch=null;
+svg.addEventListener("pointerdown",e=>{ptr.set(e.pointerId,[e.clientX,e.clientY]);moved=false; // захват — только когда начался сдвиг, иначе щелчок уйдёт не в зону
+  if(ptr.size===1)drag={x:e.clientX,y:e.clientY,vx:VB.x,vy:VB.y};
+  if(ptr.size===2){const [a,b]=[...ptr.values()];pinch={d:Math.hypot(a[0]-b[0],a[1]-b[1]),w:VB.w};drag=null;}});
+svg.addEventListener("pointermove",e=>{if(!ptr.has(e.pointerId))return;ptr.set(e.pointerId,[e.clientX,e.clientY]);
+  if(pinch&&ptr.size===2){const [a,b]=[...ptr.values()];const d=Math.hypot(a[0]-b[0],a[1]-b[1]);if(d>0)zoomAt((pinch.w*pinch.d/d)/VB.w,(a[0]+b[0])/2,(a[1]+b[1])/2);moved=true;return;}
+  if(!drag)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(!moved&&Math.abs(dx)+Math.abs(dy)>4){moved=true;svg.classList.add("drag");tip.hidden=true;try{svg.setPointerCapture(e.pointerId);}catch(_){}}
+  if(moved){const r=svg.getBoundingClientRect();VB.x=drag.vx-dx/r.width*VB.w;VB.y=drag.vy-dy/r.height*VB.h;applyVB();}});
+const up=e=>{ptr.delete(e.pointerId);if(ptr.size<2)pinch=null;if(!ptr.size){drag=null;svg.classList.remove("drag");}};
+svg.addEventListener("pointerup",up);svg.addEventListener("pointercancel",up);
+svg.addEventListener("click",()=>{if(!moved&&side.classList.contains("open"))setSide(false);});
+const zc=k=>{const r=svg.getBoundingClientRect();zoomAt(k,r.left+r.width/2,r.top+r.height/2);};
+document.getElementById("zin").onclick=()=>zc(1/1.4);document.getElementById("zout").onclick=()=>zc(1.4);document.getElementById("zfit").onclick=fit;
+window.addEventListener("resize",()=>{fit();});
+
+// ---------- боковое меню ----------
+const side=document.getElementById("side");
+function setSide(open){side.classList.toggle("open",open);document.getElementById("brand").title=open?"Свернуть меню":"Развернуть меню";
+  document.getElementById("collapse").title=open?"Свернуть меню":"Развернуть меню";document.getElementById("colPath").setAttribute("d",open?"m14 7-5 5 5 5":"m10 7 5 5-5 5");}
+document.getElementById("brand").onclick=()=>setSide(!side.classList.contains("open"));
+document.getElementById("collapse").onclick=()=>setSide(!side.classList.contains("open"));
+side.querySelectorAll(".g-ico").forEach(b=>b.onclick=()=>{if(!side.classList.contains("open"))setSide(true);});
+
+// ---------- окна ----------
+let zTop=40;
+const front=w=>{w.style.zIndex=++zTop;};
+function place(w,x,y){const r=w.getBoundingClientRect();let L=x+18,T=y-24;if(L+r.width>innerWidth-12)L=x-r.width-18;if(L<12)L=12;if(T+r.height>innerHeight-12)T=innerHeight-r.height-12;if(T<12)T=12;
+  Object.assign(w.style,{left:L+"px",top:T+"px",right:"auto",bottom:"auto"});}
+function openWin(id,x,y){const w=document.getElementById(id);w.hidden=false;front(w);if(x!=null)place(w,x,y);syncFoot();}
+function toggleWin(id){const w=document.getElementById(id);if(w.hidden)openWin(id);else{w.hidden=true;syncFoot();}}
+function syncFoot(){document.querySelectorAll("[data-win]").forEach(b=>b.classList.toggle("on",!document.getElementById(b.dataset.win).hidden));}
+document.querySelectorAll("[data-win]").forEach(b=>b.onclick=()=>toggleWin(b.dataset.win));
+document.querySelectorAll(".win").forEach(w=>{
+  w.addEventListener("pointerdown",()=>front(w));
+  w.querySelector(".x").onclick=()=>{w.hidden=true;if(w.id==="w-info"&&S.sel){S.sel=null;render();}syncFoot();};
+  const h=w.querySelector(".win-head");let d=null;
+  h.addEventListener("pointerdown",e=>{if(e.target.closest(".x"))return;const r=w.getBoundingClientRect();d={dx:e.clientX-r.left,dy:e.clientY-r.top};h.setPointerCapture(e.pointerId);});
+  h.addEventListener("pointermove",e=>{if(!d)return;Object.assign(w.style,{left:Math.max(4,Math.min(innerWidth-80,e.clientX-d.dx))+"px",top:Math.max(4,Math.min(innerHeight-48,e.clientY-d.dy))+"px",right:"auto",bottom:"auto"});});
+  h.addEventListener("pointerup",()=>{d=null;});
+});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"){const open=[...document.querySelectorAll(".win:not([hidden])")].sort((a,b)=>(+b.style.zIndex||0)-(+a.style.zIndex||0));if(open[0])open[0].querySelector(".x").click();}});
+
+// ---------- отрисовка ----------
+const NS="http://www.w3.org/2000/svg";
+const el=(t,a,p)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e;};
+const pts=p=>p.map(q=>q[0].toFixed(2)+","+q[1].toFixed(2)).join(" ");
+const fmt=n=>Math.round(n).toLocaleString("ru-RU");
+const fmt1=n=>(Math.round(n*10)/10).toLocaleString("ru-RU");
+const txt=(p,s,a,g)=>{const t=el("text",Object.assign({x:p[0].toFixed(2),y:p[1].toFixed(2)},a),g);t.textContent=s;return t;};
+const both=()=>VAR.V1.length>0&&VAR.V2.length>0;
+const ONLY=new Set();
+function diffKeys(){const out=new Set();ONLY.clear();if(!both())return out;
+  const pl=v=>{const m={};for(const b of blocks(v)){if(b.bad)continue;for(const k of b.k)(m[k]=m[k]||new Set()).add((b.in||b.c)+b.f);}return m;};
+  const a=pl("V1"),t=pl("V2");
+  for(const k of new Set([...Object.keys(a),...Object.keys(t)])){const s1=a[k],s2=t[k];if(!s1||!s2){ONLY.add(k);continue;}
+    if(s1.size!==s2.size||[...s1].some(x=>!s2.has(x)))out.add(k);}
+  return out;}
+function defs(){
+  const d=el("defs",{},svg);
+  for(const z in ZONES){const p=el("pattern",{id:"dz-"+z,patternUnits:"userSpaceOnUse",width:2.2,height:2.2,patternTransform:"rotate(45)"},d);
+    el("rect",{width:2.2,height:2.2,fill:ZONES[z].c},p);el("rect",{width:.75,height:2.2,fill:"#d81b60",opacity:.85},p);}
+  const h=el("pattern",{id:"roof",patternUnits:"userSpaceOnUse",width:2,height:2,patternTransform:"rotate(-45)"},d);
+  el("rect",{width:2,height:2,fill:"#f4f5f6"},h);el("rect",{width:.3,height:2,fill:"#dcdfe3"},h);
+  for(const t in FT_){const m=el("marker",{id:"ar-"+t,viewBox:"0 0 10 10",refX:8,refY:5,markerWidth:5,markerHeight:5,orient:"auto-start-reverse"},d);
+    el("path",{d:"M0,0 L10,5 L0,10 z",fill:FT_[t].c},m);}
+}
+const has=(c,f)=>BLD[c].floors.includes(f);
+const topF=c=>+BLD[c].floors.slice(-1)[0];
+const FLN=f=>f==="0"?"подвал":f+" этаж";   // подпись этажа: "0" — подвал
+const LEVEL={"0":"−4,500","1":"±0,000","2":"+6,000","3":"+10,500","4":"+15,000"};
+const ROOF=c=>({ADM:"+15,000",LIB:"+19,500",BR:"+10,500"}[c]);
+function render(){
+  svg.innerHTML="";defs();applyVB();
+  const dk=diffKeys();
+  const list=blocks(S.v).filter(b=>!b.bad&&b.f===S.f);
+  const gBase=el("g",{},svg),gZ=el("g",{},svg),gC=el("g",{},svg),gO=el("g",{},svg),gA=el("g",{},svg),gL=el("g",{},svg),gF=el("g",{},svg);
+  for(const c of BK){
+    if(has(c,S.f))el("polygon",{points:pts(SP[c]),fill:"#fbfbfc"},gBase);
+    else if(+S.f>topF(c))el("polygon",{points:pts(SP[c]),fill:"url(#roof)",stroke:"#d5d9de","stroke-width":.25},gBase);
+    else el("polygon",{points:pts(SP[c]),fill:"none",stroke:"#8a929b","stroke-width":.3,"stroke-dasharray":"1 .7"},gBase);
+  }
+  const order={cor:0,z1:1,z2:1,z3:1,z4:1,z5:1,z6:1,z7:1,core:2};
+  list.sort((a,b)=>order[a.z]-order[b.z]);
+  for(const b of list){
+    const g=geom(b);if(g.poly.length<3||g.area<.5)continue;
+    // отличия считаются всегда (для окна описания), показываются — только при включённом переключателе
+    const rawD=b.k.some(k=>dk.has(k))&&b.z!=="cor"&&b.z!=="core";
+    const rawO=!rawD&&both()&&b.k.every(k=>ONLY.has(k))&&b.z!=="cor"&&b.z!=="core";
+    const isD=S.diff&&rawD, isO=S.diff&&rawO;
+    const e=el("polygon",{points:pts(g.poly),fill:isD?`url(#dz-${b.z})`:ZONES[b.z].c,stroke:isD||isO?"#d81b60":b.jn?ZONES[b.z].c:"#ffffff","stroke-width":isD?.6:isO?.45:.25,style:"cursor:pointer"},gZ);
+    if(S.sel===b){e.setAttribute("stroke","#2c3c37");e.setAttribute("stroke-width",".8");}
+    if(isO)e.setAttribute("stroke-dasharray","1.2 .7");
+    if(S.diff&&S.only&&!isD&&!isO&&b.z!=="cor")e.setAttribute("opacity",.22);
+    e.addEventListener("mousemove",ev=>{if(drag&&moved)return;tip.textContent=b.n;tip.hidden=false;
+      const w=tip.offsetWidth;tip.style.left=Math.min(ev.clientX+14,innerWidth-w-8)+"px";tip.style.top=(ev.clientY+16)+"px";});
+    e.addEventListener("mouseleave",()=>{tip.hidden=true;});
+    e.addEventListener("click",ev=>{if(moved)return;ev.stopPropagation();tip.hidden=true;S.sel=b;render();show(b,rawD,rawO,ev.clientX,ev.clientY);});
+    if(b.s&&g.area>8&&g.cen){
+      const fs=Math.min(1.7,(g.len*0.92)/(0.56*b.s.length),g.dep*0.42);
+      if(fs>=0.55)txt(g.cen,b.s,{"font-size":fs.toFixed(2),"text-anchor":"middle","dominant-baseline":"central",fill:b.z==="core"?"#fff":"#1d2622",
+        transform:`rotate(${g.ang.toFixed(1)} ${g.cen[0].toFixed(2)} ${g.cen[1].toFixed(2)})`,"font-weight":isD?"700":"500"},gL);
+    }
+  }
+  // каркас: колонны в зданиях этого этажа
+  if(S.cols)for(const c of ["ADM","LIB"]){if(!has(c,S.f))continue;
+    for(const [u,v,t] of COLS[c])el("polygon",{points:pts(rectOf(c,u-.25,u+.25,v-.25,v+.25)),fill:t==="g"?"#2c3c37":"#8c6f86"},gC);}
+  // контуры и открытые грани
+  for(const c of BK)if(has(c,S.f))el("polygon",{points:pts(SP[c]),fill:"none",stroke:"#2c3c37","stroke-width":.45},gO);
+  for(const pl of OPS[S.f]||[]){el("polyline",{points:pts(pl),fill:"none",stroke:"#fff","stroke-width":.9},gO);
+    el("polyline",{points:pts(pl),fill:"none",stroke:"#2c3c37","stroke-width":.35,"stroke-dasharray":"1 .8"},gO);}
+  // сетка осей с марками: цифровые — с юга у ректората и с севера у библиотеки, буквенные — с востока
+  if(S.grid)for(const c of ["ADM","LIB"]){if(!has(c,S.f))continue;const e=EXT[c],uSide=c==="ADM"?e.v0-4.2:e.v1+4.2;
+    const line=(p,q)=>el("line",{x1:p[0],y1:p[1],x2:q[0],y2:q[1],stroke:"#6f7a85","stroke-width":.1,"stroke-dasharray":"2.4 .5 .4 .5",opacity:.75},gA);
+    const bub=(p,s)=>{el("circle",{cx:p[0],cy:p[1],r:1.75,fill:"#fff",stroke:"#5a6470","stroke-width":.14},gA);
+      txt(p,s,{"font-size":s.length>2?1.15:1.4,"text-anchor":"middle","dominant-baseline":"central",fill:"#2c3c37","font-weight":"600"},gA);};
+    for(const [nm,u] of AX[c].U){line(loc(c,u,e.v0-2.4),loc(c,u,e.v1+2.4));bub(loc(c,u,uSide),nm);}
+    for(const [nm,v] of AX[c].V){line(loc(c,e.u0-2.4,v),loc(c,e.u1+2.4,v));bub(loc(c,e.u1+4.2,v),nm);}}
+  // подписи зданий
+  const lab=LABELS.length?LABELS:[["ADM",(EXT.ADM.u0+EXT.ADM.u1)/2,EXT.ADM.v0-6.8,null],["LIB",(EXT.LIB.u0+EXT.LIB.u1)/2,EXT.LIB.v1+6.8,null]];
+  for(const [c,u,v,t] of lab){const p=loc(c,A_(c,u,"U"),A_(c,v,"V"));
+    const s=t||(BLD[c].n+(has(c,S.f)?` · ${FLN(S.f)} ${LEVEL[S.f]}`:+S.f>topF(c)?` · кровля ${ROOF(c)}`:""));
+    txt(p,s,{"font-size":2,"text-anchor":"middle","font-weight":"600",fill:"#5a6470",transform:`rotate(${angU(FR[c]).toFixed(1)} ${p[0].toFixed(2)} ${p[1].toFixed(2)})`},gO);}
+  {const p=centroid(SP.BR),n=list.filter(b=>(b.in||b.c)==="BR").length;
+    const s=S.f==="1"?"проезд · переход над ним +6,000":S.f==="2"?(n?"":"переход"):`кровля перехода ${ROOF("BR")}`;
+    if(s)txt(p,s,{"font-size":S.f==="2"?1.3:1.05,"text-anchor":"middle","dominant-baseline":"central",fill:"#5a6470","font-style":S.f==="2"?"normal":"italic",transform:`rotate(${BR_ANG.toFixed(1)} ${p[0].toFixed(2)} ${p[1].toFixed(2)})`},gO);}
+  // входы и примечания
+  for(const [c,u,v,t,vv,f] of ENTR){if((f||"1")!==S.f||((vv||"*")!=="*"&&vv!==S.v))continue;const p=loc(c,A_(c,u,"U"),A_(c,v,"V"));
+    el("circle",{cx:p[0],cy:p[1],r:.9,fill:"#2c3c37"},gO);txt([p[0]+1.4,p[1]-1.1],t,{"font-size":1.5,fill:"#2c3c37","font-weight":"600"},gO);}
+  for(const n of NOTES){if(n.f!==S.f)continue;const p=loc(n.c,A_(n.c,n.u,"U"),A_(n.c,n.v,"V"));
+    txt(p,n.t,{"font-size":1.25,"text-anchor":"middle",fill:"#a2483c","font-style":"italic",transform:`rotate(${angU(FR[n.c]).toFixed(1)} ${p[0].toFixed(2)} ${p[1].toFixed(2)})`},gO);}
+  if(S.flows){
+    for(const fl of FL){if(fl.f!==S.f||!S.ft[fl.t]||(fl.v!=="*"&&fl.v!==S.v))continue;const st=FT_[fl.t];if(!st)continue;
+      const pp=fl.p.map(q=>loc(q[0],A_(q[0],q[1],"U"),A_(q[0],q[2],"V")));
+      el("polyline",{points:pts(pp),fill:"none",stroke:st.c,"stroke-width":st.w,"stroke-dasharray":st.d,"stroke-linejoin":"round","marker-end":`url(#ar-${fl.t})`,opacity:.95},gF);}
+    for(const [c,u,v] of MARKS){if(!has(c,S.f))continue;const p=loc(c,A_(c,u,"U"),A_(c,v,"V"));el("circle",{cx:p[0],cy:p[1],r:1.15,fill:"#fff",stroke:"#EF6C00","stroke-width":.3},gF);
+      txt([p[0],p[1]+.05],"↕",{"font-size":1.4,"text-anchor":"middle","dominant-baseline":"central",fill:"#EF6C00","font-weight":"700"},gF);}
+  }
+  const here=BK.filter(c=>has(c,S.f)).map(c=>BLD[c].n.toLowerCase()).join(", ");
+  document.getElementById("cap").textContent=VN[S.v]+" · "+FN[S.f]+" · "+here+(VAR[S.v].length||COMMON.length?"":" · зоны не заполнены (заготовка)");
+  summary();check();roomAreas();syncButtons();
+}
+function show(b,isD,isO,x,y){
+  const g=geom(b),z=ZONES[b.z],other=S.v==="V1"?"V2":"V1",fc=facade(b);
+  document.getElementById("infoT").innerHTML=`${b.n}<small>${where(b)} · ≈ ${fmt(g.area)} м²</small>`;
+  let h=`<div><span class="chip" style="background:${z.c};color:${b.z==="core"?"#fff":"#1d2622"}">${z.n}</span>${b.p?`<span class="chip">табл. 26: ${PROG[b.p].n}</span>`:""}${isD?'<span class="chip diff">стоит по-разному</span>':isO?'<span class="chip diff" style="opacity:.8">только в этом варианте</span>':""}</div>
+    <div class="card"><div class="lbl">Почему здесь · ${VN[S.v]}</div><p>${b.w||'<span class="note">обоснование не заполнено</span>'}</p></div>
+    <div class="card"><div class="lbl">Фасад и свет</div><p>${fc.len>=.5?"Фасад: "+dirTxt(fc):"Без наружного фасада."}</p>
+      <p class="note">${LIGHT[b.z]?(b.nl?"Без естественного света — по норме допускается (см. обоснование).":"Нужен дневной свет (п. 3.40)."):"Дневной свет не требуется."}${b.ori?` Нужная ориентация: ${b.ori.join(", ")}.`:""}</p></div>`;
+  if(isD){const seen=new Set();let o="";
+    for(const q of blocks(other)){if(q.bad||!q.k.some(k=>b.k.includes(k)))continue;const key=q.n+(q.in||q.c)+q.f;if(seen.has(key))continue;seen.add(key);
+      o+=`<p><b>${q.n}</b> — ${where(q)}.</p><p class="note">${q.w}</p>`;}
+    h+=`<div class="card oth"><div class="lbl">В варианте «${VN[other]}»</div>${o}</div>`;}
+  if(isO)h+=`<div class="card oth"><div class="lbl">В варианте «${VN[other]}»</div><p>Такого помещения нет.</p></div>`;
+  document.getElementById("infoB").innerHTML=h;openWin("w-info",x,y);
+}
+function summary(){
+  const all=blocks(S.v).filter(b=>!b.bad),s={},by={ADM:0,LIB:0,BR:0},pg={};
+  for(const b of all){const a=geom(b).area,c=b.in||b.c;(s[b.z]=s[b.z]||{ADM:0,LIB:0,BR:0})[c]+=a;by[c]+=a;if(b.p)pg[b.p]=(pg[b.p]||0)+a;}
+  let h=`<div class="card"><div class="lbl">По зонам, м² брутто</div><table><tr><th>Зона</th><th>Ректорат</th><th>Библиотека</th><th>Переход</th></tr>`;
+  for(const z in ZONES){const r=s[z]||{ADM:0,LIB:0,BR:0};h+=`<tr><td><i style="display:inline-block;width:10px;height:10px;background:${ZONES[z].c};border-radius:3px;margin-right:6px"></i>${ZONES[z].n}</td><td>${r.ADM?fmt(r.ADM):"—"}</td><td>${r.LIB?fmt(r.LIB):"—"}</td><td>${r.BR?fmt(r.BR):"—"}</td></tr>`;}
+  h+=`<tr class="tot"><td>Итого блоками</td><td>${fmt(by.ADM)}</td><td>${fmt(by.LIB)}</td><td>${fmt(by.BR)}</td></tr></table></div>`;
+  const gross=c=>FA[c]*BLD[c].floors.length;
+  h+=`<div class="card"><div class="lbl">По зданиям</div><table><tr><th>Здание</th><th>пятно × этажи</th><th>ПЗ</th><th>разница</th></tr>
+    <tr><td>Ректорат: ${fmt1(FA.ADM)} × 3</td><td>${fmt(gross("ADM"))}</td><td>${fmt(PZ.ADM)}</td><td class="neg">${fmt(gross("ADM")-PZ.ADM)}</td></tr>
+    <tr><td>Библиотека: ${fmt1(FA.LIB)} × ${BLD.LIB.floors.length} (с подвалом)</td><td>${fmt(gross("LIB"))}</td><td>${fmt(PZ.LIB)}</td><td class="wrn">+${fmt(gross("LIB")-PZ.LIB)}</td></tr>
+    <tr><td>Переход: ${fmt1(FA.BR)} × 1</td><td>${fmt(gross("BR"))}</td><td>—</td><td></td></tr></table>
+    <p class="note">Ректорату на 3 этажах не хватает площади до ПЗ — покажите, что не поместилось. Библиотеке ПЗ вдвое меньше нормы табл. 26 — расхождение решает архитектор, раскладка — по табл. 26.</p></div>`;
+  h+=`<div class="card"><div class="lbl">Библиотека: программа табл. 26</div><table><tr><th>Группа</th><th>в варианте</th><th>≈ полезная ×0,88</th><th>М 1 800</th><th>М 1 980</th></tr>`;
+  let t0=0,t1=0,tv=0;
+  for(const k in PROG){const a=pg[k]||0,[n0,n1]=PROG[k].a;t0+=n0;t1+=n1;tv+=a;
+    h+=`<tr><td>${PROG[k].n}</td><td>${a?fmt(a):"—"}</td><td class="${a?(a*.88<n0?"neg":"pos"):""}">${a?fmt(a*.88):""}</td><td>${fmt1(n0)}</td><td>${fmt1(n1)}</td></tr>`;}
+  h+=`<tr class="tot"><td>Итого по таблице</td><td>${fmt(tv)}</td><td>${fmt(tv*.88)}</td><td>${fmt1(t0)}</td><td>${fmt1(t1)}</td></tr></table>
+    <p class="note">Группа считается по блокам с опцией <code>{p:"…"}</code>. Табл. 26 — без лекционного зала, вестибюля, гардероба, санузлов, лестниц, коридоров и техники.</p></div>
+    <p class="note" style="margin:10px 4px 0">Площадь блока — брутто внутри контура (с перегородками), полезная ≈ 0,85–0,9 от неё. Черновик: площади и ТЭП сверяет отдельный специалист.</p>`;
+  document.getElementById("sumB").innerHTML=h;
+  document.getElementById("sumTitle").textContent="«"+VN[S.v]+"»";
+}
+function check(){
+  const r=selfCheck(S.v),cnt=document.getElementById("chkCnt");
+  cnt.className="cnt "+(!r.blocks?"idle":r.errors.length?"bad":r.warnings.length?"warn":"");
+  cnt.textContent=!r.blocks?"—":r.errors.length||r.warnings.length||"✓";
+  document.getElementById("chkTitle").textContent="«"+VN[r.v]+"»";
+  let h=`<div class="card"><div class="lbl">Итог</div><p>${r.blocks?`Блоков ${r.blocks}: ошибок <b class="${r.errors.length?"neg":"pos"}">${r.errors.length}</b>, предупреждений <b class="${r.warnings.length?"wrn":"pos"}">${r.warnings.length}</b>.`:"Вариант не заполнен — это заготовка. Зоны вносятся в разделе 3 кода."}</p></div>`;
+  h+=`<div class="card"><div class="lbl">Заполнение пятна по этажам, % (нужно ≥ 99)</div><table><tr><th>Здание</th><th>П</th><th>1</th><th>2</th><th>3</th><th>4</th></tr>`;
+  for(const c of BK){h+=`<tr><td>${BLD[c].n}</td>`;for(const f of ["0","1","2","3","4"]){const q=r.coverage.find(x=>x.c===c&&x.f===f);
+    h+=q?`<td class="${!q.n?"":q.pct<99||q.pct>100.5?"neg":"pos"}">${q.n?q.pct.toFixed(1).replace(".",","):"0"}</td>`:"<td>—</td>";}h+="</tr>";}
+  h+="</table></div>";
+  const item=(x,k)=>`<div class="iss${x.f?" go":""}" data-i="${x.i}" data-f="${x.f||""}"><span class="dot ${k}"></span><span>${x.t}</span></div>`;
+  if(r.errors.length)h+=`<div class="card"><div class="lbl">Ошибки</div>${r.errors.map(x=>item(x,"e")).join("")}</div>`;
+  if(r.warnings.length)h+=`<div class="card"><div class="lbl">Предупреждения</div>${r.warnings.map(x=>item(x,"w")).join("")}</div>`;
+  h+=`<p class="note" style="margin:10px 4px 0">Проверяется: разметка блоков, наложения, заполнение этажей, дневной свет (п. 3.40), глубина учебных помещений (п. 3.41), ориентация по опции <code>ori</code> (п. 3.116), наличие обоснования. Пути эвакуации и нормы площадей помещений — не проверяются.</p>`;
+  const B=document.getElementById("chkB");B.innerHTML=h;
+  B.querySelectorAll(".iss.go").forEach(d=>d.onclick=()=>{const i=+d.dataset.i,list=blocks(S.v);S.f=d.dataset.f;S.sel=i>=0?list[i]:null;render();});
+}
+function syncButtons(){
+  document.querySelectorAll("[data-v]").forEach(b=>{b.classList.toggle("on",b.dataset.v===S.v);b.disabled=!VAR[b.dataset.v].length&&b.dataset.v!=="V1";});
+  document.querySelectorAll("[data-f]").forEach(b=>b.classList.toggle("on",b.dataset.f===S.f));
+  const ok=both(),sd=document.getElementById("showDiff"),o=document.getElementById("onlyDiff");
+  sd.checked=S.diff&&ok;sd.disabled=!ok;o.checked=S.only&&S.diff&&ok;o.disabled=!(S.diff&&ok);
+  document.getElementById("diffRow").classList.toggle("dim",!ok);document.getElementById("onlyRow").classList.toggle("dim",!(S.diff&&ok));
+  document.getElementById("grid").checked=S.grid;document.getElementById("cols").checked=S.cols;document.getElementById("flows").checked=S.flows;
+  document.querySelectorAll(".ft").forEach(b=>b.classList.toggle("on",S.ft[b.dataset.ft]));
+}
+{const box=document.getElementById("vars");for(const v in VN){const b=document.createElement("button");b.className="opt";b.dataset.v=v;b.textContent=VN[v];
+  b.title=VAR[v].length?"":"Вариант не заполнен";box.appendChild(b);}}
+document.querySelectorAll("[data-v]").forEach(b=>b.onclick=()=>{S.v=b.dataset.v;S.sel=null;document.getElementById("w-info").hidden=true;render();});
+document.querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>{S.f=b.dataset.f;S.sel=null;document.getElementById("w-info").hidden=true;render();});
+document.getElementById("showDiff").onchange=e=>{S.diff=e.target.checked;if(!S.diff)S.only=false;render();};
+document.getElementById("onlyDiff").onchange=e=>{S.only=e.target.checked;render();};
+document.getElementById("grid").onchange=e=>{S.grid=e.target.checked;render();};
+document.getElementById("cols").onchange=e=>{S.cols=e.target.checked;render();};
+document.getElementById("flows").onchange=e=>{S.flows=e.target.checked;render();};
+{const box=document.getElementById("flowTypes");for(const t in FT_){const b=document.createElement("button");b.className="ft";b.dataset.ft=t;
+  b.innerHTML=`<i style="background:${FT_[t].c}"></i>${FT_[t].n}`;b.onclick=()=>{S.ft[t]=!S.ft[t];render();};box.appendChild(b);}}
+// окно «Площади помещений»: помещения текущего этажа и сводка по этажам (м² брутто, черновик)
+function roomAreas(){
+  const all=blocks(S.v).filter(b=>!b.bad&&geom(b).area>.5),here=all.filter(b=>b.f===S.f),sw=z=>`<i style="display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;background:${ZONES[z].c}"></i>`;
+  const ord={z1:1,z2:2,z3:3,z4:4,z5:5,z6:6,z7:7,cor:8,core:9};
+  let h="";
+  for(const c of BK){const bs=here.filter(b=>(b.in||b.c)===c);if(!bs.length)continue;const m=new Map();
+    for(const b of bs){const r=m.get(b.n)||{z:b.z,a:0};r.a+=geom(b).area;m.set(b.n,r);}
+    const rows=[...m.entries()].sort((p,q)=>(ord[p[1].z]-ord[q[1].z])||(q[1].a-p[1].a));
+    h+=`<div class="card"><div class="lbl">${BLD[c].n} · ${FLN(S.f)}</div><table><tr><th>Помещение</th><th>м²</th></tr>`+
+      rows.map(([n,r])=>`<tr><td>${sw(r.z)}${n}</td><td>${fmt(r.a)}</td></tr>`).join("")+
+      `<tr class="tot"><td>Итого этаж</td><td>${fmt(bs.reduce((s,b)=>s+geom(b).area,0))}</td></tr></table></div>`;}
+  // сводка по зданию: группы табл. 26 и прочие площади по этажам
+  for(const c of BK){const fl=BLD[c].floors,bs=all.filter(b=>(b.in||b.c)===c);if(!bs.length)continue;const g=new Map();
+    const grp=b=>b.p?(b.p==="store"&&/открытого/i.test(b.n)?"Фонд открытого доступа":b.p==="store"&&/Компактн/.test(b.n)?"Компактное хранение":b.p==="store"?"Основное хранение (закрытое)":PROG[b.p].n):b.z==="core"?(/Санузл/.test(b.n)?"Санузлы":"Лестничные клетки, лифты"):/Атриум/.test(b.n)?"Атриум":b.z==="cor"?"Коридоры, холлы":b.n;
+    for(const b of bs){const k=grp(b),r=g.get(k)||{z:b.z,a:{}};r.a[b.f]=(r.a[b.f]||0)+geom(b).area;g.set(k,r);}
+    const tot={};for(const b of bs)tot[b.f]=(tot[b.f]||0)+geom(b).area;
+    h+=`<div class="card"><div class="lbl">${BLD[c].n}: все этажи</div><table><tr><th>Помещения</th>${fl.map(f=>`<th>${f==="0"?"П":f+" эт."}</th>`).join("")}<th>Всего</th></tr>`+
+      [...g.entries()].sort((p,q)=>(ord[p[1].z]-ord[q[1].z])).map(([k,r])=>`<tr><td>${sw(r.z)}${k}</td>${fl.map(f=>`<td>${r.a[f]?fmt(r.a[f]):"—"}</td>`).join("")}<td>${fmt(Object.values(r.a).reduce((s,x)=>s+x,0))}</td></tr>`).join("")+
+      `<tr class="tot"><td>Итого</td>${fl.map(f=>`<td>${fmt(tot[f]||0)}</td>`).join("")}<td>${fmt(Object.values(tot).reduce((s,x)=>s+x,0))}</td></tr></table></div>`;}
+  h+=`<p class="note" style="margin:10px 4px 0">Площади — брутто внутри контура, черновик; цвет — функциональная зона. Полезная ≈ 0,88 от брутто.</p>`;
+  document.getElementById("legend").innerHTML=h||'<div class="card"><p class="note">На этаже нет помещений.</p></div>';
+  document.getElementById("legT").textContent="«"+VN[S.v]+"» · "+FLN(S.f);
+}
+// начальное состояние из адреса: #v=V2&f=2&grid=0&cols=0&flows=0&diff=1&side=open&legend=0&check=1&help=1
+{const h=new URLSearchParams(location.hash.slice(1));if(VN[h.get("v")])S.v=h.get("v");if(FN[h.get("f")])S.f=h.get("f");
+  for(const k of ["grid","cols","flows"])if(h.get(k)==="0")S[k]=false;
+  if(h.get("diff")==="1")S.diff=true;if(h.get("side")==="open")setSide(true);if(h.get("legend")!=="0")openWin("w-legend");
+  if(h.get("check")==="1")openWin("w-check");if(h.get("help")==="1")openWin("w-help");if(h.get("area")==="1")openWin("w-area");}
+fit();render();
+</script>
+</body>
+</html>
