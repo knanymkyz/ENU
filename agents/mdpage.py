@@ -4,6 +4,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from md2html import convert
 out, title, sub = sys.argv[1], sys.argv[2], sys.argv[3]
 tabs = [a.split(':', 2) for a in sys.argv[4:]]
+lk = os.environ.get('LINK', '')
+linkhtml = (lambda u, t: f'<p class="go"><a href="{html.escape(u)}">{html.escape(t)} →</a></p>')(*lk.split('|', 1)) if lk else ''
 def js(s):  # safe inside <script type=text/plain>
     return s.replace('</script', '<\\/script')
 nav = ''.join(f'<a href="#{i}" data-id="{i}">{html.escape(l)}</a>' for i, l, _ in tabs)
@@ -48,8 +50,9 @@ th{{background:var(--tint);font-weight:600}} tr:last-child td{{border-bottom:non
 .meta p{{margin:2px 0}}
 .sev-c{{color:var(--crit);font-weight:700}} .sev-w{{color:var(--warn);font-weight:700}} .sev-o{{color:var(--ok);font-weight:700}}
 .err{{color:var(--crit)}}
+.go{{margin:-6px 0 16px}} .go a{{display:inline-block;padding:8px 14px;border-radius:6px;background:var(--accent);color:var(--paper);text-decoration:none;font-weight:600}} .go a:focus-visible{{outline:2px solid var(--fg);outline-offset:2px}}
 </style>
-<header><div class="wrap"><div class="eyebrow">Проект 207 · библиотека ЕНУ</div><h1 class="t">{html.escape(title)}</h1><p class="sub">{html.escape(sub)}</p><nav>{nav}</nav></div></header>
+<header><div class="wrap"><div class="eyebrow">Проект 207 · библиотека ЕНУ</div><h1 class="t">{html.escape(title)}</h1><p class="sub">{html.escape(sub)}</p>{linkhtml}<nav>{nav}</nav></div></header>
 <main><article id="doc">{srcs}</article></main>
 <script>
 const IDS={[t[0] for t in tabs]!r};
