@@ -366,7 +366,7 @@ const A_=(c,x,d)=>typeof x==="number"?x:ax(c,x,d);
 // блок-прямоугольник в осях здания c на этаже f: u0…u1, v0…v1 — метры или имена осей; обрезается по контуру здания
 // z — код зоны, k — ключ (строка или массив; одинаковая функция в двух вариантах — одинаковый ключ), s — подпись, n — название, w — почему здесь
 // o — опции: {nl:true} без дневного света по норме · {ori:["С","СВ","В","ЮВ"]} нужный фасад, сторона ±30° · {p:"readU"} группа табл. 26
-//            {xc:[["LIB",u0,u1,v0,v1]]} оставить только часть внутри этого прямоугольника · {in:"BR"} блок в осях c, а лежит в здании in
+//            {xc:[["LIB",u0,u1,v0,v1]]} оставить только часть внутри этого прямоугольника · {pg:[[[u,v],…]]} — и внутри этих выпуклых многоугольников (косые помещения) · {in:"BR"} блок в осях c, а лежит в здании in
 function R(c,f,u0,u1,v0,v1,z,k,s,n,w,o){
   f=String(f);const b=Object.assign({c,f,z,k:[].concat(k||n||s||"?"),s:s||"",n:n||s||"",w:w||""},o||{});
   const bad=m=>{b.err=(b.err?b.err+"; ":`«${b.n||"без названия"}» (${c}, этаж ${f}): `)+m;b.bad=true;};   // ошибка разметки — в окне «Проверка» своего варианта
@@ -455,6 +455,7 @@ function geom(b){
   if(b.g)return b.g;
   const box=b.in||b.c;let poly=clip(SP[box],rectOf(b.c,b.u[0],b.u[1],b.v[0],b.v[1]));
   for(const x of (b.xc||[]))if(poly.length)poly=clip(poly,rectOf(...x));
+  for(const q of (b.pg||[]))if(poly.length)poly=clip(poly,q.map(([a,c])=>loc(b.c,a,c)));
   const ar=poly.length>2?Math.abs(area(poly)):0;
   let lu=b.u[1]-b.u[0],lv=b.v[1]-b.v[0];
   if(poly.length>2){const L=poly.map(q=>{const w=[q[0]*1000+OX,OY-q[1]*1000];return G2L(b.c,w);});const us=L.map(q=>q[0]),vs=L.map(q=>q[1]);
@@ -492,7 +493,7 @@ function selfCheck(v){
   const grp={};for(const b of ok){const g=geom(b);if(g.area<.5){add(Wn,`«${b.n}» (${where(b)}): после обрезки по контуру от блока ничего не осталось`,b);continue;}(grp[(b.in||b.c)+b.f]=grp[(b.in||b.c)+b.f]||[]).push(b);}
   for(const k in grp){const a=grp[k],bb=a.map(b=>bbox(geom(b).poly));
     for(let i=0;i<a.length;i++)for(let j=i+1;j<a.length;j++){const p=bb[i],q=bb[j];if(p[0]>=q[2]||q[0]>=p[2]||p[1]>=q[3]||q[1]>=p[3])continue;
-      let x=clip(geom(a[i]).poly,rectOf(a[j].c,a[j].u[0],a[j].u[1],a[j].v[0],a[j].v[1]));for(const r of (a[j].xc||[]))if(x.length)x=clip(x,rectOf(...r));
+      let x=clip(geom(a[i]).poly,rectOf(a[j].c,a[j].u[0],a[j].u[1],a[j].v[0],a[j].v[1]));for(const r of (a[j].xc||[]))if(x.length)x=clip(x,rectOf(...r));for(const q of (a[j].pg||[]))if(x.length)x=clip(x,q.map(([u,v])=>loc(a[j].c,u,v)));
       const ar=x.length>2?Math.abs(area(x)):0;if(ar>.3)add(E,`Наложение ${ar.toFixed(1).replace(".",",")} м²: «${a[i].n}» и «${a[j].n}» (${where(a[i])})`,a[i]);}}
   for(const b of ok){if(geom(b).area<.5)continue;const fc=facade(b),top=BLD[b.in||b.c].floors.slice(-1)[0]===b.f;
     if(LIGHT[b.z]&&!b.nl){
