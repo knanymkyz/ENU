@@ -339,6 +339,8 @@ const ZONES={
 };
 // зоны, которым по умолчанию нужен дневной свет (пособие к СНиП 2.08.02-89 п. 3.40); исключение — опция {nl:true} с обоснованием в w
 const LIGHT={z2:1,z3:1,z4:1,z5:1,z6:1};
+// этажи, на которых рисуются тёмные стены между помещениями (читаемость плана; по просьбе архитектора — 1 этаж)
+const WALLF={"1":1};
 // библиотека: пособие к СНиП 2.08.02-89, п. 3.115, табл. 26; Ф = 1 800 000, [М = 1 800, М = 1 980], м²
 const PROG={
   abon:{n:"Абонемент (читатели + сотрудники)",a:[678,747.8]},
@@ -949,6 +951,21 @@ function render(){
       if(fs>=0.55)txt(g.cen,b.s,{"font-size":fs.toFixed(2),"text-anchor":"middle","dominant-baseline":"central",fill:b.z==="core"?"#fff":"#1d2622",
         transform:`rotate(${g.ang.toFixed(1)} ${g.cen[0].toFixed(2)} ${g.cen[1].toFixed(2)})`,"font-weight":isD?"700":"500"},gL);
     }
+  }
+  // стены между помещениями: тёмная линия по граням блоков на этажах из WALLF.
+  // Не рисуются: общие грани кусков одного помещения ({jn:true}, одно имя) и грани между блоками коридоров.
+  if(WALLF[S.f]){const E=[];
+    for(const b of list){const g=geom(b);if(g.poly.length<3||g.area<.5||b.z==="core")continue;
+      const key=b.z==="cor"?"cor":b.jn?b.z+"|"+b.n:null,p=g.poly;
+      for(let i=0;i<p.length;i++)E.push({a:p[i],b:p[(i+1)%p.length],key});}
+    for(const e of E){const dx=e.b[0]-e.a[0],dy=e.b[1]-e.a[1],L=Math.hypot(dx,dy);if(L<.05)continue;let iv=[[0,1]];
+      if(e.key)for(const f of E){if(f===e||f.key!==e.key)continue;
+        const d1=Math.abs((f.a[0]-e.a[0])*dy-(f.a[1]-e.a[1])*dx)/L,d2=Math.abs((f.b[0]-e.a[0])*dy-(f.b[1]-e.a[1])*dx)/L;
+        if(d1>.06||d2>.06)continue;
+        let t1=((f.a[0]-e.a[0])*dx+(f.a[1]-e.a[1])*dy)/(L*L),t2=((f.b[0]-e.a[0])*dx+(f.b[1]-e.a[1])*dy)/(L*L);if(t1>t2)[t1,t2]=[t2,t1];
+        iv=iv.flatMap(([s,t])=>t<=t1||s>=t2?[[s,t]]:[...(s<t1?[[s,t1]]:[]),...(t>t2?[[t2,t]]:[])]);}
+      for(const [s,t] of iv)if((t-s)*L>.05)el("line",{x1:(e.a[0]+dx*s).toFixed(2),y1:(e.a[1]+dy*s).toFixed(2),x2:(e.a[0]+dx*t).toFixed(2),y2:(e.a[1]+dy*t).toFixed(2),
+        stroke:"#2c3c37","stroke-width":.32,"stroke-linecap":"square","pointer-events":"none"},gZ);}
   }
   // каркас: колонны в зданиях этого этажа
   if(S.cols)for(const c of ["ADM","LIB"]){if(!has(c,S.f))continue;
