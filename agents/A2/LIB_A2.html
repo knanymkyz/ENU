@@ -953,10 +953,10 @@ function render(){
     }
   }
   // стены между помещениями: тёмная линия по граням блоков на этажах из WALLF.
-  // Не рисуются: общие грани кусков одного помещения ({jn:true}, одно имя) и грани между блоками коридоров.
+  // Не рисуются: общие грани кусков одного помещения ({jn:true}, один ключ k) и грани между блоками коридоров.
   if(WALLF[S.f]){const E=[];
     for(const b of list){const g=geom(b);if(g.poly.length<3||g.area<.5||b.z==="core")continue;
-      const key=b.z==="cor"?"cor":b.jn?b.z+"|"+b.n:null,p=g.poly;
+      const key=b.z==="cor"?"cor":b.jn?b.z+"|"+[].concat(b.k).join("+"):null,p=g.poly;
       for(let i=0;i<p.length;i++)E.push({a:p[i],b:p[(i+1)%p.length],key});}
     for(const e of E){const dx=e.b[0]-e.a[0],dy=e.b[1]-e.a[1],L=Math.hypot(dx,dy);if(L<.05)continue;let iv=[[0,1]];
       if(e.key)for(const f of E){if(f===e||f.key!==e.key)continue;
