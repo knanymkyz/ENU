@@ -335,6 +335,7 @@ const ZONES={
   z1:{n:"1 Общественная",c:"#F2C14E"}, z2:{n:"2 Учебная",c:"#5DA9E9"}, z3:{n:"3 Учебно-лабораторная",c:"#3CC0A8"},
   z4:{n:"4 Научно-исследовательская",c:"#9B7FD6"}, z5:{n:"5 Административно-преподавательская",c:"#F08A6B"},
   z6:{n:"6 Студенческая и рекреационная",c:"#9CCC65"}, z7:{n:"7 Вспомогательная и инженерно-техническая",c:"#A9AFB6"},
+  z8:{n:"8 Книгохранение (основное, компактное, фонды)",c:"#8FA9C4"},
   cor:{n:"Коридоры, холлы, галерея перехода",c:"#ECE6DC"}, core:{n:"Ядра: ЛК, шахты лифтов, санузлы, техника",c:"#45474B"}
 };
 // зоны, которым по умолчанию нужен дневной свет (пособие к СНиП 2.08.02-89 п. 3.40); исключение — опция {nl:true} с обоснованием в w
@@ -599,7 +600,7 @@ function render(){
     else if(+S.f>topF(c))el("polygon",{points:pts(SP[c]),fill:"url(#roof)",stroke:"#d5d9de","stroke-width":.25},gBase);
     else el("polygon",{points:pts(SP[c]),fill:"none",stroke:"#8a929b","stroke-width":.3,"stroke-dasharray":"1 .7"},gBase);
   }
-  const order={cor:0,z1:1,z2:1,z3:1,z4:1,z5:1,z6:1,z7:1,core:2};
+  const order={cor:0,z1:1,z2:1,z3:1,z4:1,z5:1,z6:1,z7:1,z8:1,core:2};
   list.sort((a,b)=>order[a.z]-order[b.z]);
   for(const b of list){
     const g=geom(b);if(g.poly.length<3||g.area<.5)continue;
@@ -641,6 +642,8 @@ function render(){
     for(const [u,v,t] of COLS[c])el("polygon",{points:pts(rectOf(c,u-.25,u+.25,v-.25,v+.25)),fill:t==="g"?"#2c3c37":"#8c6f86"},gC);}
   // контуры и открытые грани
   for(const c of BK)if(has(c,S.f))el("polygon",{points:pts(SP[c]),fill:"none",stroke:"#2c3c37","stroke-width":.45},gO);
+  // границы функциональных зон этажа (BND в исходнике варианта): толстая красная штриховая линия
+  for(const bd of (typeof BND!=="undefined"?BND:[]))if(bd.f===S.f&&has(bd.c,S.f))el("polyline",{points:pts(bd.p.map(([u,v])=>loc(bd.c,u,v))),fill:"none",stroke:"#c62828","stroke-width":.75,"stroke-dasharray":"2.2 .9","stroke-linecap":"round","stroke-linejoin":"round","pointer-events":"none"},gO);
   for(const pl of OPS[S.f]||[]){el("polyline",{points:pts(pl),fill:"none",stroke:"#fff","stroke-width":.9},gO);
     el("polyline",{points:pts(pl),fill:"none",stroke:"#2c3c37","stroke-width":.35,"stroke-dasharray":"1 .8"},gO);}
   // сетка осей с марками: цифровые — с юга у ректората и с севера у библиотеки, буквенные — с востока
