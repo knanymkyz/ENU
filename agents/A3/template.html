@@ -763,7 +763,7 @@ function roomAreas(){
       `<tr class="tot"><td>Итого этаж</td><td>${fmt(bs.reduce((s,b)=>s+geom(b).area,0))}</td></tr></table></div>`;}
   // сводка по зданию: группы табл. 26 и прочие площади по этажам
   for(const c of BK){const fl=BLD[c].floors,bs=all.filter(b=>(b.in||b.c)===c);if(!bs.length)continue;const g=new Map();
-    const grp=b=>b.p?(b.p==="store"&&/открытого/i.test(b.n)?"Фонд открытого доступа":b.p==="store"&&/Компактн/.test(b.n)?"Компактное хранение":b.p==="store"?"Основное хранение (закрытое)":PROG[b.p].n):b.z==="core"?(/Санузл/.test(b.n)?"Санузлы":"Лестничные клетки, лифты"):/Атриум/.test(b.n)?"Атриум":b.z==="cor"?"Коридоры, холлы":b.n;
+    const grp=b=>b.p?(b.p==="store"&&/открыт/i.test(b.n)?"Фонд открытого доступа":b.p==="store"&&/Пункт выдачи|сотрудник/i.test(b.n)?"Пункты выдачи и сотрудники хранения":b.p==="store"&&/Компактн/.test(b.n)?"Компактное хранение":b.p==="store"?"Основное хранение (закрытое)":PROG[b.p].n):b.z==="core"?(/Санузл/.test(b.n)?"Санузлы":"Лестничные клетки, лифты"):/Атриум/.test(b.n)?"Атриум":b.z==="cor"?"Коридоры, холлы":b.n;
     for(const b of bs){const k=grp(b),r=g.get(k)||{z:b.z,a:{}};r.a[b.f]=(r.a[b.f]||0)+geom(b).area;g.set(k,r);}
     const tot={};for(const b of bs)tot[b.f]=(tot[b.f]||0)+geom(b).area;
     h+=`<div class="card"><div class="lbl">${BLD[c].n}: все этажи</div><table><tr><th>Помещения</th>${fl.map(f=>`<th>${f==="0"?"П":f+" эт."}</th>`).join("")}<th>Всего</th></tr>`+
