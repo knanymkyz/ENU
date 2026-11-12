@@ -1,0 +1,186 @@
+<title>Библиотека ЕНУ — входы и ЛК</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: лист чертежа — заголовок, два чертежа во всю ширину, под ними пояснения в две колонки */
+:root{
+  --bg:#f5f6f3; --paper:#ffffff; --fg:#1c2421; --muted:#5f6b66; --rule:#d5dbd7;
+  --ground:#fbfbf9; --road:#d9dcd9; --roadl:#a9aeab; --walk:#b9c4d6; --plaza:#7d93bb; --bike:#7fb08a;
+  --bld:#e6e8e4; --bldl:#8e9893; --lib:#fbe9e7; --red:#c62828;
+  --lk:#2f45b5; --lkf:#dfe4fb; --main:#0c7a63; --mainf:#d7efe8; --serv:#b05e00; --servf:#fbe8d3; --atr:#7a8580;
+  --f-text:"IBM Plex Sans",system-ui,sans-serif; --f-head:"IBM Plex Sans Condensed","IBM Plex Sans",system-ui,sans-serif; --f-mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141917; --paper:#1b2220; --fg:#e4ebe7; --muted:#9aa7a1; --rule:#2e3834;
+  --ground:#18201d; --road:#2c3330; --roadl:#4d5652; --walk:#3c4a63; --plaza:#6f86b0; --bike:#4f8a5d;
+  --bld:#252d2a; --bldl:#5d6964; --lib:#3a2020; --red:#ef5350;
+  --lk:#93a3ff; --lkf:#232b52; --main:#4fd1ad; --mainf:#163b32; --serv:#f0a04b; --servf:#3d2a14; --atr:#8c9893; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141917; --paper:#1b2220; --fg:#e4ebe7; --muted:#9aa7a1; --rule:#2e3834;
+  --ground:#18201d; --road:#2c3330; --roadl:#4d5652; --walk:#3c4a63; --plaza:#6f86b0; --bike:#4f8a5d;
+  --bld:#252d2a; --bldl:#5d6964; --lib:#3a2020; --red:#ef5350;
+  --lk:#93a3ff; --lkf:#232b52; --main:#4fd1ad; --mainf:#163b32; --serv:#f0a04b; --servf:#3d2a14; --atr:#8c9893; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font:15px/1.55 var(--f-text)}
+.wrap{max-width:1180px;margin:0 auto;padding-block:28px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:28px}
+header{display:grid;gap:6px}
+.eyebrow{font:500 12px/1 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+h1{font:600 clamp(26px,4vw,38px)/1.1 var(--f-head);margin:0;text-wrap:balance}
+h2{font:600 21px/1.2 var(--f-head);margin:0 0 10px;text-wrap:balance}
+h3{font:600 16px/1.3 var(--f-head);margin:0 0 6px}
+.lead{max-width:72ch;color:var(--muted);margin:0}
+.facts{display:flex;flex-wrap:wrap;gap:8px 22px;font:500 13px/1.4 var(--f-mono);color:var(--fg);margin-top:6px}
+.facts span b{font-weight:500;color:var(--muted);margin-right:6px}
+figure{margin:0;background:var(--paper);border:1px solid var(--rule);border-radius:6px;overflow:hidden}
+figcaption{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 16px;padding:12px 16px;border-top:1px solid var(--rule);font-size:13px;color:var(--muted)}
+figcaption b{color:var(--fg);font-weight:600}
+.svgbox{overflow-x:auto}
+.svgbox svg{display:block;width:100%;min-width:620px;height:auto}
+.legend{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:13px}
+.legend i{display:inline-block;width:14px;height:10px;margin-right:6px;vertical-align:-1px;border-radius:2px}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px}
+.card{background:var(--paper);border:1px solid var(--rule);border-radius:6px;padding:18px 20px;min-width:0}
+.card p{margin:0 0 8px}.card ul{margin:0;padding-left:18px}.card li{margin:4px 0}
+.tag{display:inline-block;font:600 11px/1 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;padding:4px 7px;border-radius:3px;margin-bottom:8px}
+.t-main{background:var(--mainf);color:var(--main)}.t-serv{background:var(--servf);color:var(--serv)}.t-lk{background:var(--lkf);color:var(--lk)}.t-warn{background:var(--lib);color:var(--red)}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font:600 12px/1.3 var(--f-mono);letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+td.n{font-family:var(--f-mono);white-space:nowrap}
+.ok{color:var(--main);font-weight:600}.risk{color:var(--red);font-weight:600}
+.note{font-size:13px;color:var(--muted)}
+code,.mono{font-family:var(--f-mono);font-size:.92em}
+/* svg */
+.ground{fill:var(--ground)}
+.road{fill:var(--road);stroke:var(--roadl);stroke-width:.4}
+.plaza{fill:none;stroke:var(--plaza);stroke-width:.9}
+.walk{fill:none;stroke:var(--walk);stroke-width:.35}
+.bike{fill:none;stroke:var(--bike);stroke-width:.6}
+.bld{fill:var(--bld);stroke:var(--bldl);stroke-width:.4}
+.lib{fill:var(--lib);stroke:var(--red);stroke-width:1.6}
+.lib2{fill:var(--paper);stroke:var(--red);stroke-width:.6}
+.atr{fill:var(--bg);stroke:var(--atr);stroke-width:.3;stroke-dasharray:1.2 .8}
+.fore{fill:var(--mainf);stroke:none}
+.yard{fill:var(--servf);stroke:none}
+.lk{fill:var(--lkf);stroke:var(--lk);stroke-width:.35}
+.lift{fill:var(--bld);stroke:var(--bldl);stroke-width:.3}
+.tamb{fill:var(--mainf);stroke:var(--main);stroke-width:.3}
+.dock{fill:var(--servf);stroke:var(--serv);stroke-width:.3}
+.dist{stroke:var(--lk);stroke-width:.22;stroke-dasharray:.9 .6;fill:none}
+.exit{stroke:var(--lk);stroke-width:.45}
+.a-main{fill:none;stroke:var(--main);stroke-width:.9}
+.a-main2{fill:none;stroke:var(--main);stroke-width:.6;stroke-dasharray:1.2 .7}
+.a-serv{fill:none;stroke:var(--serv);stroke-width:.9;stroke-dasharray:2 1}
+.mk{fill:var(--main)}.mks{fill:var(--serv)}.mkl{fill:var(--lk)}.mkp{fill:var(--plaza)}
+.na{fill:var(--fg)}
+.sb{fill:var(--fg)}.sb2{fill:var(--paper);stroke:var(--fg);stroke-width:.2}
+.far{fill:var(--red)}.farl{stroke:var(--red);stroke-width:.2;stroke-dasharray:.6 .5}
+text{fill:var(--fg);font-family:var(--f-text)}
+.lbl{font-size:6px;font-weight:600}
+.small{font-size:4.6px;fill:var(--muted)}
+.road-l{font-size:6px;fill:var(--muted);font-family:var(--f-mono)}
+.core-l{font-size:6.5px;font-weight:600;fill:var(--plaza)}
+.lib-l{font-size:6px;font-weight:600;fill:var(--red);font-family:var(--f-head);letter-spacing:.06em}
+.tiny{font-size:1.75px;fill:var(--muted)}
+.atr-l{font-size:2.2px;font-weight:600;fill:var(--atr);letter-spacing:.08em}
+.lk-l{font-size:1.9px;font-weight:600;fill:var(--lk);font-family:var(--f-mono)}
+.dist-l{font-size:1.8px;fill:var(--lk);font-family:var(--f-mono)}
+.dim{font-size:1.7px;fill:var(--red);font-family:var(--f-mono)}
+.main-l{font-size:2.3px;font-weight:600;fill:var(--main);font-family:var(--f-head)}
+.main-l2{font-size:1.9px;font-weight:600;fill:var(--main)}
+.serv-l{font-size:2.3px;font-weight:600;fill:var(--serv);font-family:var(--f-head)}
+</style>
+<div class="wrap">
+<header>
+  <div class="eyebrow">ENU GRAD · библиотека · новая посадка от 09.11 · шаг 1</div>
+  <h1>Где главный вход, служебный вход и эвакуационные лестницы</h1>
+  <p class="lead">Контур и окружение взяты из DWG «Посадка» (09.11): пятиугольник со скруглёнными углами, площадь плиты по контуру 5 012,4 м². Север — вверх: стрелка «С» в чертеже не повёрнута, координаты местные (UTM).</p>
+  <div class="facts"><span><b>этажи</b>3 (6,0 + 4,5 + 4,5 м)</span><span><b>плита</b>5 012 м²</span><span><b>всего</b>15 036 м²</span><span><b>стороны</b>75,2 / 47,1 / 47,2 / 44,6 / 26,1 м, углы R ≈ 5 м</span></div>
+</header>
+
+<figure>
+  <div class="svgbox">%%SIT%%</div>
+  <figcaption><span><b>Ситуация.</b> Северо-западный фасад длиной 75 м смотрит на центральную площадь. С юго-запада проходит ул. А123, напротив южного угла с неё есть съезд. У северного угла — переход в соседний корпус.</span><span>масштаб по DWG</span></figcaption>
+</figure>
+
+<figure>
+  <div class="svgbox">%%BLD%%</div>
+  <figcaption>
+    <div class="legend">
+      <span><i style="background:var(--mainf);outline:1px solid var(--main)"></i>входы для читателей</span>
+      <span><i style="background:var(--servf);outline:1px solid var(--serv)"></i>служебный вход, двор</span>
+      <span><i style="background:var(--lkf);outline:1px solid var(--lk)"></i>ЛК 9 × 4,5 м, стрелка — выход наружу на 1 этаже</span>
+      <span><i style="background:transparent;border-top:1.5px dashed var(--lk);height:0;margin-bottom:3px"></i>расстояние между дверями ЛК по прямой</span>
+    </div>
+    <span>одинаково для 1–3 этажей</span>
+  </figcaption>
+</figure>
+
+<div class="cols">
+  <div class="card">
+    <span class="tag t-main">Главный вход</span>
+    <h3>Западный угол, со стороны площади</h3>
+    <p>Тамбур стоит на северо-западном фасаде, у самого западного угла. Угол стоит на пути из двух мест:</p>
+    <ul>
+      <li>с центральной площади — от ядра кампуса прямо к фасаду;</li>
+      <li>с ул. А123 — по проходу между библиотекой и соседним 2-этажным корпусом.</li>
+    </ul>
+    <p>Перед входом — предвходовая площадь. Угол можно застеклить на оба фасада, а над входом сделать консоль: высота 1 этажа 6 м это позволяет. От входа к атриуму видны лифты и парадная лестница.</p>
+    <p class="note">Альтернатива — вход в середине северо-западного фасада, по оси на ядро. Тогда его хуже видно с дороги, а ЛК-2 придётся сдвигать.</p>
+  </div>
+  <div class="card">
+    <span class="tag t-serv">Служебный вход</span>
+    <h3>Юго-восточный угол, у съезда с дороги</h3>
+    <p>Съезд с ул. А123 подходит к зданию примерно в 35 м южнее этого угла. Машины подъезжают прямо к разгрузке и не заезжают на пешеходную площадь.</p>
+    <p>Внутри цепочка такая: разгрузка → приёмка и обработка → хранение. Рядом стоит ЛК-5, к ней примыкают грузовой лифт и книгоподъёмник. Вход для персонала — в том же дворе.</p>
+    <span class="tag t-main" style="margin-top:6px">Второй вход</span>
+    <p>Из перехода в соседний корпус у северного угла — для студентов и сотрудников. Ему нужен свой пост контроля.</p>
+  </div>
+</div>
+
+<div class="card">
+  <span class="tag t-lk">Эвакуационные лестницы</span>
+  <h2>5 ЛК по периметру, по одной на каждый фасад</h2>
+  <p>При 4 ЛК между соседними получается 70–90 м, это больше нормы. При 5 ЛК — 40–45 м по прямой. Каждая ЛК на 1 этаже выходит прямо наружу, все 5 доходят до кровли.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>ЛК</th><th>Фасад</th><th>Что рядом</th><th>До соседней ЛК</th></tr></thead>
+    <tbody>
+      <tr><td class="n">ЛК-1</td><td>западный, 26 м</td><td>главный вход, выход к дороге</td><td class="n">%%D51%% м до ЛК-5 · %%D12%% м до ЛК-2</td></tr>
+      <tr><td class="n">ЛК-2</td><td>северо-западный, середина</td><td>выход на площадь</td><td class="n">%%D23%% м до ЛК-3</td></tr>
+      <tr><td class="n">ЛК-3</td><td>северо-восточный, у северного угла</td><td>переход в корпус</td><td class="n">%%D34%% м до ЛК-4</td></tr>
+      <tr><td class="n">ЛК-4</td><td>юго-восточный, у восточного угла</td><td>выход на дорожку к восточным корпусам</td><td class="n">%%D45%% м до ЛК-5</td></tr>
+      <tr><td class="n">ЛК-5</td><td>южный, у юго-восточного угла</td><td>служебное ядро: грузовой лифт, книгоподъёмник</td><td class="n">—</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note" style="margin-top:10px">Самая дальняя точка этажа (кроме атриума) — %%MAX%% м по прямой до ближайшей ЛК. Маршевый участок 1 этажа при высоте 6 м: два марша по 3,0 м (≈ 18 ступеней), ЛК около 9 × 4,5 м. Ширину маршей определит расчёт людей.</p>
+</div>
+
+<div class="card">
+  <span class="tag t-warn">Нормы: что из этого следует</span>
+  <h2>Что нужно заложить с самого начала</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Вопрос</th><th>Норма</th><th>Что у нас</th><th>Решение</th></tr></thead>
+    <tbody>
+      <tr><td>Площадь этажа в пожарном отсеке</td><td>СП РК 3.02-107 табл. 1, 3–5 эт.: II ст. — 4 000 м², I ст. — 5 000 м²; с АУПТ вдвое больше</td><td class="n">5 012 м²</td><td><span class="risk">больше 5 000.</span> Нужна АУПТ во всём здании (тогда II ст. до 8 000 м²) или противопожарная стена, делящая этаж на 2 отсека</td></tr>
+      <tr><td>Атриум</td><td>СН РК 2.02-01 п. 5.1.1.6–5.1.1.8</td><td class="n">3 × 5 012 = 15 036 м²</td><td>На 2–3 этажах отделить пустоту остеклением EI 45 или противопожарными шторами, иначе все этажи суммируются</td></tr>
+      <tr><td>Расстояние между ЛК</td><td>СП РК 3.02-107 табл. 9: 60 м при плотности до 2 чел/м², 50 м при 2–3</td><td class="n">40–45 м по прямой</td><td><span class="ok">проходит</span>; по пути выйдет на 10–20 % больше, проверим на планировке</td></tr>
+      <tr><td>Тупики</td><td>табл. 9: 25–30 м; с МГН — 15 м (СП РК 3.06-101 п. 4.2.4)</td><td>—</td><td>Коридоры замыкать в кольцо вокруг атриума, тогда тупиков нет</td></tr>
+      <tr><td>Тип лестниц</td><td>высота до 28 м</td><td class="n">пол 3 эт. +10,5 м</td><td><span class="ok">обычные Л1</span>, незадымляемые не нужны</td></tr>
+      <tr><td>Выходы на кровлю</td><td>ТР-405 п. 196: 1 на каждые 1 000 м²</td><td class="n">≈ 4 560 м² без фонаря</td><td>5 выходов — все 5 ЛК довести до кровли</td></tr>
+      <tr><td>Переход в соседний корпус</td><td>ТР-405 п. 39 пп. 2; СП РК 3.02-107 п. 4.2.1.13</td><td>здания соединены</td><td>В месте примыкания — противопожарная стена с дверями 1-го типа. Для соединённых зданий нужен круговой пожарный проезд — согласовать с генпланом</td></tr>
+      <tr><td>МГН</td><td>СП РК 3.06-101 п. 4.2.7</td><td>2–3 этажи</td><td>Зоны безопасности у ЛК-1 и ЛК-3 (рядом с лифтами и входами)</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note" style="margin-top:10px">Ссылки на пункты — по разбору пожарной безопасности, который делали для прошлого варианта. Пределы по площади отсека в СП РК 3.02-107 и СП РК 2.02-101 расходятся; принят более мягкий, обязательный СП РК 3.02-107.</p>
+</div>
+
+<div class="card">
+  <h3>Что нужно от вас</h3>
+  <ul>
+    <li>Подтвердить главный вход у западного угла или выбрать вход по оси на ядро.</li>
+    <li>Уточнить, на каком этаже переход в соседний корпус: если на 2-м, вход из него будет не на первом этаже.</li>
+    <li>Съезд с дороги у южного угла — это служебный или пожарный подъезд? От этого зависит, где ставить разгрузку.</li>
+  </ul>
+</div>
+</div>
