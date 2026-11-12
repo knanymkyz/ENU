@@ -26,11 +26,11 @@ def inside(P,x,y):
         if (y0>y)!=(y1>y) and x<(x1-x0)*(y-y0)/(y1-y0)+x0: c=not c
     return c
 # ---------- LK config
-LK={'ЛК-1':('W',18),'ЛК-2':('NW',38),'ЛК-3':('NE',36),'ЛК-4':('SE',36),'ЛК-5':('S',38)}
+LK={'ЛК-1':('W',18),'ЛК-2':('NW',55.6),'ЛК-3':('NW',19.6),'ЛК-4':('NE',36),'ЛК-5':('SE',36),'ЛК-6':('S',38)}
 LKB={k:box(e,s-4.5,s+4.5,0.3,4.8) for k,(e,s) in LK.items()}
 DOOR={k:pt(e,s,4.8) for k,(e,s) in LK.items()}
 names=list(LK)
-SP=[(names[i],names[(i+1)%5],math.dist(DOOR[names[i]],DOOR[names[(i+1)%5]])) for i in range(5)]
+SP=[(names[i],names[(i+1)%6],math.dist(DOOR[names[i]],DOOR[names[(i+1)%6]])) for i in range(6)]
 mx=0;far=None
 for gx in range(50,160):
     for gy in range(115,207):
@@ -66,16 +66,16 @@ o.append(tx(60,300,'центральная площадь','core-l'))
 o.append(tx(60,290,'(ядро кампуса)','small'))
 o.append(tx(105,160,'БИБЛИОТЕКА','lib-l'))
 o.append(tx(105,151,'3 эт. · 5 012 м²','small'))
-o.append(tx(160,262,'корпус','small'))
+
 o.append(tx(-20,195,'корпус 2 эт.','small'))
 # arrows
-mainE=pt('NW',67.5,0)
-o.append(arrow([(65,262),(58,215),(mainE[0]-6,mainE[1]+8)],'a-main','ah'))
-o.append(arrow([(20,95),(32,130),(mainE[0]-10,mainE[1]-2)],'a-main','ah'))
+mainE=pt('NW',37.6,0)
+o.append(arrow([(62,262),(70,215),(mainE[0]-4,mainE[1]+5)],'a-main','ah'))
+o.append(arrow([(20,95),(36,135),(48,166),(mainE[0]-6,mainE[1]+2)],'a-main','ah'))
 o.append(tx(10,88,'от остановки / дороги','small','start'))
 o.append(arrow([(131,86),(131,104),(128,112)],'a-serv','ahs'))
 o.append(tx(137,95,'съезд с дороги → служебный двор','small','start'))
-o.append(tx(141,205,'переход','small','start'))
+o.append(tx(141,205,'переход на 2 эт.','small','start'));o.append(tx(160,262,'ректорат: 1 000 м² библиотеке','small'))
 # north arrow
 o.append(f'<g transform="translate({W-22},{24})"><path class="na" d="M0,-12 L5,8 L0,4 L-5,8z"/><text class="lbl" y="-15" text-anchor="middle">С</text></g>')
 o.append(f'<g transform="translate({W-90},{H-12})"><rect class="sb" width="25" height="2.5"/><rect class="sb2" x="25" width="25" height="2.5"/><text class="small" x="0" y="-3">0</text><text class="small" x="50" y="-3" text-anchor="middle">50 м</text></g>')
@@ -94,7 +94,7 @@ for p,c in feat['walk']+feat['plaza']: o.append(poly(T(p),'walk',Ysvg,c))
 for p,c in feat['bld']: o.append(poly(T(p),'bld',Ysvg,c))
 o.append(poly(T(feat['link']),'bld',Ysvg))
 # forecourt + service yard
-fc=[pt('NW',58,0),pt('NW',75.24,0),V[8][:2],pt('W',8,0),pt('W',8,-14),pt('NW',75.24,-16),pt('NW',58,-14)]
+fc=[pt('NW',24,0),pt('NW',51.2,0),pt('NW',51.2,-15),pt('NW',24,-15)]
 o.append(poly(T(fc),'fore',Ysvg))
 yd=[pt('S',28,0),V[1][:2],V[2][:2],pt('SE',16,0),pt('SE',16,-14),pt('S',28,-16)]
 o.append(poly(T(yd),'yard',Ysvg))
@@ -124,18 +124,19 @@ for k,(e,s) in LK.items():
     o.append(tx(c[0],c[1]-0.8,k,'lk-l',rot=ang))
     o.append(line(pt(e,s,0.3),pt(e,s,-4.5),'exit','bhl'))
 # lifts
-lb=box('NW',51,56,13,19);o.append(poly(T(lb),'lift',Ysvg));c=pt('NW',53.5,16);o.append(tx(c[0],c[1]-0.8,'лифты','tiny'))
+lb=box('NW',45,50,11,17);o.append(poly(T(lb),'lift',Ysvg));c=pt('NW',47.5,14);o.append(tx(c[0],c[1]-0.8,'лифты','tiny'))
+c=pt('NW',37.6,12);o.append(tx(c[0],c[1],'вестибюль 6 м','tiny'));c=pt('NW',37.6,9.6);o.append(tx(c[0],c[1],'ось → атриум','tiny'))
 sb=box('S',28,33,0.3,4.8);o.append(poly(T(sb),'lift',Ysvg));c=pt('S',30.5,2.5);o.append(tx(c[0],c[1]-0.8,'гр.','tiny'))
 # entrances
-me=pt('NW',67.5,0);o.append(poly(T(box('NW',62,73,0.3,6)),'tamb',Ysvg))
-o.append(line(pt('NW',67.5,-13),pt('NW',67.5,-0.8),'a-main','bh'))
-c=pt('NW',67.5,-16.5);o.append(tx(c[0],c[1],'ГЛАВНЫЙ ВХОД','main-l'))
-c=pt('NW',67.5,-19.4);o.append(tx(c[0],c[1],'предвходовая площадь','tiny'))
-c=pt('NW',67.5,3.2);o.append(tx(c[0],c[1]-0.8,'тамбур','tiny',rot=-math.degrees(math.atan2(edge('NW')[1][1],edge('NW')[1][0]))-180))
+me=pt('NW',37.6,0);o.append(poly(T(box('NW',31.6,43.6,0.3,5)),'tamb',Ysvg))
+o.append(line(pt('NW',37.6,-12),pt('NW',37.6,-0.8),'a-main','bh'))
+c=pt('NW',37.6,-16.5);o.append(tx(c[0],c[1],'ГЛАВНЫЙ ВХОД','main-l'))
+
+c=pt('NW',37.6,2.7);o.append(tx(c[0],c[1]-0.8,'тамбур','tiny',rot=-math.degrees(math.atan2(edge('NW')[1][1],edge('NW')[1][0]))-180))
 # link entrance
 lm=(129.5,206.5);o.append(line((136,213),(124.2,204.0),'a-main2','bh'))
-o.append(tx(140,216,'вход из корпуса','main-l2','start'))
-o.append(tx(140,212.6,'(тёплый переход)','tiny','start'))
+o.append(tx(140,216,'переход в ректорат, 2 эт.','main-l2','start'))
+o.append(tx(140,212.6,'+6,000 · под ним проезд ≥ 4,5 м','tiny','start'))
 # service
 o.append(line(pt('SE',8,-13),pt('SE',8,-0.8),'a-serv','bhs'))
 o.append(poly(T(box('SE',3,13,0.3,6)),'dock',Ysvg))
@@ -146,7 +147,7 @@ c=pt('SE',8,-20);o.append(tx(c[0]+1,c[1],'разгрузка книг, перс�
 o.append(line((131,98),(126,112),'a-serv','bhs'));o.append(tx(131,99.5-2,'от дороги','tiny','start'))
 # facade lengths
 for nm,lab,off in [('S','44,6',-3.2),('SE','47,2',-3.2),('NE','47,1',-3.2),('NW','75,2',-3.2),('W','26,1',-3.4)]:
-    A,u,n,L=edge(nm);c=pt(nm,L/2 if nm!='NW' else 20,off);ang=-math.degrees(math.atan2(u[1],u[0]))
+    A,u,n,L=edge(nm);c=pt(nm,L/2 if nm!='NW' else 8,off);ang=-math.degrees(math.atan2(u[1],u[0]))
     if ang>90: ang-=180
     if ang<-90: ang+=180
     o.append(tx(c[0],c[1]-0.7,lab+' м','dim',rot=ang))
