@@ -1,0 +1,141 @@
+<title>Библиотека ЕНУ — зонирование 3 этажей</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: лист — шапка, три плана этажей с экспликацией рядом, затем сверка с табл. 26 */
+:root{
+ --bg:#f5f6f3;--paper:#fff;--fg:#1c2421;--muted:#5f6b66;--rule:#d5dbd7;--red:#c62828;--main:#0c7a63;--serv:#b05e00;--lk:#2f45b5;
+ --abon:#f2c98a;--avan:#f6e7b8;--cat:#e8c7e0;--ru:#bfe0c6;--gr:#d7ecb4;--rs:#9fd0b9;--av:#c9c3ea;--st:#a9bfd6;--oa:#cfe0f0;--sv:#e9d2bd;--x:#f4ddd6;--core:#dde1de;--st2:#3b4fbf;--void:#eef0ee;
+ --f-text:"IBM Plex Sans",system-ui,sans-serif;--f-head:"IBM Plex Sans Condensed","IBM Plex Sans",system-ui,sans-serif;--f-mono:"IBM Plex Mono",ui-monospace,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+ --bg:#141917;--paper:#1b2220;--fg:#e4ebe7;--muted:#9aa7a1;--rule:#2e3834;--red:#ef5350;--main:#4fd1ad;--serv:#f0a04b;--lk:#93a3ff;
+ --abon:#6b5328;--avan:#5c5530;--cat:#5a3c55;--ru:#2f5638;--gr:#46562a;--rs:#25523f;--av:#433d6b;--st:#2e4660;--oa:#2c4357;--sv:#5a4330;--x:#5a3a33;--core:#343c39;--st2:#7f8ff0;--void:#1f2624;color-scheme:dark}}
+:root[data-theme="dark"]{
+ --bg:#141917;--paper:#1b2220;--fg:#e4ebe7;--muted:#9aa7a1;--rule:#2e3834;--red:#ef5350;--main:#4fd1ad;--serv:#f0a04b;--lk:#93a3ff;
+ --abon:#6b5328;--avan:#5c5530;--cat:#5a3c55;--ru:#2f5638;--gr:#46562a;--rs:#25523f;--av:#433d6b;--st:#2e4660;--oa:#2c4357;--sv:#5a4330;--x:#5a3a33;--core:#343c39;--st2:#7f8ff0;--void:#1f2624;color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font:15px/1.55 var(--f-text)}
+.wrap{max-width:1240px;margin:0 auto;padding-block:28px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:26px}
+.eyebrow{font:500 12px/1 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+h1{font:600 clamp(26px,4vw,38px)/1.1 var(--f-head);margin:6px 0 8px;text-wrap:balance}
+h2{font:600 22px/1.2 var(--f-head);margin:0 0 10px}
+h3{font:600 16px/1.3 var(--f-head);margin:0 0 6px}
+.lead{max-width:76ch;color:var(--muted);margin:0}
+.kpis{display:flex;flex-wrap:wrap;gap:10px 28px;margin-top:12px;font-variant-numeric:tabular-nums}
+.kpis div{display:grid}.kpis b{font:600 22px/1.1 var(--f-head)}.kpis span{font-size:12px;color:var(--muted)}
+.card{background:var(--paper);border:1px solid var(--rule);border-radius:6px;padding:18px 20px;min-width:0}
+.floor{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:18px;align-items:start}
+@media (max-width:860px){.floor{grid-template-columns:1fr}}
+.svgbox{overflow-x:auto}.svgbox svg{display:block;width:100%;min-width:560px;height:auto}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px}
+.legend i{display:inline-block;width:14px;height:10px;margin-right:6px;vertical-align:-1px;border-radius:2px;outline:1px solid var(--rule)}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13.5px;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font:600 11.5px/1.3 var(--f-mono);letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+td.n,th.n{text-align:right;font-family:var(--f-mono);white-space:nowrap}
+tr.tot td{font-weight:600;border-top:2px solid var(--fg)}
+.ok{color:var(--main);font-weight:600}.mid{color:var(--serv);font-weight:600}.low{color:var(--red);font-weight:600}
+.note{font-size:13px;color:var(--muted)}
+ul{margin:0;padding-left:18px}li{margin:4px 0}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px}
+/* svg */
+.ground{fill:var(--paper)}.void{fill:var(--void);stroke:var(--muted);stroke-width:.25;stroke-dasharray:1 .7}
+.rm{stroke:var(--fg);stroke-width:.18}.outline{fill:none;stroke:var(--red);stroke-width:.6}
+.z-abon{fill:var(--abon)}.z-avan{fill:var(--avan)}.z-cat{fill:var(--cat)}.z-ru{fill:var(--ru)}.z-gr{fill:var(--gr)}.z-rs{fill:var(--rs)}.z-av{fill:var(--av)}
+.z-st{fill:var(--st)}.z-oa{fill:var(--oa)}.z-sv{fill:var(--sv)}.z-x{fill:var(--x)}.z-core{fill:var(--core)}.z-st2{fill:var(--st2)}
+text{fill:var(--fg);font-family:var(--f-text)}
+.rl{font-size:1.75px;font-weight:600}.ra{font-size:1.5px;font-weight:400;fill:var(--muted);font-family:var(--f-mono)}
+.lkl{font-size:1.7px;font-weight:600;fill:var(--paper);font-family:var(--f-mono)}
+.vl{font-size:2px;fill:var(--muted);letter-spacing:.1em}
+.ml{font-size:1.7px;fill:var(--muted)}.amt{fill:var(--main);font-weight:600}.ast{fill:var(--serv);font-weight:600}
+.ctl{font-size:1.6px;fill:var(--main);font-weight:600}
+.am{stroke:var(--main);stroke-width:.6}.as{stroke:var(--serv);stroke-width:.6}.mkm{fill:var(--main)}.mks{fill:var(--serv)}.na{fill:var(--fg)}
+</style>
+%%DEFS%%
+<div class="wrap">
+<header>
+ <div class="eyebrow">ENU GRAD · библиотека · новая посадка · шаг 2</div>
+ <h1>Зонирование: вся программа на 3 этажа и блок в ректорате</h1>
+ <p class="lead">Программа — таблица 26 и всё, о чём договорились раньше. Контур взят из DWG от 09.11, входы и 6 ЛК — по утверждённой схеме. Площади указаны по плану, со стенами. Для сравнения с таблицей 26 полезная площадь = по плану × 0,88, как и в прошлых отчётах.</p>
+ <div class="kpis">
+  <div><b>%%TC%% %</b><span>программы табл. 26 (засчитано не больше нормы)</span></div>
+  <div><b>%%TRC%% %</b><span>от пересмотренной программы (см. ниже)</span></div>
+  <div><b>%%SEATS%%</b><span>читательских мест в залах из 1 800</span></div>
+  <div><b>%%GROUP%%</b><span>мест в групповых из 360</span></div>
+ </div>
+</header>
+
+<div class="card">
+ <h2>Как устроен план</h2>
+ <div class="cols">
+  <ul>
+   <li><b>Фасадная полоса глубиной 12 м</b> со светом — читальные залы, абонемент, лекционный зал и служебные помещения.</li>
+   <li><b>Средняя полоса</b> без окон — открытый доступ, компактное хранение, хранилище редких книг, лаборатории.</li>
+   <li><b>Галерея шириной 3 м вокруг атриума</b> — аванзал каждого этажа, вход во все залы.</li>
+  </ul>
+  <ul>
+   <li><b>1 этаж:</b> на западе — зона до контроля (вестибюль, гардероб, лекционный зал, абонемент, дирекция). На востоке — хранение и служебная зона у служебного входа. Атриум на 1 этаже — зал каталогов и СБО под фонарём.</li>
+   <li><b>2–3 этажи:</b> залы по периметру, открытый доступ за ними, компактное хранение у книгоподъёмника. На 2–3 этажах атриум — пустота, отделённая остеклением EI 45.</li>
+   <li><b>Ректорат, 1 000 м²</b> — научное отделение за контролем. Вход только из библиотеки по переходу (вариант А, один пост).</li>
+  </ul>
+ </div>
+ <div class="legend" style="margin-top:12px">
+  <span><i style="background:var(--ru)"></i>учебные залы</span><span><i style="background:var(--rs)"></i>научные залы</span><span><i style="background:var(--gr)"></i>групповые</span><span><i style="background:var(--av)"></i>АВ, редкие книги</span>
+  <span><i style="background:var(--oa)"></i>открытый доступ</span><span><i style="background:var(--st)"></i>хранение</span><span><i style="background:var(--abon)"></i>абонемент</span><span><i style="background:var(--avan)"></i>аванзал</span>
+  <span><i style="background:var(--cat)"></i>каталоги, СБО</span><span><i style="background:var(--sv)"></i>служебные</span><span><i style="background:var(--x)"></i>вестибюль, гардероб, лекционный зал</span><span><i style="background:var(--st2)"></i>ЛК</span><span><i style="background:var(--core)"></i>лифты, санузлы</span>
+ </div>
+</div>
+
+<div class="card floor"><div><h2>1 этаж · высота 6,0 м</h2><div class="svgbox">%%P1%%</div></div>
+ <div class="tbl"><table><thead><tr><th>Помещение</th><th class="n">м²</th><th class="n">мест</th></tr></thead><tbody>%%L1%%</tbody></table></div></div>
+<div class="card floor"><div><h2>2 этаж · 4,5 м · переход в ректорат</h2><div class="svgbox">%%P2%%</div></div>
+ <div class="tbl"><table><thead><tr><th>Помещение</th><th class="n">м²</th><th class="n">мест</th></tr></thead><tbody>%%L2%%</tbody></table></div></div>
+<div class="card floor"><div><h2>3 этаж · 4,5 м</h2><div class="svgbox">%%P3%%</div></div>
+ <div class="tbl"><table><thead><tr><th>Помещение</th><th class="n">м²</th><th class="n">мест</th></tr></thead><tbody>%%L3%%</tbody></table></div></div>
+<div class="card floor"><div><h2>Ректорат, 2 этаж · 1 000 м²</h2>
+ <p>Научное отделение за контролем. Читатели попадают сюда только из библиотеки, через переход из холла 2 этажа. Двери на лестницы ректората работают только на выход, с сигнализацией. Здесь только залы, без фондов: перекрытия ректората офисные. Книги приходят по заказу через пункт выдачи.</p>
+ <p class="note">Планировку ректората я не видела, поэтому блок дан списком.</p></div>
+ <div class="tbl"><table><thead><tr><th>Помещение</th><th class="n">м²</th><th class="n">мест</th></tr></thead><tbody>%%LR%%</tbody></table></div></div>
+
+<div class="card">
+ <h2>Сверка с таблицей 26</h2>
+ <div class="tbl"><table>
+  <thead><tr><th>Строка табл. 26</th><th class="n">Норма, м²</th><th class="n">Пересмотр, м²</th><th class="n">Полезная по плану, м²</th><th class="n">% от нормы</th><th class="n">% от пересмотра</th></tr></thead>
+  <tbody>%%T26%%</tbody></table></div>
+ <p class="note" style="margin-top:8px">В итоговых процентах строка засчитана не больше своей нормы: лишний аванзал не закрывает нехватку залов. Строки «МБА» и «Служебный каталог» стоят в одном помещении, площадь разделена пропорционально нормам.</p>
+</div>
+
+<div class="cols">
+ <div class="card">
+  <h2>Почему программу можно пересмотреть</h2>
+  <p>Вы говорили, что требования можно пересматривать с аргументами. Я предлагаю два изменения, оба касаются хранения:</p>
+  <ul>
+   <li><b>Фонд 1,5 млн ед. вместо 1,8 млн.</b> По п. 3.99а Пособия — 125 ед. на читателя, при 12 000 читателей это 1,5 млн. Хранение и открытый доступ уменьшаются на 1/6.</li>
+   <li><b>Основное хранение — на мобильных стеллажах.</b> Подвала под фонды больше нет, хранение стоит в наземных этажах, где каждый метр дорог. Мобильные стеллажи вмещают примерно в 1,8 раза больше на 1 м². Основное хранение: 2 250 / 1,8 ≈ 1 250 м². Большая часть хранения стоит на 1 этаже по грунту, где тяжёлая нагрузка не нужна перекрытию.</li>
+  </ul>
+  <p class="note">Без пересмотра основное хранение закрыто на треть: это главная дыра. С пересмотром — около 85 %.</p>
+ </div>
+ <div class="card">
+  <h2>Что учтено из прежних решений</h2>
+  <ul>
+   <li>Фонд абонементов оставлен. Вместо аванзала абонемента — место ожидания у выдачи.</li>
+   <li>Пункты выдачи засчитаны в аванзал, включая холл перехода и пункт выдачи в ректорате.</li>
+   <li>Хранилище редких книг — в средней полосе, без окон и солнца. Читальный зал редких книг рядом, на северо-востоке.</li>
+   <li>Отсеки хранилищ меньше 600 м²: 1 этаж — 3 отсека, на 2–3 этажах компактное хранение около 280 м².</li>
+   <li>Санузлы стоят друг над другом и не над хранилищами. Реставрация (мокрые процессы) — на 1 этаже, над ней сухое хранение, это допускается.</li>
+   <li>До контроля по п. 3.108 Пособия: абонемент, дирекция, бюро записи, лекционный зал, гардероб. Каталоги и СБО — за контролем.</li>
+   <li>Служебные помещения только на 1 этаже (не выше 3-го). Цепочка книг: служебный вход → экспедиция → хранение → книгоподъёмник у ЛК-6.</li>
+  </ul>
+ </div>
+</div>
+
+<div class="card">
+ <h2>Что дальше и что нужно от вас</h2>
+ <ul>
+  <li><b>Главная нехватка — читальные залы:</b> учебные около 70 %, научные около 75 % с учётом ректората. Варианты: сузить атриум с 450 до 300 м² (+300 м² на 2–3 этажах) или отдать залам часть галерей.</li>
+  <li>Согласовать с заказчиком фонд 1,5 млн и мобильные стеллажи. От этого зависит, закрыто ли хранение.</li>
+  <li>Подтвердить вариант А для ректората: один пост, вход только из библиотеки.</li>
+  <li>Это схема по поясам и секторам. Двери, внутренние коридоры и мебель — на следующем шаге.</li>
+ </ul>
+</div>
+</div>
