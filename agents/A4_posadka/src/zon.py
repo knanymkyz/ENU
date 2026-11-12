@@ -2,9 +2,9 @@ import json, math
 from shapely.geometry import Polygon, Point, LineString
 from shapely.ops import unary_union
 exec(open('geo.py').read().split("LK={")[0].replace("print(","(lambda *a,**k:None)("))
-LP=Polygon(LIB); AT=Polygon(ATR); C=(LP.centroid.x,LP.centroid.y)
+LP=Polygon(LIB); _c=LP.centroid; _k=(300/LP.area)**.5; ATR=[(_c.x+(x-_c.x)*_k,_c.y+(y-_c.y)*_k) for x,y in LIB]; AT=Polygon(ATR); C=(LP.centroid.x,LP.centroid.y)
 RING=LP.exterior; PER=RING.length
-OUTD=12; GAL=3
+OUTD=14; GAL=3
 INNER=LP.buffer(-OUTD,join_style=2); GALP=AT.buffer(GAL,join_style=2)
 BAND={'out':LP.difference(INNER),'mid':INNER.difference(GALP),'gal':GALP.difference(AT),'atr':AT,
       'om':LP.difference(GALP),'all':LP}
@@ -55,7 +55,7 @@ R(1,'st3','Основное хранение · отсек 3','store:main','mid'
 R(1,'dir','Дирекция, бюро записи','serv:sp','out',('NW',24.1),('NW',33))
 R(1,'bags','Портфели, охрана, пожарный пост','serv:bags','mid',('NW',24.1),('NW',33))
 R(1,'galW','Фойе у атриума и лекционного зала (до контроля)','x','gal',('NW',37.6),('S',27.5))
-R(1,'galE','Аванзал, пост контроля','avan','gal',('S',27.5),('NW',37.6),1.5)
+R(1,'galE','Каталоги и СБО: галерея вокруг атриума, пост контроля','cat','gal',('S',27.5),('NW',37.6))
 R(1,'cat','Зал каталогов и СБО под фонарём атриума','cat','atr',None,None)
 # ---------------- FLOOR 2
 R(2,'u2a','Читальный зал учебный · юго-запад','readU','out',('W',13.5),('S',27.5),2.4)
@@ -75,8 +75,8 @@ R(3,'u3a','Читальный зал учебный · юго-запад','readU
 R(3,'s3a','Читальный зал научный · юг','readS','out',('S',27.5),('SE',40.5),3.0)
 R(3,'s3b','Читальный зал научный · восток','readS','out',('SE',40.5),('NE',40.5),3.0)
 R(3,'rare','Зал редких книг','av','out',('NE',40.5),('NW',24.1),5.0)
-R(3,'s3c','Читальный зал научный · северо-запад','readS','out',('NW',24.1),('NW',51.1),3.0)
-R(3,'g3','Групповые комнаты','group','out',('NW',51.1),('W',13.5),2.2)
+R(3,'g3','Групповые комнаты','group','out',('NW',24.1),('NW',51.1),2.2)
+R(3,'u3b','Читальный зал учебный · запад','readU','out',('NW',51.1),('W',13.5),2.4)
 R(3,'oa3a','Открытый доступ · запад','store:oa','mid',('NW',51.1),('S',27.5))
 R(3,'comp3','Компактное хранение · у книгоподъёмника','store:comp','mid',('S',27.5),('SE',40.5))
 R(3,'oa3b','Открытый доступ · восток','store:oa','mid',('SE',40.5),('NE',24))
