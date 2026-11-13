@@ -1,0 +1,172 @@
+<title>Библиотека ЕНУ — сандық и шаңырақ</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: лист — шапка, три плана этажей с экспликацией рядом, затем сверка с табл. 26 */
+:root{
+ --sd:#b88a5a;--sd2:#a77a4c;--sdl:#5a3d22;--glass:#cfe3ea;--glass2:#9fc4d2;--fin:#6d7a76;
+ --bg:#f5f6f3;--paper:#fff;--fg:#1c2421;--muted:#5f6b66;--rule:#d5dbd7;--red:#c62828;--main:#0c7a63;--serv:#b05e00;--lk:#2f45b5;
+ --abon:#f2c98a;--avan:#f6e7b8;--cat:#e8c7e0;--ru:#bfe0c6;--gr:#d7ecb4;--rs:#9fd0b9;--av:#c9c3ea;--st:#a9bfd6;--oa:#cfe0f0;--sv:#e9d2bd;--x:#f4ddd6;--core:#dde1de;--st2:#3b4fbf;--void:#eef0ee;
+ --f-text:"IBM Plex Sans",system-ui,sans-serif;--f-head:"IBM Plex Sans Condensed","IBM Plex Sans",system-ui,sans-serif;--f-mono:"IBM Plex Mono",ui-monospace,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+ --bg:#141917;--paper:#1b2220;--fg:#e4ebe7;--muted:#9aa7a1;--rule:#2e3834;--red:#ef5350;--main:#4fd1ad;--serv:#f0a04b;--lk:#93a3ff;
+ --abon:#6b5328;--avan:#5c5530;--cat:#5a3c55;--ru:#2f5638;--gr:#46562a;--rs:#25523f;--av:#433d6b;--st:#2e4660;--oa:#2c4357;--sv:#5a4330;--x:#5a3a33;--core:#343c39;--st2:#7f8ff0;--void:#1f2624;--sd:#8a6440;--sd2:#7a5636;--sdl:#e8c9a2;--glass:#2b4650;--glass2:#3d6372;--fin:#9aa7a1;color-scheme:dark}}
+:root[data-theme="dark"]{
+ --bg:#141917;--paper:#1b2220;--fg:#e4ebe7;--muted:#9aa7a1;--rule:#2e3834;--red:#ef5350;--main:#4fd1ad;--serv:#f0a04b;--lk:#93a3ff;
+ --abon:#6b5328;--avan:#5c5530;--cat:#5a3c55;--ru:#2f5638;--gr:#46562a;--rs:#25523f;--av:#433d6b;--st:#2e4660;--oa:#2c4357;--sv:#5a4330;--x:#5a3a33;--core:#343c39;--st2:#7f8ff0;--void:#1f2624;--sd:#8a6440;--sd2:#7a5636;--sdl:#e8c9a2;--glass:#2b4650;--glass2:#3d6372;--fin:#9aa7a1;color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font:15px/1.55 var(--f-text)}
+.wrap{max-width:1240px;margin:0 auto;padding-block:28px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:26px}
+.eyebrow{font:500 12px/1 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+h1{font:600 clamp(26px,4vw,38px)/1.1 var(--f-head);margin:6px 0 8px;text-wrap:balance}
+h2{font:600 22px/1.2 var(--f-head);margin:0 0 10px}
+h3{font:600 16px/1.3 var(--f-head);margin:0 0 6px}
+.lead{max-width:76ch;color:var(--muted);margin:0}
+.kpis{display:flex;flex-wrap:wrap;gap:10px 28px;margin-top:12px;font-variant-numeric:tabular-nums}
+.kpis div{display:grid}.kpis b{font:600 22px/1.1 var(--f-head)}.kpis span{font-size:12px;color:var(--muted)}
+.card{background:var(--paper);border:1px solid var(--rule);border-radius:6px;padding:18px 20px;min-width:0}
+.floor{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:18px;align-items:start}
+@media (max-width:860px){.floor{grid-template-columns:1fr}}
+.svgbox{overflow-x:auto}.svgbox svg{display:block;width:100%;min-width:560px;height:auto}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px}
+.legend i{display:inline-block;width:14px;height:10px;margin-right:6px;vertical-align:-1px;border-radius:2px;outline:1px solid var(--rule)}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13.5px;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font:600 11.5px/1.3 var(--f-mono);letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+td.n,th.n{text-align:right;font-family:var(--f-mono);white-space:nowrap}
+tr.tot td{font-weight:600;border-top:2px solid var(--fg)}
+.ok{color:var(--main);font-weight:600}.mid{color:var(--serv);font-weight:600}.low{color:var(--red);font-weight:600}
+.note{font-size:13px;color:var(--muted)}
+ul{margin:0;padding-left:18px}li{margin:4px 0}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px}
+/* svg */
+.ground{fill:var(--paper)}.void{fill:var(--void);stroke:var(--muted);stroke-width:.25;stroke-dasharray:1 .7}
+.rm{stroke:var(--fg);stroke-width:.18}.outline{fill:none;stroke:var(--red);stroke-width:.6}
+.z-abon{fill:var(--abon)}.z-avan{fill:var(--avan)}.z-cat{fill:var(--cat)}.z-ru{fill:var(--ru)}.z-gr{fill:var(--gr)}.z-rs{fill:var(--rs)}.z-av{fill:var(--av)}
+.z-st{fill:var(--st)}.z-oa{fill:var(--oa)}.z-sv{fill:var(--sv)}.z-x{fill:var(--x)}.z-core{fill:var(--core)}.z-st2{fill:var(--st2)}
+text{fill:var(--fg);font-family:var(--f-text)}
+.rl{font-size:1.75px;font-weight:600}.ra{font-size:1.5px;font-weight:400;fill:var(--muted);font-family:var(--f-mono)}
+.lkl{font-size:1.7px;font-weight:600;fill:var(--paper);font-family:var(--f-mono)}
+.vl{font-size:2px;fill:var(--muted);letter-spacing:.1em}
+.ml{font-size:1.7px;fill:var(--muted)}.amt{fill:var(--main);font-weight:600}.ast{fill:var(--serv);font-weight:600}
+.ctl{font-size:1.6px;fill:var(--main);font-weight:600}
+.am{stroke:var(--main);stroke-width:.6}.as{stroke:var(--serv);stroke-width:.6}.mkm{fill:var(--main)}.mks{fill:var(--serv)}.na{fill:var(--fg)}
+.fig{margin:0}.fig figcaption{font-size:13px;color:var(--muted);padding-top:6px}
+.svgbox.sq svg{min-width:320px}
+.atrE{fill:none;stroke:var(--muted);stroke-width:.12;stroke-dasharray:.6 .4}
+.f-desk{fill:var(--paper);stroke:var(--fg);stroke-width:.12}.f-term{fill:var(--fg)}.f-tbl{fill:var(--paper);stroke:var(--fg);stroke-width:.1}.f-ch{fill:var(--muted)}.f-shelf{fill:var(--st);stroke:var(--fg);stroke-width:.08}
+.al{font-size:.85px;font-weight:600}.alm{font-size:.85px;font-weight:600;fill:var(--main)}.al2{font-size:.8px;fill:var(--muted)}
+.earth{fill:var(--core)}.slab{fill:var(--fg)}.fac{stroke:var(--fg);stroke-width:.25}.glass{stroke:var(--lk);stroke-width:.25}.glt{fill:var(--lk)}
+.sky{fill:var(--oa);stroke:var(--fg);stroke-width:.15}.ray{stroke:var(--abon);stroke-width:.25;stroke-dasharray:.5 .4}
+.person circle{fill:var(--fg)}.person line{stroke:var(--fg);stroke-width:.09}
+.sl{font-size:.95px;fill:var(--fg)}.sl2{font-size:.9px;fill:var(--muted)}.lv{font-size:.85px;fill:var(--muted);font-family:var(--f-mono)}
+.oa-dash{fill:none;stroke:var(--fg);stroke-width:.25;stroke-dasharray:1 .6}
+.sandyk{fill:var(--sd);stroke:none}.shaftw{fill:var(--fg)}.vitr{fill:var(--lk)}.amph{fill:var(--rs);stroke:var(--fg);stroke-width:.12}
+.curt{stroke:var(--red);stroke-width:.2;stroke-dasharray:.5 .3}.sl3{font-size:1.05px;font-weight:600;fill:var(--fg);letter-spacing:.05em}
+.f-terr0{fill:var(--rs);opacity:.55}.f-terr1{fill:var(--rs);opacity:.7}.f-terr2{fill:var(--rs);opacity:.85}.f-terr3{fill:var(--rs)}.f-stair{fill:var(--paper);stroke:var(--fg);stroke-width:.06}.f-tread{fill:var(--fg)}
+.terrs{fill:var(--rs);stroke:var(--fg);stroke-width:.12}.shelfs{fill:var(--paper);stroke:var(--fg);stroke-width:.08}.books{stroke:var(--serv);stroke-width:.12}.ledl{stroke:var(--abon);stroke-width:.18}.stairl{stroke:var(--fg);stroke-width:.12;stroke-dasharray:.4 .3}.dl{fill:var(--abon)}.lattice{stroke:var(--muted);stroke-width:.1}
+.f-amph{fill:var(--rs);stroke:var(--fg);stroke-width:.08}
+.gl{fill:var(--glass)}.slabe{fill:var(--muted);opacity:.5}.mul{stroke:var(--fg);stroke-width:.04;opacity:.5}.mul2{stroke:var(--fg);stroke-width:.06}
+.fin{fill:var(--fin)}.portal{fill:var(--glass2)}.door{fill:var(--fg);opacity:.75}.shadow{fill:var(--fg);opacity:.55}
+.sd-bg{fill:var(--sd)}.sd-orn{fill:none;stroke:var(--sdl);stroke-width:.12}.sd-dot{fill:var(--sdl)}.sd-frame{fill:none;stroke:var(--fg);stroke-width:.15}
+.tower{fill:var(--sd2);stroke:var(--fg);stroke-width:.12}.tower-sl{fill:var(--glass2)}
+.shan{fill:var(--glass);stroke:var(--fg);stroke-width:.12}.shanl{stroke:var(--fg);stroke-width:.08}
+.el{font-size:.95px;fill:var(--fg);font-weight:600}.el2{font-size:.85px;fill:var(--muted)}
+.moves{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-top:14px}
+.move{border-top:2px solid var(--fg);padding-top:8px;min-width:0}.move b{display:block;font:600 15px/1.3 var(--f-head);margin-bottom:4px}
+.move p{margin:0;font-size:14px}
+</style>
+%%DEFS%%
+<div class="wrap">
+<header>
+ <div class="eyebrow">ENU GRAD · библиотека · новая посадка · шаг 4 · концепция, версия 2</div>
+ <h1>«Сандық и шаңырақ»: прозрачное основание, сундук-хранилище, книжные террасы</h1>
+ <p class="lead">Новая постановка: всё хранение — на мобильных стеллажах, на 3 этаже без окон. 1 этаж — публичный и служебный. 2 этаж — учебный open space вместе с открытым доступом. Аванзалы не делаем. Атриум на 3 этаже закрыт хранилищем. Площади в ректорате не выделили, поэтому залы распределены между учебными и научными в пропорции программы. Площади программы — ориентир, а не жёсткое требование.</p>
+ <div class="kpis">
+  <div><b>%%SEATS%%</b><span>читательских мест в залах (из 1 800)</span></div>
+  <div><b>%%GROUP%%</b><span>мест в групповых</span></div>
+  <div><b>%%CAP%% млн</b><span>ед. вмещает хранение на 3 этаже (нужно 1,5 млн)</span></div>
+  <div><b>62 : 38</b><span>научные : учебные залы по площади (в программе 61 : 39)</span></div>
+ </div>
+</header>
+
+<div class="card">
+ <h2>Концепция</h2>
+ <p style="max-width:80ch">Раз 3 этаж глухой, это стоит сделать главной темой здания, а не недостатком. Наверху стоит <b>сандық</b> — казахский сундук для ценностей. Это сплошной, без окон, объём хранилища, обшитый металлом с орнаментом ою-өрнек. Под ним — <b>прозрачное основание</b> 1–2 этажей высотой 10,5 м. Внутри основания из вестибюля на 2 этаж поднимается <b>книжный ландшафт</b>: террасы, стенки которых сделаны из стеллажей, а по оси идёт прямая лестница. Над ним — <b>шаңырақ</b>: решётка потолка под днищем сундука с точечным светом.</p>
+ <div class="svgbox" style="margin-top:14px">%%ELEV%%</div>
+ <p class="note">Северо-западный фасад, вид с центральной площади. Схема, без масштаба деталей.</p>
+ <div class="moves">
+  <div class="move"><b>1. Сандық — сплошной объём 3 этажа</b><p>Всё хранение на мобильных стеллажах, без окон, атриум сверху закрыт. Облицовка — металлические панели с рельефным орнаментом ою-өрнек, ночью подсветка. Вариант: в орнамент вписан текст древнетюркскими (орхонскими) знаками.</p></div>
+  <div class="move"><b>2. Консоль и портал</b><p>Сандық выступает над стеклянным основанием на 1,5–3 м и становится козырьком над входом. Вход — стеклянный портал на всю высоту основания, 10,5 м. ЛК-2 и ЛК-3 по бокам поднимаются над кровлей как две башни.</p></div>
+  <div class="move"><b>3. Книжные террасы</b><p>Как на ваших фото: четыре террасы по 1,5 м поднимаются с 1 на 2 этаж. Стенки террас — стеллажи открытого доступа с подсветкой полок, на каждой террасе — стойки для работы с высокими стульями. По оси — прямая лестница от стойки СБО до open space. От входа видно сразу всё: каталоги, СБО, книги, путь наверх.</p></div>
+  <div class="move"><b>4. Шаңырақ — светящийся потолок</b><p>Над атриумом теперь днище сундука, а не фонарь. Поэтому потолок атриума — решётка-шаңырақ с точечными светильниками, тёмная, как на ночном фото. Книги светятся сами за счёт подсветки полок.</p></div>
+ </div>
+</div>
+
+<div class="card">
+ <h2>Разрез по оси главного входа</h2>
+ <div class="svgbox">%%SEC%%</div>
+ <p class="note">С северо-запада на юго-восток. 1 этаж — 6,0 м, 2 этаж — 4,5 м, 3 этаж («сандық») — 4,5 м. Атриум — на 2 этажа, высота 10,5 м. Цвета — как на планах.</p>
+ <div class="cols" style="margin-top:12px;align-items:start">
+  <figure class="fig"><div class="svgbox sq">%%APLAN%%</div><figcaption>Атриум на 1 этаже. Вход сверху. Ближе к входу — терминалы каталога и стойка СБО. Дальше — четыре террасы-стеллажа и лестница по оси на 2 этаж.</figcaption></figure>
+  <ul>
+   <li><b>От входа по оси:</b> портал → вестибюль высотой 6 м → пост контроля → каталоги и СБО → лестница между террасами → open space 2 этажа.</li>
+   <li><b>Дневного света в середине плана больше нет:</b> над атриумом хранилище. Свет дают фасады: 14 м полосы у окон на 1–2 этажах. Середина — книги и террасы при искусственном свете. Для стеллажей это и лучше.</li>
+   <li><b>Пожарный отсек.</b> Террасы открыто связывают 1 и 2 этажи, площадь двух этажей суммируется: 9 724 м². Это проходит только при I степени огнестойкости и АУПТ (до 10 000 м²). Второй вариант — противопожарные шторы EI 60 по краю атриума на 2 этаже, тогда этажи считаются отдельно.</li>
+  </ul>
+ </div>
+</div>
+
+<div class="card">
+ <h2>Что где</h2>
+ <div class="cols">
+  <ul>
+   <li><b>1 этаж — публичный и служебный.</b> До контроля: вестибюль, гардероб с портфелями, лекционный зал, абонемент с фондом, буфет с террасой на площадь, дирекция. За контролем: каталоги и СБО у подножия террас и научный зал на востоке (тихий, высота 6 м). У служебного входа: экспедиция, обработка, служебный каталог, МБА, помещения персонала.</li>
+   <li><b>2 этаж — open space с открытым доступом.</b> Учебные зоны — на западе и юго-западе, ближе к входу и террасам. Научные зоны — на юге и востоке, тише и дальше от потока. В середине — стеллажи. Групповые комнаты — стеклянные боксы над входом.</li>
+  </ul>
+  <ul>
+   <li><b>3 этаж — «сандық», сплошной.</b> Семь отсеков хранения на мобильных стеллажах, каждый меньше 600 м², один из них — над атриумом. Рядом: лаборатории копирования, оцифровки и реставрации у книгоподъёмника; хранилище и зал редких книг; медиатека; сотрудники хранения и фонд аудиовизуальных материалов.</li>
+   <li><b>Учебные и научные залы</b> по площади соотносятся как 38 : 62, как в программе (1 728 : 2 700). В местах: 500 учебных и 643 научных.</li>
+ </ul>
+ </div>
+ <div class="legend" style="margin-top:12px">
+  <span><i style="background:var(--ru)"></i>учебные зоны</span><span><i style="background:var(--rs)"></i>научные</span><span><i style="background:var(--gr)"></i>групповые</span><span><i style="background:var(--av)"></i>медиатека, редкие книги</span>
+  <span><i style="background:var(--oa)"></i>открытый доступ</span><span><i style="background:var(--st)"></i>хранение</span><span><i style="background:var(--abon)"></i>абонемент</span><span><i style="background:var(--avan)"></i>холл перехода</span>
+  <span><i style="background:var(--cat)"></i>каталоги, СБО</span><span><i style="background:var(--sv)"></i>служебные</span><span><i style="background:var(--x)"></i>вестибюль, гардероб, лекц. зал, буфет</span><span><i style="background:var(--st2)"></i>ЛК</span><span><i style="background:var(--core)"></i>лифты, санузлы</span>
+ </div>
+</div>
+
+<div class="card floor"><div><h2>1 этаж · 6,0 м</h2><div class="svgbox">%%P1%%</div></div>
+ <div class="tbl"><table><thead><tr><th>Помещение</th><th class="n">м²</th><th class="n">мест</th></tr></thead><tbody>%%L1%%</tbody></table></div></div>
+<div class="card floor"><div><h2>2 этаж · 4,5 м · open space</h2><div class="svgbox">%%P2%%</div><p class="note">Пунктир — граница стеллажей открытого доступа внутри open space. Стен там нет.</p></div>
+ <div class="tbl"><table><thead><tr><th>Помещение</th><th class="n">м²</th><th class="n">мест</th></tr></thead><tbody>%%L2%%</tbody></table></div></div>
+<div class="card floor"><div><h2>3 этаж · 4,5 м · «сандық»</h2><div class="svgbox">%%P3%%</div></div>
+ <div class="tbl"><table><thead><tr><th>Помещение</th><th class="n">м²</th><th class="n">мест</th></tr></thead><tbody>%%L3%%</tbody></table></div></div>
+<div class="card">
+ <h2>Сверка с программой — для ориентира</h2>
+ <div class="tbl"><table>
+  <thead><tr><th>Строка табл. 26</th><th class="n">Норма, м²</th><th class="n">Принятая, м²</th><th class="n">Полезная по плану, м²</th><th class="n">% от принятой</th></tr></thead>
+  <tbody>%%T26%%</tbody></table></div>
+ <p class="note" style="margin-top:8px">Полезная = по плану × 0,88. Принятая программа: фонд 1,5 млн ед., хранение на мобильных стеллажах (основное 2 250 / 1,8 + компактное 375 = 1 625 м²), учебные залы и открытый доступ — одной строкой. Террасы засчитаны как учебные места. Аванзал не обязателен. Портфели — в гардеробе.</p>
+</div>
+
+<div class="cols">
+ <div class="card">
+  <h2>Что надо учесть</h2>
+  <ul>
+   <li><b>Нагрузка.</b> Мобильные стеллажи дают на перекрытие около 12–15 кН/м². Хранилище наверху — значит, плита 3 этажа, колонны и фундаменты считаются на эту нагрузку. Конструктору это нужно знать сразу.</li>
+   <li><b>Кровля над хранилищем</b> — без садов, террас и инженерных узлов с водой: протечка над фондом недопустима. Водостоки — вне контура хранилища.</li>
+   <li><b>Запас хранения.</b> Сплошной 3 этаж вмещает около %%CAP%% млн ед. при нужных 1,5 млн — это две трети запаса. Если заказчик не планирует такой рост, часть отсеков можно отдать под архив университета или депозитарий.</li>
+   <li><b>Пожарный отсек</b> — 5 012 м² на этаж, нужна АУПТ во всём здании. Хранилище — газовое или тонкораспылённое пожаротушение.</li>
+  </ul>
+ </div>
+ <div class="card">
+  <h2>Нужно от вас</h2>
+  <ul>
+   <li><b>Мест стало меньше:</b> 1 215 из 1 800, раньше было 1 456. Причина — ушёл научный зал в ректорате. Добрать можно двумя способами: отдать залам часть 3 этажа, только у залов там не будет окон, или поставить антресоль в научном зале 1 этажа — его высота 6 м.</li>
+   <li>Куда направить запас хранения на 3 этаже?</li>
+   <li>Переход к ректорату остаётся, только как связь? Если нет, холл перехода на 2 этаже отдадим под групповые.</li>
+  </ul>
+ </div>
+</div>
+</div>
