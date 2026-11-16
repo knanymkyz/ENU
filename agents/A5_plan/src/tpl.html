@@ -1,0 +1,218 @@
+<title>Планировка А5 библиотеки ЕНУ</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: рабочий лист архитектора — шапка с итогами, просмотр планов по этажам с экспликацией сбоку, ниже таблицы проверок и правила расстановки */
+:root{
+ --bg:#f5f6f3;--paper:#fff;--fg:#1c2421;--muted:#5f6b66;--rule:#d5dbd7;--red:#c62828;--main:#0c7a63;--serv:#b05e00;--lk:#3b4fbf;--sun:#e0a100;--evac:#0a8f4d;--sel:#111;
+ --abon:#f2c98a;--cat:#e8c7e0;--ru:#bfe0c6;--gr:#d7ecb4;--rs:#9fd0b9;--av:#c9c3ea;--st:#a9bfd6;--oa:#d9e8f5;--sv:#e9d2bd;--x:#f4ddd6;--core:#d3d8d5;--cor:#f7f8f6;--pk:#fff3bf;--void:#eef0ee;
+ --f-text:"IBM Plex Sans",system-ui,sans-serif;--f-head:"IBM Plex Sans Condensed","IBM Plex Sans",system-ui,sans-serif;--f-mono:"IBM Plex Mono",ui-monospace,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+ --bg:#141917;--paper:#1b2220;--fg:#e4ebe7;--muted:#9aa7a1;--rule:#2e3834;--red:#ef5350;--main:#4fd1ad;--serv:#f0a04b;--lk:#8f9dff;--sun:#f2c94c;--evac:#4ade80;--sel:#fff;
+ --abon:#6b5328;--cat:#5a3c55;--ru:#2f5638;--gr:#46562a;--rs:#25523f;--av:#433d6b;--st:#2e4660;--oa:#263a4b;--sv:#5a4330;--x:#5a3a33;--core:#39423f;--cor:#222a27;--pk:#5b5220;--void:#1f2624;color-scheme:dark}}
+:root[data-theme="dark"]{
+ --bg:#141917;--paper:#1b2220;--fg:#e4ebe7;--muted:#9aa7a1;--rule:#2e3834;--red:#ef5350;--main:#4fd1ad;--serv:#f0a04b;--lk:#8f9dff;--sun:#f2c94c;--evac:#4ade80;--sel:#fff;
+ --abon:#6b5328;--cat:#5a3c55;--ru:#2f5638;--gr:#46562a;--rs:#25523f;--av:#433d6b;--st:#2e4660;--oa:#263a4b;--sv:#5a4330;--x:#5a3a33;--core:#39423f;--cor:#222a27;--pk:#5b5220;--void:#1f2624;color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font:15px/1.55 var(--f-text)}
+.wrap{max-width:1320px;margin:0 auto;padding-block:28px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:22px}
+.eyebrow{font:500 12px/1.3 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+h1{font:600 clamp(26px,4vw,36px)/1.1 var(--f-head);margin:6px 0 8px;text-wrap:balance}
+h2{font:600 21px/1.2 var(--f-head);margin:0 0 10px;text-wrap:balance}
+h3{font:600 15.5px/1.3 var(--f-head);margin:14px 0 6px}
+p{margin:0 0 8px}.lead{max-width:78ch;color:var(--muted);margin:0}
+.kpis{display:flex;flex-wrap:wrap;gap:12px 30px;margin-top:14px;font-variant-numeric:tabular-nums}
+.kpis div{display:grid;max-width:230px}.kpis b{font:600 23px/1.1 var(--f-head)}.kpis span{font-size:12.5px;color:var(--muted)}
+.card{background:var(--paper);border:1px solid var(--rule);border-radius:6px;padding:18px 20px;min-width:0}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:22px;align-items:start}
+.cols>*{min-width:0}
+.note{font-size:13px;color:var(--muted)}
+ul{margin:0;padding-left:18px}li{margin:4px 0}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13.5px;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font:600 11.5px/1.3 var(--f-mono);letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+td.n,th.n{text-align:right;font-family:var(--f-mono);white-space:nowrap}
+tr.tot td{font-weight:600;border-top:2px solid var(--fg)}
+tr.sub td{font:600 11.5px/1.3 var(--f-mono);letter-spacing:.04em;text-transform:uppercase;color:var(--muted);padding-top:12px}
+.ok{color:var(--main);font-weight:600}.mid{color:var(--serv);font-weight:600}.low{color:var(--red);font-weight:600}
+.pill{display:inline-block;font:600 11.5px/1 var(--f-mono);padding:4px 7px;border-radius:3px;border:1px solid currentColor;white-space:nowrap}
+/* просмотр */
+.bar{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;margin-bottom:12px}
+.tabs{display:inline-flex;border:1px solid var(--fg);border-radius:4px;overflow:hidden}
+.tabs button{font:600 14px/1 var(--f-head);padding:9px 14px;background:var(--paper);color:var(--fg);border:0;border-right:1px solid var(--fg);cursor:pointer}
+.tabs button:last-child{border-right:0}
+.tabs button[aria-pressed="true"]{background:var(--fg);color:var(--paper)}
+.tabs button:focus-visible,.rm:focus-visible,.tog input:focus-visible{outline:2px solid var(--lk);outline-offset:2px}
+.tog{display:inline-flex;gap:6px;align-items:center;font-size:13.5px;cursor:pointer}
+.viewer{display:grid;grid-template-columns:minmax(0,1.75fr) minmax(280px,1fr);gap:18px;align-items:start}
+.viewer>*{min-width:0}
+@media (max-width:940px){.viewer{grid-template-columns:minmax(0,1fr)}}
+.svgbox{overflow-x:auto;border:1px solid var(--rule);border-radius:4px}
+.svgbox svg{display:block;width:100%;min-width:620px;height:auto}
+.side{display:grid;gap:12px;min-width:0}
+.info{border-left:3px solid var(--fg);padding:2px 0 2px 12px;min-height:118px}
+.info b{font:600 16px/1.25 var(--f-head);display:block}
+.info .m{font:13px/1.4 var(--f-mono);color:var(--muted);margin:3px 0 6px}
+.info p{font-size:13.5px;margin:0}
+.expl{max-height:560px;overflow:auto;border:1px solid var(--rule);border-radius:4px}
+.expl table{font-size:12.5px}.expl th{position:sticky;top:0;background:var(--paper)}
+.expl tr[data-k]{cursor:pointer}.expl tr[data-k]:hover td{background:var(--bg)}
+.expl tr.on td{background:var(--pk)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;margin-top:12px}
+.legend i{display:inline-block;width:14px;height:10px;margin-right:6px;vertical-align:-1px;border-radius:2px;outline:1px solid var(--rule)}
+/* svg */
+.ground{fill:var(--paper)}
+.rm{stroke:var(--fg);stroke-width:.3;stroke-linejoin:round;cursor:pointer}
+.rm.zone{stroke-width:.16;stroke-dasharray:1.1 .7}
+.rm:hover{filter:brightness(.93)}.rm.on{stroke:var(--sel);stroke-width:.75;stroke-dasharray:none}
+.outline{fill:none;stroke:var(--fg);stroke-width:.75;pointer-events:none}
+.c-abon{fill:var(--abon)}.c-cat{fill:var(--cat)}.c-ru{fill:var(--ru)}.c-gr{fill:var(--gr)}.c-rs{fill:var(--rs)}.c-av{fill:var(--av)}.c-st{fill:var(--st)}.c-oa{fill:var(--oa)}
+.c-sv{fill:var(--sv)}.c-x{fill:var(--x)}.c-core{fill:var(--core)}.c-lk{fill:var(--lk)}.c-cor{fill:var(--cor);stroke-width:.12}.c-pk{fill:var(--pk)}.c-void{fill:var(--void);stroke-dasharray:1 .7;stroke-width:.2}
+svg text{fill:var(--fg);font-family:var(--f-text);pointer-events:none}
+.rl{font-size:1.55px;font-weight:600}.ra{font-size:1.3px;fill:var(--muted);font-family:var(--f-mono)}.no{font-size:1.25px;font-family:var(--f-mono);font-weight:500}
+.lkl{font-size:1.9px;font-weight:600;fill:var(--paper);font-family:var(--f-mono)}.cl{font-size:1.25px;font-family:var(--f-mono);fill:var(--muted)}
+.vl{font-size:1.5px;fill:var(--muted);letter-spacing:.08em}
+.ml{font-size:1.75px;fill:var(--muted)}.amt{fill:var(--main);font-weight:600}.ast{fill:var(--serv);font-weight:600}
+.am{stroke:var(--main);stroke-width:.7}.as{stroke:var(--serv);stroke-width:.7}.mkm{fill:var(--main)}.mks{fill:var(--serv)}.na{fill:var(--fg)}.sc{stroke:var(--fg);stroke-width:.25}
+.gst{fill:var(--paper);stroke:var(--fg);stroke-width:.22;pointer-events:none}.gtr{stroke:var(--fg);stroke-width:.08}.garr{stroke:var(--fg);stroke-width:.2}.mk{fill:var(--fg)}
+.ctl{stroke:var(--main);stroke-width:.35;stroke-dasharray:.9 .5}.ctlt{font-size:1.3px;fill:var(--main);font-weight:600}
+.bridge{fill:var(--void);stroke:var(--fg);stroke-width:.25;stroke-dasharray:1 .6}
+.sdoor{stroke:var(--serv);stroke-width:.7}
+.sky{fill:var(--pk);stroke:var(--fg);stroke-width:.15}.skyl{stroke:var(--fg);stroke-width:.1}
+.ax{display:none}.axl{stroke:var(--red);stroke-width:.09;stroke-dasharray:1.6 .5 .3 .5;opacity:.7}.axt{font-size:1.6px;fill:var(--red);font-family:var(--f-mono)}
+.ov{display:none;pointer-events:none}
+.show-ax .ax,.show-ev .ov-evac,.show-lt .ov-light{display:inline}
+.route{fill:none;stroke:var(--evac);stroke-width:.45;stroke-dasharray:1 .6}.rt{font-size:1.6px;font-weight:600;fill:var(--evac);paint-order:stroke;stroke:var(--paper);stroke-width:.5}
+.exit{fill:var(--evac);stroke:var(--paper);stroke-width:.25}.far{fill:none;stroke:var(--evac);stroke-width:.35}
+.eo{stroke:var(--evac);stroke-width:.6}.meo{fill:var(--evac)}
+.lcor{fill:var(--sun);opacity:.28;stroke:none}.lroom{fill:var(--sun);opacity:.45;stroke:none}.lsrc{fill:var(--sun);stroke:var(--fg);stroke-width:.2}
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px 26px}
+.rules>div{border-top:2px solid var(--fg);padding-top:8px;min-width:0}.rules b.h{display:block;font:600 15px/1.3 var(--f-head);margin-bottom:4px}
+.rules ul{font-size:13.5px}
+</style>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<marker id="mam" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" orient="auto"><path d="M0,0L10,5L0,10z" class="mkm"/></marker>
+<marker id="mas" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" orient="auto"><path d="M0,0L10,5L0,10z" class="mks"/></marker>
+<marker id="meo" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="3.2" markerHeight="3.2" orient="auto"><path d="M0,0L10,5L0,10z" class="meo"/></marker>
+<marker id="mk" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0L10,5L0,10z" class="mk"/></marker>
+</defs></svg>
+<div class="wrap">
+<header>
+ <div class="eyebrow">Проект 207 · кампус ЕНУ · библиотека · новая посадка · вариант А5 · %%DATE%%</div>
+ <h1>Планировка А5: вестибюль со вторым светом, open space на 2 этаже, хранилище и научные залы на 3-м</h1>
+ <p class="lead">Контур из DWG «Посадка», 5 012 м², три этажа (6,0 + 4,5 + 4,5 м). Главный вход — по оси северо-западного фасада, служебный — на северо-восточном. Помещения показаны со стенами; в open space выделены зоны без мебели, правила расстановки — ниже. Площади по плану, полезная = по плану × 0,88.</p>
+ <div class="kpis">
+  <div><b>%%SEATS%%</b><span>читательских мест из 1 800: учебных %%SU%%, научных %%SS%%, АВ и редкие %%SA%%</span></div>
+  <div><b>%%BOOKS%% млн</b><span>единиц вмещает фонд: %%BOA%% тыс. в открытом доступе, %%BST%% млн в хранилище</span></div>
+  <div><b>%%GROUP%%</b><span>мест в групповых комнатах</span></div>
+  <div><b>%%MAXLK%% м</b><span>самый длинный путь от двери до лестницы (норма 50 м)</span></div>
+  <div><b>%%PROG%% %</b><span>принятой программы закрыто полезной площадью</span></div>
+ </div>
+</header>
+
+<div class="card">
+ <div class="bar">
+  <div class="tabs" role="group" aria-label="Этаж">
+   <button type="button" data-f="1" aria-pressed="true">1 этаж · ±0,000</button><button type="button" data-f="2" aria-pressed="false">2 этаж · +6,000</button><button type="button" data-f="3" aria-pressed="false">3 этаж · +10,500</button>
+  </div>
+  <label class="tog"><input type="checkbox" id="t-ax"> оси 8,4 × 8,4</label>
+  <label class="tog"><input type="checkbox" id="t-ev"> эвакуация</label>
+  <label class="tog"><input type="checkbox" id="t-lt"> свет в коридорах</label>
+ </div>
+ <div class="viewer" id="viewer">
+  <div>
+   <div class="svgbox" data-f="1">%%P1%%</div>
+   <div class="svgbox" data-f="2" hidden>%%P2%%</div>
+   <div class="svgbox" data-f="3" hidden>%%P3%%</div>
+   <div class="legend">
+    <span><i style="background:var(--x)"></i>вестибюль, гардероб, кафетерий</span><span><i style="background:var(--abon)"></i>абонемент</span><span><i style="background:var(--cat)"></i>каталоги, СБО</span>
+    <span><i style="background:var(--ru)"></i>учебные зоны</span><span><i style="background:var(--oa)"></i>открытый фонд</span><span><i style="background:var(--rs)"></i>научные зоны</span><span><i style="background:var(--gr)"></i>групповые</span>
+    <span><i style="background:var(--av)"></i>АВ-залы, редкие книги</span><span><i style="background:var(--st)"></i>хранение</span><span><i style="background:var(--sv)"></i>служебные</span><span><i style="background:var(--pk)"></i>световой карман</span>
+    <span><i style="background:var(--lk)"></i>лестничная клетка</span><span><i style="background:var(--core)"></i>лифты, санузлы, техника</span><span><i style="background:var(--cor)"></i>коридор</span><span><i style="background:var(--serv);height:3px;vertical-align:3px"></i>дверь в служебную зону</span>
+   </div>
+   <p class="note" style="margin-top:8px">Север вверху. Сплошная линия — стена, пунктир — граница зоны без стены. Нажмите на помещение или строку таблицы, чтобы увидеть площадь и обоснование.</p>
+  </div>
+  <div class="side">
+   <div class="info" id="info" aria-live="polite"><b>Выберите помещение</b><p class="note">Здесь появятся номер, площадь, число мест и причина, почему помещение стоит именно тут.</p></div>
+   <div class="expl" data-f="1">%%E1%%</div>
+   <div class="expl" data-f="2" hidden>%%E2%%</div>
+   <div class="expl" data-f="3" hidden>%%E3%%</div>
+  </div>
+ </div>
+</div>
+
+<div class="card">
+ <h2>Как устроено</h2>
+ <div class="cols">
+  <ul>
+   <li><b>Входная группа.</b> Центральные три пролёта северо-западного фасада — вестибюль 25 × 17 м. Над его передней частью второй свет высотой 10,5 м, по оси — прямая парадная лестница на 2 этаж. Контроль стоит сразу за тамбуром, зон «до» и «после» нет. Гардероб — в глубине вестибюля, лифты А — справа от лестницы.</li>
+   <li><b>1 этаж.</b> По фасаду на площадь: кафетерий, пост и бюро записи, СБО. В середине, под хранилищем, — абонемент; к нему и дальше к южному коридору ведут два сквозных прохода от вестибюля. Вдоль южного, юго-восточного и юго-западного фасадов — групповые комнаты. У северо-восточного фасада — служебный блок с отдельным входом.</li>
+   <li><b>2 этаж.</b> Единый open space. У окон — двенадцать учебных зон до 100 мест, в середине без дневного света — стеллажи открытого фонда. Напротив лестницы — абонемент 2 этажа. В северном углу — холл перехода в ректорат и дирекция.</li>
+  </ul>
+  <ul>
+   <li><b>3 этаж.</b> Середина и северо-запад — девять отсеков хранилища, каждый меньше 600 м², на общем служебном коридоре от ЛК-6 до ЛК-3. У северного угла — реставрация, у западного — копирование. Хранилище редких книг — у грузового лифта, зал редких книг — в читательской полосе у ЛК-3. Вдоль южного, юго-восточного и северо-восточного фасадов — полоса научных залов, читатели попадают в неё по ЛК-4, ЛК-5 и лифтами Б.</li>
+   <li><b>Путь книги.</b> Приёмка у служебного входа → комплектование и обработка → грузовой лифт → коридор хранилища 3 этажа → отсеки. Обратно к читателю: книгоподъёмник из середины хранилища прямо в абонемент 2 и 1 этажей. С читателями книги не пересекаются.</li>
+   <li><b>Лестницы.</b> Шесть клеток Л1 у фасадов: две симметрично по сторонам от входа, по одной на остальных фасадах. На 1 этаже каждая выходит прямо наружу.</li>
+  </ul>
+ </div>
+</div>
+
+<div class="card">
+ <h2>Проверки</h2>
+ <div class="tbl"><table>
+  <thead><tr><th>Что проверено</th><th>Этаж</th><th class="n">По плану</th><th class="n">Норма</th><th>Итог</th><th>Источник</th></tr></thead>
+  <tbody>%%CHK%%</tbody></table></div>
+ <p class="note" style="margin-top:8px">Пути посчитаны по сетке 0,5 м в обход стен, от середины стены с дверью до двери лестницы. «Тупик» — помещение, из которого второй путь к другой лестнице проходит мимо первой. Включите слой «эвакуация», чтобы увидеть самые длинные пути.</p>
+ <div class="cols" style="margin-top:14px">
+  <div>
+   <h3>Лестницы: хватает ли ширины</h3>
+   <div class="tbl"><table><thead><tr><th>Этаж</th><th class="n">Людей</th><th class="n">Лестниц</th><th class="n">Пропустят без одной</th><th>Итог</th></tr></thead><tbody>%%STAIRS%%</tbody></table></div>
+   <p class="note" style="margin-top:6px">Марш 1,5 м, 165 человек на 1 м ширины (п. 4.2.2.28). Высота 1 этажа 6,0 м: три марша по 13–14 подъёмов, клетка 4,2 × 9,0 м.</p>
+  </div>
+  <div>
+   <h3>Отсеки хранилища</h3>
+   <div class="tbl"><table><thead><tr><th>Отсек</th><th class="n">По плану, м²</th><th class="n">Вмещает, тыс. ед.</th><th>Выходы</th></tr></thead><tbody>%%STORE%%</tbody></table></div>
+  </div>
+ </div>
+ <h3>Световые карманы</h3>
+ <ul>%%LIGHT%%</ul>
+</div>
+
+<div class="card">
+ <h2>Сверка с программой</h2>
+ <div class="tbl"><table>
+  <thead><tr><th>Группа помещений</th><th class="n">Программа, м²</th><th class="n">Полезная по плану, м²</th><th class="n">%</th><th>Где</th></tr></thead>
+  <tbody>%%T26%%</tbody></table></div>
+ <p class="note" style="margin-top:8px">Программа — табл. 26 Пособия к СНиП 2.08.02-89 с вашими решениями: фонд 1,8 млн, открытый фонд 20 % по 5 м² на 1 000 книг, закрытое хранение 1,44 млн по 1,5 м² на 1 000 книг, МБА и аванзал не делаем, портфели — в гардеробе. Итог считается так: по каждой строке в счёт идёт не больше программы.</p>
+</div>
+
+<div class="card">
+ <h2>Правила расстановки мебели</h2>
+ <p class="lead" style="margin-bottom:14px">Мебель на планах не показана. Это задание для того, кто будет её расставлять: зоны и число мест в них — в экспликации, правила — здесь.</p>
+ <div class="rules">%%RULES%%</div>
+</div>
+
+<div class="cols">
+ <div class="card">
+  <h2>Что не поместилось</h2>
+  <ul>%%MISS%%</ul>
+ </div>
+ <div class="card">
+  <h2>Допущения и что подтвердить</h2>
+  <ul>%%ASSUME%%</ul>
+ </div>
+</div>
+</div>
+<script>
+const D=%%DATA%%;
+const V=document.getElementById('viewer'),info=document.getElementById('info');
+function floor(f){document.querySelectorAll('[data-f]').forEach(e=>{if(e.tagName==='BUTTON')e.setAttribute('aria-pressed',e.dataset.f===f);else e.hidden=e.dataset.f!==f});try{localStorage.setItem('a5f',f)}catch(e){}}
+document.querySelectorAll('.tabs button').forEach(b=>b.addEventListener('click',()=>floor(b.dataset.f)));
+[['t-ax','show-ax'],['t-ev','show-ev'],['t-lt','show-lt']].forEach(([id,c])=>{const el=document.getElementById(id);el.addEventListener('change',()=>V.classList.toggle(c,el.checked));V.classList.toggle(c,el.checked)});
+function pick(k,scroll){const r=D[k];if(!r)return;document.querySelectorAll('.on').forEach(e=>e.classList.remove('on'));
+ document.querySelectorAll('[data-k="'+k+'"]').forEach(e=>{e.classList.add('on');if(scroll&&e.tagName==='TR'){const b=e.closest('.expl');b.scrollTop=e.offsetTop-b.clientHeight/2}});
+ info.innerHTML='<b></b><div class="m"></div><p></p>';info.children[0].textContent=(r.no?r.no+' · ':'')+r.n;info.children[1].textContent=r.m;info.children[2].textContent=r.w}
+document.querySelectorAll('.rm').forEach(e=>{e.addEventListener('click',()=>pick(e.dataset.k,true));e.addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();pick(e.dataset.k,true)}})});
+document.querySelectorAll('.expl tr[data-k]').forEach(e=>e.addEventListener('click',()=>pick(e.dataset.k,false)));
+try{const f=localStorage.getItem('a5f');if(f)floor(f)}catch(e){}
+</script>
