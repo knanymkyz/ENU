@@ -113,8 +113,8 @@ def door_candidates(r, walk):
     return out
 
 
-MAIN = (1.6, 21.0)
-SERV = (79.6, 22.0)
+MAIN = (-0.9, 21.0)
+SERV = (80.0, 36.3)
 EXNW = (19.0, 0.4)     # выход на площадь у ЛК-1
 EXPK = (48.7, 0.4)     # выход на площадь через фойе-карман лекционного зала
 PUB2 = ['lobA', 'zW', 'zSW', 'zS0', 'zS', 'zSE', 'zN1', 'zN2', 'oaN', 'oaS', 'oaSW', 'gal2', 'corN', 'hall4', 'hallbr', 'abon2']
@@ -123,11 +123,11 @@ EX2 = {k: LKDOOR[k] for k in ('ЛК-1', 'ЛК-2', 'ЛК-4', 'ЛК-5')}
 EX3 = {k: LKDOOR[k] for k in ('ЛК-1', 'ЛК-4', 'ЛК-5')}
 
 CFG = {
-    1: dict(walk=['vest', 'hall1', 'read2', 'readE', 'info', 'scor', 'svest'],
-            exits={**LKDOOR, 'Главный вход': MAIN, 'Служебный вход': SERV, 'Выход на площадь у ЛК-1': EXNW},
+    1: dict(walk=['vest', 'hall1', 'abon', 'info', 'tamb', 'ctrl', 'scor', 'svest', 'stamb', 'ex2'],
+            exits={**LKDOOR1, 'Главный вход': MAIN, 'Служебный вход': SERV},
             lifts=LIFTDOOR, light_cor=['hall1', 'scor'],
-            light=[(k, LKDOOR[k]) for k in LKDOOR] + [('Выход на площадь', EXNW), ('Комплектование', (54.0, 14.5)), ('Реставрация', (71.5, 44.0)), ('Мокрая реставрация', (71.5, 50.3))],
-            light_rooms=['vest', 'svest', 'read2', 'readE', 'info', 'cafe', 'gL1', 'terr']),
+            light=[(k, LKDOOR1[k]) for k in LKDOOR1],
+            light_rooms=['vest', 'svest', 'info', 'cafe', 'abon', 'readN', 'g1', 'g2', 'g3', 'terr', 'proc', 'stf', 'staff1']),
     2: dict(walk=PUB2, exits=EX2, lifts=LIFTDOOR, light_cor=['corN', 'hall4'],
             light=[('ЛК-2', LKDOOR['ЛК-2']), ('ЛК-4', LKDOOR['ЛК-4'])], light_rooms=['hallbr', 'oaN', 'zSE', 'oaS', 'gN1']),
     '2s': dict(walk=PUB2 + ['flob'], exits=EX2, lifts={}, light_cor=[], light=[], light_rooms=[]),

@@ -46,7 +46,7 @@ import plan as PL
 
 LPOS = {(1, 'vest'): (8.0, 28.0), (2, 'atr'): (35.2, 20.0), (3, 'atr'): (35.2, 24.0), (2, 'vv'): (6.5, 27.5), (1, 'terr'): (27.0, 20.0),
         (2, 'abon2'): (52.0, 20.5), (1, 'cloak'): (41.0, 23.7), (1, 'porch'): (-3.4, 24.0)}
-SDOOR = {1: [((50.9, 14.5), (50.9, 16.9))], 2: [], 3: []}
+SDOOR = {1: [((68.96, 16.65), (71.46, 16.65))], 2: [], 3: []}
 def label(r):
     g = max(polys(r['g']), key=lambda q: q.area)
     if (r['f'], r['k']) in LPOS:
@@ -94,7 +94,7 @@ def plan(f):
             o.append(line((4.6, 15.4), (4.6, 30.6), 'ctl'))
             o.append(text((6.2, 17.2), 'контроль', 'ctlt', anchor='start'))
             # гардероб: барьеры на двух длинных сторонах и 12 рядов консольных вешалок
-            cx0, cx1, cy0, cy1 = PL.CLX0, 49.5, 16.9, 30.5
+            cx0, cx1, cy0, cy1 = PL.CLBOX
             for yb in (cy0 + 0.33, cy1 - 0.33):
                 o.append(line((cx0, yb), (cx1, yb), 'bar'))
             ya, yb_ = cy0 + 1.65, cy1 - 1.65
@@ -108,7 +108,7 @@ def plan(f):
         if c == 'lk':
             o.append(text((px, py), r['k'][3:], 'lkl', dy=.6)); continue
         if c in ('core', 'wc'):
-            t = {'liftA': 'Л-А', 'liftB': 'Л-Б', 'liftF': 'Гр', 'blift': '', 'wcA': 'WC', 'wcB': 'WC', 'wcS': 'WC'}[r['k']]
+            t = {'liftA': 'Л-А', 'liftB': 'Л-Б', 'liftF': 'Гр', 'blift': '', 'wcA': 'WC', 'wcB': 'WC', 'wcS': 'WC', 'wcN': 'WC'}[r['k']]
             if t: o.append(text((px, py), t, 'cl', dy=.5))
             continue
         if c == 'void':
@@ -134,8 +134,7 @@ def plan(f):
         o.append(text((a[0] + off[0], a[1] + off[1]), t, 'ml ' + cls + 't', anchor=ta))
     if f == 1:
         arrow((-13.0, 19.0), (-6.6, 19.0), 'am', 'главный вход', ta='end', off=(-.8, .6))
-        arrow((88.0, 22.0), (81.4, 22.0), 'as', 'служебный вход', ta='start', off=(.8, 1.4))
-        arrow((88.0, 27.5), (81.4, 27.5), 'as', 'приёмка', ta='start', off=(.8, 1.9))
+        arrow((88.0, 36.3), (81.4, 36.3), 'as', 'служебный вход, приёмка', ta='start', off=(.8, 1.4))
     if f == 2:
         o.append(f'<path class="bridge" d="M{P((76.2,-0.6))} L{P((82.2,-6.6))} L{P((86.8,-2.0))} L{P((80.8,4.0))}Z"/>')
         o.append(text((88.5, -6.0), 'переход в ректорат', 'ml amt', anchor='start'))
