@@ -45,7 +45,7 @@ PERS = {}
 import plan as PL
 
 LPOS = {(1, 'vest'): (8.0, 28.0), (2, 'atr'): (35.2, 20.0), (3, 'atr'): (35.2, 24.0), (2, 'vv'): (6.5, 27.5), (1, 'terr'): (27.0, 20.0),
-        (2, 'abon2'): (52.0, 20.5), (1, 'cloak'): (41.2, 20.0), (1, 'porch'): (-3.4, 24.0)}
+        (2, 'abon2'): (52.0, 20.5), (1, 'cloak'): (41.0, 23.7), (1, 'porch'): (-3.4, 24.0)}
 SDOOR = {1: [((50.9, 14.5), (50.9, 16.9))], 2: [], 3: []}
 def label(r):
     g = max(polys(r['g']), key=lambda q: q.area)
@@ -75,7 +75,7 @@ def plan(f):
     # главная лестница-амфитеатр: террасы со стеллажами и марши по оси
     if f in (1, 2):
         x0, x1, y0, y1 = 21.2, 49.3, 16.9, 30.9
-        xb = x1 if f == 2 else 33.0
+        xb = x1 if f == 2 else PL.CLX0
         n = 6
         for i in range(n):
             ta, tb = x0 + (x1 - x0) * i / n, x0 + (x1 - x0) * (i + 1) / n
@@ -93,9 +93,14 @@ def plan(f):
         if f == 1:
             o.append(line((4.6, 15.4), (4.6, 30.6), 'ctl'))
             o.append(text((6.2, 17.2), 'контроль', 'ctlt', anchor='start'))
-            o.append(line((33.0, 16.9), (49.5, 16.9), 'bar'))
-            o.append(line((33.0, 30.9), (49.5, 30.9), 'bar'))
-            o.append(line((38.1, 12.5), (45.3, 12.5), 'bar'))
+            # гардероб: барьеры на двух длинных сторонах и 12 рядов консольных вешалок
+            cx0, cx1, cy0, cy1 = PL.CLX0, 49.5, 16.9, 30.5
+            for yb in (cy0 + 0.33, cy1 - 0.33):
+                o.append(line((cx0, yb), (cx1, yb), 'bar'))
+            ya, yb_ = cy0 + 1.65, cy1 - 1.65
+            for i in range(12):
+                xa = cx0 + 1.0 + i * 1.34
+                o.append(f'<path class="hang" d="M{P((xa,ya))} L{P((xa+0.55,ya))} L{P((xa+0.55,yb_))} L{P((xa,yb_))}Z"/>')
     # подписи
     for r in rs:
         (px, py), g = label(r)
