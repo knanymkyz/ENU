@@ -126,14 +126,16 @@ CFG = {
             lifts=LIFTDOOR, light_cor=['hall1', 'scor'],
             light=[(k, LKDOOR[k]) for k in LKDOOR] + [('Выход на площадь', EXNW), ('Служебный каталог', (69.4, 14.6))],
             light_rooms=['vest', 'pkE', 'pkL', 'svest', 'open1', 'read1', 'read2']),
-    2: dict(walk=['zW', 'zSW', 'zS0', 'zS', 'zSE', 'zE', 'zNE', 'oaN', 'oaS', 'oaSW', 'gal2', 'corN', 'scor', 'hallbr', 'abon2'],
-            exits={**LKDOOR, 'ЛК-3 (из зала)': LK3S}, lifts=LIFTDOOR, light_cor=['corN', 'scor'],
-            light=[('ЛК-2', LKDOOR['ЛК-2']), ('ЛК-3', LKDOOR['ЛК-3']), ('Приёмная дирекции', (69.4, 12.3)), ('Восточный угол', (70.1, 47.3))], light_rooms=['hallbr', 'oaN']),
-    3: dict(walk=['sW', 'sVV', 'sS1', 'sS2', 'sSE', 'sE', 'sN1', 'sN2', 'oa3', 'oa3w', 'gal3'],
+    2: dict(walk=['zW', 'zSW', 'zS0', 'zS', 'zSE', 'zN1', 'zN2', 'oaN', 'oaS', 'oaSW', 'gal2', 'corN', 'hall4', 'hallbr', 'abon2'],
+            exits={k: LKDOOR[k] for k in ('ЛК-1', 'ЛК-2', 'ЛК-4', 'ЛК-5')}, lifts=LIFTDOOR, light_cor=['corN', 'hall4'],
+            light=[('ЛК-2', LKDOOR['ЛК-2']), ('ЛК-4', LKDOOR['ЛК-4']), ('Приёмная дирекции', (69.4, 12.3))], light_rooms=['hallbr', 'oaN', 'zSE', 'oaS']),
+    '2s': dict(walk=['scor', 'corN', 'hall4'], exits={k: LKDOOR[k] for k in ('ЛК-2', 'ЛК-3', 'ЛК-4')}, lifts={},
+               light_cor=['scor'], light=[('ЛК-3', LKDOOR['ЛК-3']), ('Северный коридор', (70.1, 16.6)), ('Холл ЛК-4', (70.1, 49.6))], light_rooms=[]),
+    3: dict(walk=['sW', 'sVV', 'sS1', 'sS2', 'sSE', 'sE', 'sN1', 'sN2', 'oa3', 'oa3w', 'gal3', 'hall4'],
             exits={'ЛК-1': LKDOOR['ЛК-1'], 'ЛК-4': LKDOOR['ЛК-4'], 'ЛК-5': LKDOOR['ЛК-5'], 'ЛК-2 (через дверь в служебный коридор)': G23},
             lifts=LIFTDOOR, light_cor=[], light=[], light_rooms=[]),
-    '3s': dict(walk=['scor'],
-               exits={'ЛК-2': LKDOOR['ЛК-2'], 'ЛК-3': LKDOOR['ЛК-3']},
+    '3s': dict(walk=['scor', 'hall4'],
+               exits={'ЛК-2': LKDOOR['ЛК-2'], 'ЛК-3': LKDOOR['ЛК-3'], 'ЛК-4': LKDOOR['ЛК-4']},
                lifts={}, light_cor=['scor'],
                light=[('ЛК-2', LKDOOR['ЛК-2']), ('ЛК-3', LKDOOR['ЛК-3']), ('Галерея атриума', (51.2, 14.6)), ('Реставрация', (69.4, 14.7)), ('Восточный угол', (70.1, 47.3))], light_rooms=[]),
 }
@@ -141,7 +143,7 @@ SKIP = ('lk', 'core', 'wc', 'void')
 
 
 def run(key):
-    f = 3 if key == '3s' else key
+    f = {'3s': 3, '2s': 2}.get(key, key)
     cfg = CFG[key]
     R = {r['k']: r for r in rooms(f)}
     walk = unary_union([R[k]['g'] for k in cfg['walk'] if k in R])
@@ -167,7 +169,8 @@ def run(key):
         lf = dijkstra(m, [snap(m, p) for p in cfg['lifts'].values()])[0]
     res = []
     for r in rooms(f):
-        if r['k'] in cfg['walk'] or r['c'] in SKIP or key == 3 or (key == '3s' and r['c'] in ('readS', 'oa', 'cor', 'av')):
+        if r['k'] in cfg['walk'] or r['c'] in SKIP or key == 3 or (key == '3s' and r['c'] in ('readS', 'oa', 'cor', 'av')) or (key == 2 and r['c'] == 'cor') \
+                or (key == 2 and r['c'] == 'store') or (key == '2s' and r['c'] != 'store'):
             continue
         cand = [(c, snap(m, c, 1.2)) for c in door_candidates(r, walk)]
         cand = [(c, s) for c, s in cand if s is not None and np.isfinite(D[s])]
@@ -213,7 +216,7 @@ def run(key):
     return dict(rooms=res, hall=hall, light=light, exits=cfg['exits'], D=D, m=m)
 
 
-RES = {k: run(k) for k in (1, 2, 3, '3s')}
+RES = {k: run(k) for k in (1, 2, '2s', 3, '3s')}
 
 if __name__ == '__main__':
     for k, v in RES.items():
