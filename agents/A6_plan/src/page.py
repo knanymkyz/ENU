@@ -2,6 +2,7 @@
 import json, math, collections, html
 from shapely.ops import polylabel, unary_union
 from checks import *
+from furn import FURN, STAT
 
 def fm(x, d=0):
     return f"{x:,.{d}f}".replace(',', ' ').replace('.', ',')
@@ -65,6 +66,14 @@ def plan(f):
         zone = ' zone' if r['open'] else ''
         o.append(f'<path class="rm c-{cls}{zone}" data-k="{f}:{r["k"]}" tabindex="0" d="{dpath(r["g"])}"><title>{html.escape(r["n"])} — {fm(r["a"])} м²</title></path>')
     o.append(f'<path class="outline" d="{dpath(LP)}"/>')
+    # мебель по расчёту (furn.py), один path на класс
+    by = collections.defaultdict(list)
+    for cls, pts in FURN[f]:
+        if len(pts) == 2:
+            by[cls].append('M' + P(pts[0]) + ' L' + P(pts[1]))
+        else:
+            by[cls].append('M' + ' L'.join(P(c) for c in pts[:-1]) + 'Z')
+    o.append('<g class="fu">' + ''.join(f'<path class="fu-{c}" d="{" ".join(v)}"/>' for c, v in by.items()) + '</g>')
     # оси
     ax = ['<g class="ax">']
     for i, x in enumerate(GX):

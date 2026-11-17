@@ -83,6 +83,7 @@ svg text{fill:var(--fg);font-family:var(--f-text);pointer-events:none}
 .sky{fill:var(--pk);stroke:var(--fg);stroke-width:.15}.skyl{stroke:var(--fg);stroke-width:.1}
 .ax{display:none}.axl{stroke:var(--red);stroke-width:.09;stroke-dasharray:1.6 .5 .3 .5;opacity:.7}.axt{font-size:1.6px;fill:var(--red);font-family:var(--f-mono)}
 .ov{display:none;pointer-events:none}
+.fu{pointer-events:none}.hide-fu .fu{display:none}.fu-tb{fill:var(--paper);stroke:var(--fg);stroke-width:.06}.fu-ch{fill:var(--fg);opacity:.42}.fu-sh{fill:var(--paper);stroke:var(--fg);stroke-width:.07}.fu-sl{fill:none;stroke:var(--fg);stroke-width:.05;opacity:.7}.fu-st{fill:var(--fg);fill-opacity:.16;stroke:var(--fg);stroke-width:.04;stroke-opacity:.6}.fu-tm{fill:var(--main);stroke:var(--fg);stroke-width:.05}.fu-cn{fill:var(--paper);stroke:var(--fg);stroke-width:.1}.fu-pc{fill:var(--fg);opacity:.65}.fu-sc{fill:var(--fg);opacity:.75}.fu-mgn{fill:none;stroke:var(--main);stroke-width:.12}
 .show-ax .ax,.show-ev .ov-evac,.show-lt .ov-light{display:inline}
 .route{fill:none;stroke:var(--evac);stroke-width:.45;stroke-dasharray:1 .6}.rt{font-size:1.6px;font-weight:600;fill:var(--evac);paint-order:stroke;stroke:var(--paper);stroke-width:.5}
 .exit{fill:var(--evac);stroke:var(--paper);stroke-width:.25}.far{fill:none;stroke:var(--evac);stroke-width:.35}
@@ -118,6 +119,7 @@ svg text{fill:var(--fg);font-family:var(--f-text);pointer-events:none}
   <div class="tabs" role="group" aria-label="Этаж">
    <button type="button" data-f="1" aria-pressed="true">1 этаж · ±0,000</button><button type="button" data-f="2" aria-pressed="false">2 этаж · +6,000</button><button type="button" data-f="3" aria-pressed="false">3 этаж · +10,500</button>
   </div>
+  <label class="tog"><input type="checkbox" id="t-fu" checked> мебель</label>
   <label class="tog"><input type="checkbox" id="t-ax"> оси 8,4 × 8,4</label>
   <label class="tog"><input type="checkbox" id="t-ev"> эвакуация</label>
   <label class="tog"><input type="checkbox" id="t-lt"> свет в коридорах</label>
@@ -193,8 +195,10 @@ svg text{fill:var(--fg);font-family:var(--f-text);pointer-events:none}
 </div>
 
 <div class="card">
- <h2>Правила расстановки мебели</h2>
- <p class="lead" style="margin-bottom:14px">Мебель на планах не показана. Это задание для того, кто будет её расставлять: зоны и число мест в них — в экспликации, правила — здесь.</p>
+ <h2>Мебель: расстановка и правила</h2>
+ <p class="lead" style="margin-bottom:14px">Мебель расставлена на планах (слой «мебель» над планом можно выключить). Места — по нормам площади на место из экспликации, стеллажи — по вместимости фонда. Столы ставились сеткой по правилам ниже: столы торцом к окну, первый ряд в 0,6 м от фасада, проходы не меньше 1,2 м, у дверей лестниц и лифтов свободно 2,4 м; где на 4-местных столах мест не хватало — 6-местные.</p>
+ <div class="tbl" style="margin-bottom:10px"><table><thead><tr><th>Что</th><th class="n">По расчёту</th><th class="n">Расставлено</th><th>Итог</th></tr></thead><tbody>%%FURNT%%</tbody></table></div>
+ <p class="note" style="margin-bottom:14px">Не встали по форме зоны (помещение, сколько мест не хватает): %%FURNDEF%%. Вместимость стеллажей — допущение: в открытом фонде 7 полок по 30 книг на 1 м с каждой стороны, в закрытом хранении 8 полок по 35.</p>
  <div class="rules">%%RULES%%</div>
 </div>
 
@@ -215,6 +219,7 @@ const V=document.getElementById('viewer'),info=document.getElementById('info');
 function floor(f){document.querySelectorAll('[data-f]').forEach(e=>{if(e.tagName==='BUTTON')e.setAttribute('aria-pressed',e.dataset.f===f);else e.hidden=e.dataset.f!==f});try{localStorage.setItem('a6f',f)}catch(e){}}
 document.querySelectorAll('.tabs button').forEach(b=>b.addEventListener('click',()=>floor(b.dataset.f)));
 [['t-ax','show-ax'],['t-ev','show-ev'],['t-lt','show-lt']].forEach(([id,c])=>{const el=document.getElementById(id);el.addEventListener('change',()=>V.classList.toggle(c,el.checked));V.classList.toggle(c,el.checked)});
+{const el=document.getElementById('t-fu');const u=()=>V.classList.toggle('hide-fu',!el.checked);el.addEventListener('change',u);u()}
 function pick(k,scroll){const r=D[k];if(!r)return;document.querySelectorAll('.on').forEach(e=>e.classList.remove('on'));
  document.querySelectorAll('[data-k="'+k+'"]').forEach(e=>{e.classList.add('on');if(scroll&&e.tagName==='TR'){const b=e.closest('.expl');b.scrollTop=e.offsetTop-b.clientHeight/2}});
  info.innerHTML='<b></b><div class="m"></div><p></p>';info.children[0].textContent=(r.no?r.no+' · ':'')+r.n;info.children[1].textContent=r.m;info.children[2].textContent=r.w}

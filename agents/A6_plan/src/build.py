@@ -132,6 +132,44 @@ RATEN = {1.5: 'мобильные, 1,5', 2.5: 'обычные, 2,5'}
 STORE = ''.join(f'<tr><td>{r["n"]}</td><td class="n">{r["f"]}</td><td class="n">{fm(r["a"])}</td><td>{RATEN[r["rate"]]}</td><td class="n">{fm(r["u"]/r["rate"])}</td><td>{EXS[r["k"]]}</td></tr>' for r in ROOMS if r['c'] == 'store')
 STORE += f'<tr class="tot"><td>Всего</td><td></td><td class="n">{fm(sum(r["a"] for r in ROOMS if r["c"]=="store"))}</td><td></td><td class="n">{fm(BST/1000)}</td><td></td></tr>'
 
+# ---------- мебель: сверка расстановки с расчётом
+def fsum(pred, key):
+    return sum(st.get(key, 0) for (f_, k_), st in STAT.items() if pred(R1[(f_, k_)]))
+FROWS = []
+for nm, cats in [('Учебные зоны', ('readU',)), ('Групповые', ('group',)), ('Научные зоны и зал редких книг', ('readS',)), ('АВ-залы', ('av',))]:
+    pr = lambda r, c=cats: r['c'] in c or (r['k'] == 'rare' and 'readS' in c)
+    pr2 = (lambda r, c=cats: r['c'] in c and r['k'] != 'rare') if 'av' in cats else pr
+    need = sum(r['seats'] for r in ROOMS if pr2(r) and (r['f'], r['k']) in STAT); got = fsum(pr2, 'seats')
+    FROWS.append((nm, f'{need} мест', f'{got} мест', got >= need))
+lst = STAT[(1, 'lect')]
+FROWS.append(('Лекционный зал', '150 мест', f'{lst["seats"]} мест (из них 2 для МГН)', lst['seats'] >= 150))
+cs = STAT[(1, 'cafe')]['seats']
+FROWS.append(('Буфет', '40–45 мест', f'{cs} мест', cs >= 40))
+ab = STAT[(1, 'abon')]['seats'] + STAT[(2, 'abon2')]['seats']
+FROWS.append(('Абонемент: места для просмотра книг', '—', f'{ab} мест, 3 стойки выдачи, витрины {fm(STAT[(1, "abon")]["run"])} пог. м', True))
+tm = fsum(lambda r: True, 'term')
+FROWS.append(('Терминалы поиска', f'{TERM_N}', f'{tm}', tm >= TERM_N))
+oab = fsum(lambda r: r['c'] == 'oa', 'books'); oar = fsum(lambda r: r['c'] == 'oa', 'run')
+FROWS.append(('Открытый фонд: двусторонние стеллажи 2,1 м, 7 полок × 30 книг на 1 м', f'{fm(BOA/1000)} тыс. (5 м² на 1 000)', f'{fm(oar)} пог. м · {fm(oab/1000)} тыс.', oab >= 0.95 * BOA))
+for fl, nm, rt in [(1, 'Хранилище 1 этажа: стационарные стеллажи 0,5 м, проход 0,75 м', '2,5'), (2, 'Хранилища 2 этажа: мобильные, блоки по 10 тележек', '1,5'), (3, 'Хранилища 3 этажа: мобильные, блоки по 10 тележек', '1,5')]:
+    need = sum(r['u'] / r['rate'] for r in ROOMS if r['c'] == 'store' and r['f'] == fl) * 1000
+    got = fsum(lambda r, fl=fl: r['c'] == 'store' and r['f'] == fl, 'books'); run = fsum(lambda r, fl=fl: r['c'] == 'store' and r['f'] == fl, 'run')
+    FROWS.append((nm + ', 8 полок × 35 книг на 1 м', f'{fm(need/1000)} тыс. ({rt} м² на 1 000)', f'{fm(run)} пог. м · {fm(got/1000)} тыс.', got >= 0.95 * need))
+stf = fsum(lambda r: True, 'staff')
+FROWS.append(('Рабочие места персонала', '—', f'{stf} мест (столы, лабораторные столы, стойки)', True))
+FURNT = ''.join(f'<tr><td>{a}</td><td class="n">{b}</td><td class="n">{c}</td><td>{pill(ok) if b != "—" else ""}</td></tr>' for a, b, c, ok in FROWS)
+DEF = sorted([(R1[k], st['need'] - st['seats']) for k, st in STAT.items() if st.get('need') and st['seats'] < st['need'] and k != (1, 'lect')], key=lambda t: -t[1])
+FURNDEF = ', '.join(f'{r["no"]} {html.escape(r["s"])} — {d}' for r, d in DEF)
+SEATS_F = sum(st['seats'] for k, st in STAT.items() if R1[k]['c'] in ('readU', 'readS', 'group', 'av'))
+for k, st in STAT.items():
+    d = DATA[f"{k[0]}:{k[1]}"]
+    bits = []
+    if st['seats']: bits.append(f"расставлено {st['seats']} мест" + (f" из {st['need']}" if st.get('need') and st['need'] != st['seats'] else ''))
+    if st.get('term'): bits.append(f"терминалов {st['term']}")
+    if st['books']: bits.append(f"стеллажи {fm(st['run'])} пог. м, ≈ {fm(st['books']/1000)} тыс. книг")
+    if st.get('staff') and not st['seats']: bits.append(f"рабочих мест {st['staff']}")
+    if bits: d['m'] += ' · ' + ', '.join(bits)
+
 # ---------- программа
 ROWS = [('Абонемент', ['abon'], 678, '1 этаж у хранилища + стойка 2 этажа'), ('Каталоги и СБО (терминалы поиска — в открытых зонах, 25 мест × 4 м²)', ['cat'], 503, '1 этаж: СБО у входа; терминалы — на 1, 2 и 3 этажах'),
         ('Учебные читальные залы', ['readU'], 1728, '2 этаж, 1 этаж и террасы лестницы'), ('Открытый фонд, 360 тыс. ед.', ['oa'], 1800, '2 и 3 этажи; ещё 30 тыс. на террасах'),
@@ -232,7 +270,7 @@ def li(xs): return ''.join(f'<li>{x}</li>' for x in xs)
 t = open('tpl.html').read()
 SUBS = dict(DATE=datetime.date.today().strftime('%d.%m.%Y'), SEATS=fm(SEATS), SU=str(SU), SS=str(SS), SA=str(AVS), GROUP=str(SG),
             BOOKS=fm((BOA + BST) / 1e6, 2), BOA=fm(BOA / 1000), BST=fm(BST / 1e6, 2), MAXLK=f"{MAXLK:.0f}", PROG=f"{PROG:.0f}",
-            P1=plan(1), P2=plan(2), P3=plan(3), E1=expl(1), E2=expl(2), E3=expl(3), CHK=''.join(CHK), STAIRS=STAIRS, STORE=STORE,
+            P1=plan(1), P2=plan(2), P3=plan(3), E1=expl(1), E2=expl(2), E3=expl(3), CHK=''.join(CHK), STAIRS=STAIRS, STORE=STORE, FURNT=FURNT, FURNDEF=FURNDEF or 'нет',
             LIGHT=li(LIGHT), T26=''.join(T26), RULES=RH, MISS=li(MISS), ASSUME=li(ASSUME), DATA=json.dumps(DATA, ensure_ascii=False))
 for k, v in SUBS.items(): t = t.replace('%%' + k + '%%', v)
 assert '%%' not in t, t[t.index('%%'):t.index('%%') + 30]
