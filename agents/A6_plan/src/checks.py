@@ -117,8 +117,8 @@ MAIN = (1.6, 21.0)
 SERV = (79.6, 22.0)
 EXNW = (19.0, 0.4)     # выход на площадь у ЛК-1
 EXPK = (48.7, 0.4)     # выход на площадь через фойе-карман лекционного зала
-PUB2 = ['zW', 'zSW', 'zS0', 'zS', 'zSE', 'zN1', 'zN2', 'oaN', 'oaS', 'oaSW', 'gal2', 'corN', 'hall4', 'hallbr', 'abon2']
-PUB3 = ['sW', 'sVV', 'sS1', 'sS2', 'sSE', 'sN1', 'sN2', 'sAtr', 'oa3', 'oa3w', 'gal3', 'hall4']
+PUB2 = ['lobA', 'zW', 'zSW', 'zS0', 'zS', 'zSE', 'zN1', 'zN2', 'oaN', 'oaS', 'oaSW', 'gal2', 'corN', 'hall4', 'hallbr', 'abon2']
+PUB3 = ['lobA', 'sW', 'sVV', 'sS1', 'sS2', 'sSE', 'sN1', 'sN2', 'sAtr', 'oa3', 'oa3w', 'gal3', 'hall4']
 EX2 = {k: LKDOOR[k] for k in ('ЛК-1', 'ЛК-2', 'ЛК-4', 'ЛК-5')}
 EX3 = {k: LKDOOR[k] for k in ('ЛК-1', 'ЛК-4', 'ЛК-5')}
 
