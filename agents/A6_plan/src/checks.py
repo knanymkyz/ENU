@@ -113,31 +113,26 @@ def door_candidates(r, walk):
     return out
 
 
-from plan import LK3S
 MAIN = (1.6, 21.0)
 SERV = (79.6, 22.0)
 EXNW = (19.0, 0.4)     # выход на площадь у ЛК-1
 EXPK = (48.7, 0.4)     # выход на площадь через фойе-карман лекционного зала
-G23 = (50.9, 14.6)     # дверь из северной галереи 3 этажа в служебный коридор к ЛК-2
+PUB2 = ['zW', 'zSW', 'zS0', 'zS', 'zSE', 'zN1', 'zN2', 'oaN', 'oaS', 'oaSW', 'gal2', 'corN', 'hall4', 'hallbr', 'abon2']
+PUB3 = ['sW', 'sVV', 'sS1', 'sS2', 'sSE', 'sN1', 'sN2', 'sAtr', 'oa3', 'oa3w', 'gal3', 'hall4']
+EX2 = {k: LKDOOR[k] for k in ('ЛК-1', 'ЛК-2', 'ЛК-4', 'ЛК-5')}
+EX3 = {k: LKDOOR[k] for k in ('ЛК-1', 'ЛК-4', 'ЛК-5')}
 
 CFG = {
-    1: dict(walk=['vest', 'hall1', 'open1', 'read1', 'read2', 'pkE', 'pkL', 'scor', 'svest'],
+    1: dict(walk=['vest', 'hall1', 'open1', 'read2', 'pkL', 'scor', 'svest'],
             exits={**LKDOOR, 'Главный вход': MAIN, 'Служебный вход': SERV, 'Выход на площадь у ЛК-1': EXNW, 'Выход через фойе-карман': EXPK},
             lifts=LIFTDOOR, light_cor=['hall1', 'scor'],
-            light=[(k, LKDOOR[k]) for k in LKDOOR] + [('Выход на площадь', EXNW), ('Служебный каталог', (69.4, 14.6))],
-            light_rooms=['vest', 'pkE', 'pkL', 'svest', 'open1', 'read1', 'read2']),
-    2: dict(walk=['zW', 'zSW', 'zS0', 'zS', 'zSE', 'zN1', 'zN2', 'oaN', 'oaS', 'oaSW', 'gal2', 'corN', 'hall4', 'hallbr', 'abon2'],
-            exits={k: LKDOOR[k] for k in ('ЛК-1', 'ЛК-2', 'ЛК-4', 'ЛК-5')}, lifts=LIFTDOOR, light_cor=['corN', 'hall4'],
-            light=[('ЛК-2', LKDOOR['ЛК-2']), ('ЛК-4', LKDOOR['ЛК-4']), ('Приёмная дирекции', (69.4, 12.3))], light_rooms=['hallbr', 'oaN', 'zSE', 'oaS']),
-    '2s': dict(walk=['scor', 'corN', 'hall4'], exits={k: LKDOOR[k] for k in ('ЛК-2', 'ЛК-3', 'ЛК-4')}, lifts={},
-               light_cor=['scor'], light=[('ЛК-3', LKDOOR['ЛК-3']), ('Северный коридор', (70.1, 16.6)), ('Холл ЛК-4', (70.1, 49.6))], light_rooms=[]),
-    3: dict(walk=['sW', 'sVV', 'sS1', 'sS2', 'sSE', 'sE', 'sN1', 'sN2', 'oa3', 'oa3w', 'gal3', 'hall4'],
-            exits={'ЛК-1': LKDOOR['ЛК-1'], 'ЛК-4': LKDOOR['ЛК-4'], 'ЛК-5': LKDOOR['ЛК-5'], 'ЛК-2 (через дверь в служебный коридор)': G23},
-            lifts=LIFTDOOR, light_cor=[], light=[], light_rooms=[]),
-    '3s': dict(walk=['scor', 'hall4'],
-               exits={'ЛК-2': LKDOOR['ЛК-2'], 'ЛК-3': LKDOOR['ЛК-3'], 'ЛК-4': LKDOOR['ЛК-4']},
-               lifts={}, light_cor=['scor'],
-               light=[('ЛК-2', LKDOOR['ЛК-2']), ('ЛК-3', LKDOOR['ЛК-3']), ('Галерея атриума', (51.2, 14.6)), ('Реставрация', (69.4, 14.7)), ('Восточный угол', (70.1, 47.3))], light_rooms=[]),
+            light=[(k, LKDOOR[k]) for k in LKDOOR] + [('Выход на площадь', EXNW), ('Копирование', (69.4, 14.6)), ('Реставрация', (71.5, 44.0)), ('Мокрая реставрация', (71.5, 50.3))],
+            light_rooms=['vest', 'pkL', 'svest', 'open1', 'read2']),
+    2: dict(walk=PUB2, exits=EX2, lifts=LIFTDOOR, light_cor=['corN', 'hall4'],
+            light=[('ЛК-2', LKDOOR['ЛК-2']), ('ЛК-4', LKDOOR['ЛК-4'])], light_rooms=['hallbr', 'oaN', 'zSE', 'oaS', 'gN1']),
+    '2s': dict(walk=PUB2 + ['flob'], exits=EX2, lifts={}, light_cor=[], light=[], light_rooms=[]),
+    3: dict(walk=PUB3, exits=EX3, lifts=LIFTDOOR, light_cor=[], light=[], light_rooms=[]),
+    '3s': dict(walk=PUB3 + ['flob', 'lob2', 'rare'], exits={**EX3, 'ЛК-2': LKDOOR['ЛК-2']}, lifts={}, light_cor=[], light=[], light_rooms=[]),
 }
 SKIP = ('lk', 'core', 'wc', 'void')
 
@@ -169,8 +164,11 @@ def run(key):
         lf = dijkstra(m, [snap(m, p) for p in cfg['lifts'].values()])[0]
     res = []
     for r in rooms(f):
-        if r['k'] in cfg['walk'] or r['c'] in SKIP or key == 3 or (key == '3s' and r['c'] in ('readS', 'oa', 'cor', 'av')) or (key == 2 and r['c'] == 'cor') \
-                or (key == 2 and r['c'] == 'store') or (key == '2s' and r['c'] != 'store'):
+        if r['k'] in cfg['walk'] or r['c'] in SKIP or key == 3:
+            continue
+        if key in ('2s', '3s') and r['c'] != 'store':
+            continue
+        if key == 2 and r['c'] in ('store', 'cor'):
             continue
         cand = [(c, snap(m, c, 1.2)) for c in door_candidates(r, walk)]
         cand = [(c, s) for c, s in cand if s is not None and np.isfinite(D[s])]
