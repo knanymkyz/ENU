@@ -126,7 +126,7 @@ CFG = {
     1: dict(walk=['vest', 'hall1', 'read2', 'readE', 'info', 'scor', 'svest'],
             exits={**LKDOOR, 'Главный вход': MAIN, 'Служебный вход': SERV, 'Выход на площадь у ЛК-1': EXNW},
             lifts=LIFTDOOR, light_cor=['hall1', 'scor'],
-            light=[(k, LKDOOR[k]) for k in LKDOOR] + [('Выход на площадь', EXNW), ('Копирование', (69.4, 14.6)), ('Комплектование', (54.0, 14.5)), ('Реставрация', (71.5, 44.0)), ('Мокрая реставрация', (71.5, 50.3))],
+            light=[(k, LKDOOR[k]) for k in LKDOOR] + [('Выход на площадь', EXNW), ('Комплектование', (54.0, 14.5)), ('Реставрация', (71.5, 44.0)), ('Мокрая реставрация', (71.5, 50.3))],
             light_rooms=['vest', 'svest', 'read2', 'readE', 'info', 'cafe', 'gL1', 'terr']),
     2: dict(walk=PUB2, exits=EX2, lifts=LIFTDOOR, light_cor=['corN', 'hall4'],
             light=[('ЛК-2', LKDOOR['ЛК-2']), ('ЛК-4', LKDOOR['ЛК-4'])], light_rooms=['hallbr', 'oaN', 'zSE', 'oaS', 'gN1']),
