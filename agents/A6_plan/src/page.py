@@ -94,6 +94,8 @@ def plan(f):
             o.append(line((4.6, 15.4), (4.6, 30.6), 'ctl'))
             o.append(text((6.2, 17.2), 'контроль', 'ctlt', anchor='start'))
             o.append(line((33.0, 16.9), (49.5, 16.9), 'bar'))
+            o.append(line((33.0, 30.9), (49.5, 30.9), 'bar'))
+            o.append(line((38.1, 12.5), (45.3, 12.5), 'bar'))
     # подписи
     for r in rs:
         (px, py), g = label(r)
