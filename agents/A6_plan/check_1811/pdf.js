@@ -1,0 +1,11 @@
+const {chromium}=require('playwright');const fs=require('fs');
+(async()=>{const b=await chromium.launch();const p=await b.newPage();
+await p.emulateMedia({colorScheme:'light',media:'print'});
+const h=fs.readFileSync(process.argv[2],'utf8');
+const css='<style>body{background:#fff!important;font-size:11px!important}.wrap{max-width:none!important;padding:0!important;gap:10px!important}.tbl{overflow:visible!important}h1{font-size:22px!important}h2{font-size:15px!important;margin-bottom:6px!important}.card{padding:10px 12px!important;break-inside:auto}.kpis{grid-template-columns:repeat(4,1fr)!important;gap:8px!important}.kpi{padding:8px 10px!important}.kpi b{font-size:18px!important}table{font-size:10.5px!important}td,th{padding:3px 6px!important}.note,.note2,.src,.lead,.rm{font-size:9.5px!important}.pill,.tag{font-size:9.5px!important}tr{break-inside:avoid}.cols{gap:10px!important}.cols>.card{break-inside:avoid}ul.items{gap:5px!important}</style>';
+await p.setContent('<!doctype html><html lang="ru"><head><meta charset="utf-8">'+h.replace('</style>','</style>'+css)+'</html>',{waitUntil:'networkidle'});
+await p.evaluate(()=>document.fonts.ready);
+await p.evaluate(()=>{for(const h of document.querySelectorAll('h2'))if(h.textContent.startsWith('Где площадь'))h.closest('section').style.breakBefore='page'});
+await p.pdf({path:process.argv[3],format:'A4',landscape:true,printBackground:true,displayHeaderFooter:true,headerTemplate:'<span></span>',footerTemplate:'<div style="font-size:8px;width:100%;text-align:right;padding-right:10mm;color:#666">Сверка плана с табл. 26 · <span class="pageNumber"></span> / <span class="totalPages"></span></div>',margin:{top:'12mm',bottom:'14mm',left:'10mm',right:'10mm'}});
+console.log(await p.evaluate(()=>[...document.fonts].filter(f=>f.status==='loaded').map(f=>f.family).join(',')));
+await b.close();})();
