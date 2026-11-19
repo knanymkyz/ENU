@@ -88,7 +88,7 @@ WHY = {
     'Читальные залы — ав-обслуживание, крупноформатные, редкие книги': 'нет зала крупноформатных изданий',
     'Читальные залы — помещения групповых занятий': '3 комнаты на 1 этаже; на 2 и 3 этажах групповых нет',
     'Служебно-производственные — администрация, персонал, экспедиция': 'нет санузлов, душевых и гардероба персонала, комнаты приёма пищи, кабинетов заведующих, склада',
-    'Книгохранилище — открытый доступ': 'зоны открытого фонда вмещают около 318 тыс. из 360; ещё около 30 тыс. — на стеллажах лестницы-амфитеатра (помещение 252), её площадь учтена как учебные места верхнего уровня',
+    'Книгохранилище — открытый доступ': 'зоны открытого фонда вмещают около 318 тыс. из 360; запас — стеллажи лестницы-амфитеатра (помещение 252), её площадь учтена как учебные места верхнего уровня',
     'Абонемент — площадь для читателей': 'абонемент 1 этажа 423 м² и 2 этажа 102 м²',
     'Комплектование, обработка, служебный каталог — сотрудники': '',
     'Книгохранилище — сотрудники хранения': '',
@@ -112,8 +112,8 @@ srow += f'<tr><td>Групповые, 2,2 м² (сверх 1 800)</td><td class=
 strow = ''.join(f'<tr><td class="rm">{n}</td><td class="n">{W[n]["f"]}</td><td class="n">{fm(W[n]["a"], 1)}</td><td class="n">{fm(r, 1)}</td><td class="n">{fm(W[n]["a"]/r)}</td></tr>' for n, r in STORE.items())
 strow += f'<tr class="tot"><td>Закрытое</td><td></td><td class="n">{fm(A(list(STORE)), 1)}</td><td></td><td class="n">{fm(CAP)} из 1 440</td></tr>'
 strow += f'<tr><td>Открытый</td><td class="n">2, 3</td><td class="n">{fm(A(OPEN), 1)}</td><td class="n">5</td><td class="n">{fm(CAPO)} из 360</td></tr>'
-strow += f'<tr><td>Лестница-амфитеатр, 252</td><td class="n">1–2</td><td class="n">{fm(A(["252"]), 1)}</td><td class="n">—</td><td class="n">≈ 30 (оценка)</td></tr>'
-strow += f'<tr class="tot"><td>Весь фонд</td><td></td><td></td><td></td><td class="n">≈ {fm(CAP + CAPO + 30)} из 1 800</td></tr>'
+strow += f'<tr><td>Лестница-амфитеатр, 252</td><td class="n">1–2</td><td class="n">{fm(A(["252"]), 1)}</td><td class="n">—</td><td class="n">запас</td></tr>'
+strow += f'<tr class="tot"><td>Весь фонд</td><td></td><td></td><td></td><td class="n">{fm(CAP + CAPO)} из 1 800 + запас</td></tr>'
 
 # ---------- решения: где площадь меньше нормы и почему
 DECS = [
@@ -143,7 +143,7 @@ open(os.path.join(HERE, 'RESHENIYA_1911.md'), 'w').write('# Где площад�
 VC = A(['101', '102', '103', '146'])
 t = open(os.path.join(HERE, 'tpl.html')).read()
 for k, v in dict(T26=''.join(rows), SH=''.join(sh), SROW=srow, STROW=strow, DEC=dec, PROG=f'{100*TC/TN:.0f}', TP=fm(TP), TN=fm(TN, 1),
-                 SEATS=fm(SEATS), SEATSD=fm(1800 - SEATS), SG=str(SG), FUND=fm((CAP + CAPO + 30) / 1000, 2), CLOSED=fm(CAP / 1000, 2), OPENK=fm(CAPO + 30),
+                 SEATS=fm(SEATS), SEATSD=fm(1800 - SEATS), SG=str(SG), FUND=fm((CAP + CAPO) / 1000, 2), CLOSED=fm(CAP / 1000, 2), OPENK=fm(CAPO),
                  STOT=fm(STOT), VC=fm(VC), C2=fm(A(['202', '251'])), C3=fm(A(['315'])), SPA=fm(A(SP)), ALL25=fm(A(list(STORE)) / 2.5)).items():
     t = t.replace('%%' + k + '%%', v)
 assert '%%' not in t, t[t.index('%%'):t.index('%%') + 30]
