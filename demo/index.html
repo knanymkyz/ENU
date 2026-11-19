@@ -1,0 +1,139 @@
+<title>Sandyq &amp; Shanyraq</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one drawing-sheet column; drawings sit on white "paper" panels, text keeps to ~65ch */
+:root{
+  --bg:#eef0ee; --paper:#ffffff; --ink:#1d2321; --muted:#5d6763; --rule:#cfd5d2;
+  --copper:#9a5a2c; --glass:#3f7f99; --chip:#e3e8e5;
+  --display:"IBM Plex Sans Condensed","Arial Narrow",system-ui,sans-serif;
+  --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#151a19; --paper:#f4f5f3; --ink:#e6ebe8; --muted:#9aa6a1; --rule:#2f3835;
+  --copper:#d08a55; --glass:#7cb8d0; --chip:#222a28; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#151a19; --paper:#f4f5f3; --ink:#e6ebe8; --muted:#9aa6a1; --rule:#2f3835;
+  --copper:#d08a55; --glass:#7cb8d0; --chip:#222a28; color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 var(--body)}
+.wrap{max-width:1080px;margin:0 auto;padding-block:40px 64px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  display:grid;gap:56px}
+h1,h2,h3{font-family:var(--display);font-weight:600;text-wrap:balance;margin:0;line-height:1.15}
+h1{font-size:clamp(2.4rem,6vw,4rem);letter-spacing:-.01em}
+h1 .k{color:var(--copper)}
+h2{font-size:1.75rem}
+h3{font-size:1.1rem}
+p{margin:0;max-width:65ch}
+.eyebrow{font:500 .75rem/1.4 var(--mono);text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
+header{display:grid;gap:18px}
+.lead{font-size:1.2rem;max-width:58ch}
+.facts{display:flex;flex-wrap:wrap;gap:10px 28px;padding-top:6px;border-top:1px solid var(--rule)}
+.facts div{display:grid}
+.facts b{font:600 1.5rem/1.2 var(--display);font-variant-numeric:tabular-nums}
+.facts span{font:.8rem/1.4 var(--mono);color:var(--muted)}
+section{display:grid;gap:20px}
+.sheet{background:var(--paper);border:1px solid var(--rule);padding:12px;border-radius:2px}
+.sheet img{display:block;width:100%;height:auto}
+figure{margin:0;display:grid;gap:8px;min-width:0}
+figcaption{font:.82rem/1.5 var(--mono);color:var(--muted)}
+.ideas{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:20px}
+.idea{display:grid;gap:6px;align-content:start;border-top:2px solid var(--copper);padding-top:10px}
+.idea p{font-size:.95rem}
+.two{display:grid;grid-template-columns:1.25fr 1fr;gap:24px;align-items:start}
+.plans{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.steps{list-style:none;margin:0;padding:0;display:grid;gap:0;counter-reset:s}
+.steps li{display:grid;grid-template-columns:3rem 1fr;gap:4px 16px;padding:18px 0;border-top:1px solid var(--rule);counter-increment:s}
+.steps li::before{content:counter(s,decimal-leading-zero);font:500 1rem/1.4 var(--mono);color:var(--glass);grid-row:span 2}
+.steps p{font-size:.97rem}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tag{font:.75rem/1 var(--mono);background:var(--chip);padding:6px 8px;border-radius:2px}
+.role{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px}
+.role div{display:grid;gap:8px;align-content:start}
+.role ul{margin:0;padding-left:1.1em;display:grid;gap:4px}
+a{color:var(--glass);text-underline-offset:3px}
+a:focus-visible{outline:2px solid var(--glass);outline-offset:3px}
+.cta{font:500 1rem var(--body)}
+footer{font:.8rem/1.5 var(--mono);color:var(--muted);border-top:1px solid var(--rule);padding-top:16px}
+@media (max-width:760px){.two,.plans{grid-template-columns:1fr}}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="eyebrow">Case study · university library · concept stage · 2026</div>
+  <h1>Sandyq <span class="k">&amp;</span> Shanyraq</h1>
+  <p class="lead">A four-storey university library that I zoned together with a team of AI agents. I set the brief, the building codes and every design decision. The agents drafted the plans, counted the areas and checked my work.</p>
+  <div class="facts">
+    <div><b>4</b><span>floors, 8.4 m grid</span></div>
+    <div><b>1.8M</b><span>volumes to house</span></div>
+    <div><b>1,260</b><span>reading seats</span></div>
+    <div><b>6</b><span>AI agents</span></div>
+    <div><b>3 weeks</b><span>~50 iterations</span></div>
+  </div>
+</header>
+
+<section>
+  <h2>The idea</h2>
+  <p>The program put all book storage on a windowless third floor. Instead of hiding that, I made it the theme of the building. On top sits a <b>sandyq</b>, the Kazakh chest for valuables, clad in metal with the oyu-örnek ornament. Below it is a transparent glass base. Light comes through a <b>shanyraq</b> skylight down an atrium that cuts through all three floors.</p>
+  <figure>
+    <div class="sheet"><img src="img/facade.jpg" alt="North-west facade: glass base two floors high, a copper box with Kazakh ornament on top, a skylight over the atrium" width="2396" height="630"></div>
+    <figcaption>North-west facade, view from the main square. Schematic.</figcaption>
+  </figure>
+  <div class="ideas">
+    <div class="idea"><h3>Sandyq</h3><p>A closed storage volume on mobile shelving. No windows, metal cladding with relief ornament, lit at night.</p></div>
+    <div class="idea"><h3>Glass base</h3><p>Floors 1–2, 10.5 m of glass. The chest cantilevers over a full-height entrance portal.</p></div>
+    <div class="idea"><h3>Shanyraq</h3><p>A 300 m² atrium through three floors under a skylight shaped like the yurt's crown.</p></div>
+    <div class="idea"><h3>Book terraces</h3><p>Four 1.5 m terraces with shelving walls climb from the lobby to the open-plan second floor.</p></div>
+    <div class="idea"><h3>Reading lounge</h3><p>Sunk 0.45 m under the skylight. Soft modules around one big wooden table and trees.</p></div>
+  </div>
+</section>
+
+<section>
+  <h2>Section and atrium</h2>
+  <div class="two">
+    <figure>
+      <div class="sheet"><img src="img/section-atrium.jpg" alt="Cross-section through the atrium: terraces and stair on the left, sunken reading lounge on the right, skylight above" width="2396" height="936"></div>
+      <figcaption>Cross-section through the lounge and terraces. Daylight reaches the ground floor through the skylight.</figcaption>
+    </figure>
+    <figure>
+      <div class="sheet"><img src="img/atrium.jpg" alt="Ground-floor atrium plan: catalogue terminals at the entrance, terraces and stair on the left, reading lounge with trees on the right" width="1178" height="1240"></div>
+      <figcaption>Atrium, ground floor: catalogue, terraces, sunken lounge.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section>
+  <h2>Zoning by floor</h2>
+  <div class="plans">
+    <figure><div class="sheet"><img src="img/plan-1.jpg" alt="Floor 1 zoning plan" width="1416" height="1204"></div><figcaption>Floor 1 · public and staff</figcaption></figure>
+    <figure><div class="sheet"><img src="img/plan-2.jpg" alt="Floor 2 zoning plan" width="1416" height="1204"></div><figcaption>Floor 2 · open-plan reading + open stacks</figcaption></figure>
+    <figure><div class="sheet"><img src="img/plan-3.jpg" alt="Floor 3 zoning plan" width="1416" height="1204"></div><figcaption>Floor 3 · the sandyq: storage, labs, rare books</figcaption></figure>
+  </div>
+  <p>Every zone on these plans has an area and a reason. In the full sheet, hovering a zone shows why it is there and which code or brief item it follows. Reading rooms face north, east and south-east, as the code asks. Each storage compartment stays under 600 m², as fire rules require.</p>
+</section>
+
+<section>
+  <h2>How I built it</h2>
+  <ol class="steps">
+    <li><h3>Rules first</h3><p>I wrote the brief as a document the AI could follow: building footprint, structural grid, program areas from the design code, and which facade suits which room. When rules conflicted, the agent had to ask me, not guess.</p></li>
+    <li><h3>Plans as code</h3><p>A generator agent turned each scheme into an interactive HTML sheet: plans, sections, area tables. A new idea such as “atrium through three floors” takes minutes to redraw, not days.</p></li>
+    <li><h3>Independent reviewers</h3><p>Separate agents checked the result without seeing how it was made: program areas, fire safety, accessibility with stairs and lifts, daylight and ceiling heights.</p></li>
+    <li><h3>Check against the model</h3><p>Another agent read the room areas from the Revit model and compared them with the code, including how many people each room holds.</p></li>
+    <li><h3>Iterate</h3><p>Three rounds of variants, then a new footprint, then three versions of this concept. Each round was driven by a design decision I made after reading the reviews.</p></li>
+  </ol>
+  <div class="tags"><span class="tag">Claude Code</span><span class="tag">multi-agent review</span><span class="tag">Python</span><span class="tag">SVG / HTML</span><span class="tag">Revit</span><span class="tag">building codes</span></div>
+</section>
+
+<section>
+  <h2>My role</h2>
+  <div class="role">
+    <div><h3>Me</h3><ul><li>Concept and every planning decision</li><li>Design rules and code requirements for the agents</li><li>Agent workflow and the review loop</li><li>Final check of every variant</li></ul></div>
+    <div><h3>AI agents</h3><ul><li>Drafting plans, sections and facades</li><li>Area counts and seat counts</li><li>Code checks and critique</li><li>Turning my notes into documents</li></ul></div>
+  </div>
+  <p class="cta"><a href="concept.html" target="_blank" rel="noopener">Open the full concept sheet</a> (in Russian, with all plans and area tables)</p>
+</section>
+
+<footer>Client name, location and project details are removed. Drawings are schematic, from the concept stage.</footer>
+</div>
