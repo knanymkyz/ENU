@@ -1,0 +1,132 @@
+<title>Сверка плана 18.11</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Лист экспертизы: узкая колонка текста, широкие таблицы; цвет только для итогов (норма выполнена / частично / мало / избыток) */
+:root{
+ --paper:#f4f6f3;--sheet:#ffffff;--ink:#1b2320;--muted:#5d6a64;--rule:#d3dbd6;--accent:#24566b;
+ --ok:#1f7a4d;--okbg:#e2f2e8;--mid:#946200;--midbg:#fbf0d6;--low:#b3261e;--lowbg:#fbe4e1;--over:#24566b;--overbg:#e1eef3;
+ --f-text:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;--f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+ --paper:#121816;--sheet:#1a221f;--ink:#e3ebe7;--muted:#9aa8a1;--rule:#2d3834;--accent:#7fb6cc;
+ --ok:#5fd39a;--okbg:#173527;--mid:#f0bf55;--midbg:#3a2f12;--low:#ff8a80;--lowbg:#3d1d1a;--over:#8cc7dd;--overbg:#16313b;color-scheme:dark}}
+:root[data-theme="dark"]{
+ --paper:#121816;--sheet:#1a221f;--ink:#e3ebe7;--muted:#9aa8a1;--rule:#2d3834;--accent:#7fb6cc;
+ --ok:#5fd39a;--okbg:#173527;--mid:#f0bf55;--midbg:#3a2f12;--low:#ff8a80;--lowbg:#3d1d1a;--over:#8cc7dd;--overbg:#16313b;color-scheme:dark}
+body{background:var(--paper);color:var(--ink);font:15px/1.55 var(--f-text)}
+.wrap{max-width:1180px;margin:0 auto;padding-block:28px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:22px}
+.eyebrow{font:500 12px/1.4 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+h1{font-size:30px;line-height:1.15;margin:4px 0 8px;text-wrap:balance;font-weight:700}
+h2{font-size:19px;margin:0 0 10px;text-wrap:balance;font-weight:600}
+h3{font-size:15px;margin:0 0 8px;font-weight:600}
+p{margin:0}.lead{max-width:72ch;color:var(--muted)}
+.card{background:var(--sheet);border:1px solid var(--rule);border-radius:6px;padding:18px 20px;min-width:0}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.kpi{background:var(--sheet);border:1px solid var(--rule);border-radius:6px;padding:14px 16px;display:grid;gap:2px}
+.kpi b{font:600 26px/1.2 var(--f-text);font-variant-numeric:tabular-nums}
+.kpi span{font-size:13px;color:var(--muted)}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,460px),1fr));gap:22px}
+.cols>*{min-width:0}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th{font:500 12px/1.3 var(--f-mono);letter-spacing:.03em;color:var(--muted);text-align:left;padding:6px 8px;border-bottom:1px solid var(--rule);vertical-align:bottom}
+td{padding:7px 8px;border-bottom:1px solid var(--rule);vertical-align:top}
+.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.rm{font:13px/1.4 var(--f-mono);color:var(--muted)}
+.note{font-size:13px;color:var(--muted)}
+tr.tot td{font-weight:600;border-top:1.5px solid var(--ink)}
+.pill{display:inline-block;padding:1px 8px;border-radius:10px;font:500 12.5px/1.5 var(--f-mono)}
+.pill.ok{color:var(--ok);background:var(--okbg)}.pill.mid{color:var(--mid);background:var(--midbg)}.pill.low{color:var(--low);background:var(--lowbg)}
+.pill.over{color:var(--over);background:var(--overbg)}
+ul.items{margin:0;padding:0;list-style:none;display:grid;gap:10px}
+ul.items li{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:baseline}
+ul.items li>div{min-width:0}
+.tag{font:500 11.5px/1.6 var(--f-mono);padding:0 7px;border-radius:4px;white-space:nowrap}
+.tag.ok{color:var(--ok);background:var(--okbg)}.tag.mid{color:var(--mid);background:var(--midbg)}.tag.low{color:var(--low);background:var(--lowbg)}
+.legend{display:flex;flex-wrap:wrap;gap:8px 16px;font-size:13px;color:var(--muted)}
+.src{font-size:13px;color:var(--muted);max-width:90ch}
+@media (max-width:520px){h1{font-size:25px}.card{padding:14px}}
+</style>
+
+<div class="wrap">
+ <header>
+  <div class="eyebrow">Библиотека ЕНУ · проект 207 · план 1–3 этажей из Revit, 18.11</div>
+  <h1>Сверка плана 18.11 с программой</h1>
+  <p class="lead">Площади взяты из экспликации вашего PDF: это площади помещений, то есть полезные, и они сравниваются с табл. 26 Пособия к СНиП 2.08.02-89 напрямую. Программа — с вашими решениями: фонд 1,8 млн, открытый фонд 20 %, электронный каталог, на 2–3 этажах мобильные стеллажи.</p>
+ </header>
+
+ <div class="kpis">
+  <div class="kpi"><span>Программа табл. 26</span><b>67 %</b><span>засчитано без превышений</span></div>
+  <div class="kpi"><span>Читательских мест</span><b>889 из 1 800</b><span>плюс групповые: 173 из 360</span></div>
+  <div class="kpi"><span>Фонд</span><b>1,72 млн из 1,8</b><span>закрытый 1,41 млн, открытый 318 тыс.</span></div>
+  <div class="kpi"><span>Служебно-производственные</span><b>260 из 540 м²</b><span>48 % нормы</span></div>
+ </div>
+
+ <div class="cols">
+  <section class="card">
+   <h2>Что получилось</h2>
+   <ul class="items">
+    <li><span class="tag ok">да</span><div><b>Буфет и СБО поменяны местами.</b> Буфет 147 м² у входа, каталоги и справочное бюро 128 м² и выставка 62 м² — рядом с абонементом.</div></li>
+    <li><span class="tag ok">да</span><div><b>Абонемент у хранилища:</b> 422 м² и площадь сотрудников 35 м² между абонементом и хранилищем — книги подаются без лифта.</div></li>
+    <li><span class="tag ok">да</span><div><b>Запись читателей — у КПП:</b> «Пост контроля и справочная» 104 стоит до турникета.</div></li>
+    <li><span class="tag ok">да</span><div><b>Все отсеки хранения меньше 600 м²</b> (СП РК 3.02-107, п. 4.2.1.69). Хранение редких книг 310 — отдельное помещение со стенами.</div></li>
+    <li><span class="tag ok">да</span><div><b>Закрытое хранение — 1,41 млн из 1,44</b> (98 %), если на 2–3 этажах мобильные стеллажи.</div></li>
+    <li><span class="tag ok">да</span><div><b>Санузлы стоят друг над другом</b> на всех этажах, три блока; над хранилищем мокрых помещений нет. На каждом этаже по 4 лестничные клетки.</div></li>
+   </ul>
+  </section>
+  <section class="card">
+   <h2>Что нужно решить</h2>
+   <ul class="items">
+    <li><span class="tag low">важно</span><div><b>Мест в залах 889 из 1 800 (49 %).</b> Где можно взять площадь: аванзалы 709 м² при норме 450; вестибюль с гардеробом 937 м² при норме 270–630; лекционный зал +51 м²; коридоры 2 и 3 этажей — 968 и 925 м². Если в залы перейдёт часть проходов open space, мест станет больше.</div></li>
+    <li><span class="tag low">важно</span><div><b>Зал редких книг 309 не примыкает к хранению 310.</b> Между ними коридор 315, а дверь хранения выходит прямо в него: редкие книги носят через читательскую часть. Нужно поставить их стена в стену, с дверью из хранения прямо к стойке зала.</div></li>
+    <li><span class="tag low">важно</span><div><b>Абонемент 2 этажа (215) в западном углу</b>, а хранилище — у восточного фасада: около 60 м по общему коридору, книгоподъёмника на плане нет. Лучше поставить стойку у хранилища или у служебного коридора 247.</div></li>
+    <li><span class="tag mid">проверить</span><div><b>Нет служебной лестницы.</b> Двери отсеков 246 и 311 выходят в общие коридоры, сотрудники ходят на 2 и 3 этажи через читательскую часть. Грузоподъёмник у коридоров 247 и 312 есть.</div></li>
+    <li><span class="tag mid">проверить</span><div><b>Гардероб: 15 рядов в помещении около 17 × 14 м.</b> Если ряды идут поперёк 17 м, шаг около 1,1 м, а мы раньше брали не меньше 1,2–1,34 м. Площади хватает, проверить проходы между рядами.</div></li>
+    <li><span class="tag mid">проверить</span><div><b>Хранилище 138 — 596,8 м²</b> при пределе 600: любое смещение стены может перейти предел.</div></li>
+    <li><span class="tag mid">мелочь</span><div><b>Штамп листов</b> от другого проекта («Многоквартирный жилой комплекс…, III очередь»).</div></li>
+   </ul>
+  </section>
+ </div>
+
+ <section class="card">
+  <h2>Программа табл. 26</h2>
+  <div class="legend" style="margin-bottom:10px"><span><span class="pill ok">≥ 95 %</span> выполнено</span><span><span class="pill mid">70–95 %</span> частично</span><span><span class="pill low">&lt; 70 %</span> мало</span><span><span class="pill ok over">&gt; 120 %</span> избыток</span></div>
+  <div class="tbl"><table>
+   <thead><tr><th>Строка</th><th class="n">Норма, м²</th><th class="n">По плану, м²</th><th class="n">%</th><th>Помещения</th><th>Как считали</th></tr></thead>
+   <tbody><tr><td>Абонемент</td><td class="n">678</td><td class="n">561</td><td class="n"><span class="pill mid">83 %</span></td><td class="rm">140, 215, 139</td><td class="note">читатели 1,8 м² × 360 + сотрудники 5 м² × 6; 139 — площадь сотрудников у хранилища</td></tr><tr><td>Аванзал</td><td class="n">450</td><td class="n">709</td><td class="n"><span class="pill ok over">158 %</span></td><td class="rm">116, 201</td><td class="note">читатели 1,5 м² × 270 + сотрудники 5 м² × 9; в прежней программе этой строки не было</td></tr><tr><td>Каталоги и СБО</td><td class="n">503</td><td class="n">295</td><td class="n"><span class="pill low">59 %</span></td><td class="rm">141, 142, 214, 217, 317, 331</td><td class="note">по электронной оценке нужно 290–330 м²; выставка 142 — часть СБО (п. 3.108)</td></tr><tr><td>Учебные читальные залы</td><td class="n">1 728</td><td class="n">912</td><td class="n"><span class="pill low">53 %</span></td><td class="rm">114, 204, 205, 206, 216, 226</td><td class="note">2,4 м² × 720 мест</td></tr><tr><td>Помещения групповых занятий</td><td class="n">792</td><td class="n">381</td><td class="n"><span class="pill low">48 %</span></td><td class="rm">115, 117, 118</td><td class="note">2,2 м² × 360 мест</td></tr><tr><td>Научные читальные залы</td><td class="n">2 700</td><td class="n">1 334</td><td class="n"><span class="pill low">49 %</span></td><td class="rm">318, 319, 327, 328, 329, 340, 341, 342</td><td class="note">3,0 м² × 900 мест</td></tr><tr><td>АВ-залы, крупноформатные, редкие книги</td><td class="n">900</td><td class="n">326</td><td class="n"><span class="pill low">36 %</span></td><td class="rm">227, 228, 309</td><td class="note">5,0 м² × 180 мест; зала крупноформатных изданий нет</td></tr><tr><td>Открытый фонд, 360 тыс.</td><td class="n">1 800</td><td class="n">1 589</td><td class="n"><span class="pill mid">88 %</span></td><td class="rm">203, 224, 225, 316, 330</td><td class="note">5 м² на 1 000 ед.</td></tr><tr><td>Закрытое хранение, 1,44 млн</td><td class="n">2 160</td><td class="n">2 110</td><td class="n"><span class="pill ok">98 %</span></td><td class="rm">138, 246, 248, 311, 313, 310</td><td class="note">по вместимости: 1 этаж и редкие — 2,5 м², 2–3 этажи мобильные — 1,5 м² на 1 000</td></tr><tr><td>Сотрудники хранения</td><td class="n">52</td><td class="n">45</td><td class="n"><span class="pill mid">87 %</span></td><td class="rm">135</td><td class="note"></td></tr><tr><td>Комплектование и обработка</td><td class="n">78</td><td class="n">68</td><td class="n"><span class="pill mid">87 %</span></td><td class="rm">130</td><td class="note"></td></tr><tr><td>Служебный каталог</td><td class="n">112,5</td><td class="n">0</td><td class="n"><span class="pill low">0 %</span></td><td class="rm">—</td><td class="note">электронный — ваше решение 17.11</td></tr><tr><td>Лаборатории</td><td class="n">360</td><td class="n">238</td><td class="n"><span class="pill low">66 %</span></td><td class="rm">136</td><td class="note">решение 17.11: современный состав 160–200 м²; гигиена книг — в 131</td></tr><tr><td>Служебно-производственные</td><td class="n">540</td><td class="n">260</td><td class="n"><span class="pill low">48 %</span></td><td class="rm">105, 131, 132, 133, 134</td><td class="note">3 м² на 10 тыс. ед.: дирекция, экспедиция, служебный вход, рекреация</td></tr><tr class="tot"><td>Итого по программе</td><td class="n">12 853,5</td><td class="n">8 829</td><td class="n"><b>67 %</b></td><td></td><td class="note">превышения не засчитываются: в счёт идёт 8 570 м²</td></tr></tbody></table></div>
+ </section>
+
+ <div class="cols">
+  <section class="card">
+   <h2>Читательские места</h2>
+   <div class="tbl"><table><thead><tr><th>Залы</th><th class="n">Мест по площади</th><th class="n">Нужно</th><th class="n">%</th></tr></thead><tbody><tr><td>Учебные залы</td><td class="n">380</td><td class="n">720</td><td class="n"><span class="pill low">53 %</span></td></tr><tr><td>Научные залы</td><td class="n">444</td><td class="n">900</td><td class="n"><span class="pill low">49 %</span></td></tr><tr><td>АВ-залы и зал редких книг</td><td class="n">65</td><td class="n">180</td><td class="n"><span class="pill low">36 %</span></td></tr><tr class="tot"><td>Читательские места</td><td class="n">889</td><td class="n">1 800</td><td class="n"><b>49 %</b></td></tr><tr><td>Групповые (сверх 1 800)</td><td class="n">173</td><td class="n">360</td><td class="n"><span class="pill low">48 %</span></td></tr></tbody></table></div>
+   <p class="src" style="margin-top:8px">Места посчитаны делением площади на норму на место. Расстановка мебели в зонах сложной формы обычно даёт на 2–3 % меньше. Места в аванзалах и абонементе в 1 800 не входят.</p>
+  </section>
+  <section class="card">
+   <h2>Фонд</h2>
+   <div class="tbl"><table><thead><tr><th>№</th><th>Помещение</th><th class="n">Этаж</th><th class="n">м²</th><th class="n">м² на 1 000</th><th class="n">тыс. ед.</th></tr></thead><tbody><tr><td>138</td><td>Основное книгохранилище</td><td class="n">1</td><td class="n">596,82</td><td class="n">2,5</td><td class="n">239</td></tr><tr><td>246</td><td>Основное книгохранилище</td><td class="n">2</td><td class="n">392,63</td><td class="n">1,5</td><td class="n">262</td></tr><tr><td>248</td><td>Основное книгохранилище</td><td class="n">2</td><td class="n">456,82</td><td class="n">1,5</td><td class="n">305</td></tr><tr><td>311</td><td>Основное книгохранилище</td><td class="n">3</td><td class="n">403,60</td><td class="n">1,5</td><td class="n">269</td></tr><tr><td>313</td><td>Основное книгохранилище</td><td class="n">3</td><td class="n">456,66</td><td class="n">1,5</td><td class="n">304</td></tr><tr><td>310</td><td>Хранение редких книг</td><td class="n">3</td><td class="n">69,52</td><td class="n">2,5</td><td class="n">28</td></tr><tr class="tot"><td></td><td>Закрытое хранение</td><td></td><td class="n">2 376,05</td><td></td><td class="n">1 406</td></tr><tr><td></td><td>Открытый фонд (203, 224, 225, 316, 330)</td><td class="n">2, 3</td><td class="n">1 588,99</td><td class="n">5</td><td class="n">318</td></tr><tr class="tot"><td></td><td>Весь фонд</td><td></td><td></td><td></td><td class="n">1 724 из 1 800</td></tr></tbody></table></div>
+   <p class="src" style="margin-top:8px">Если на 2–3 этажах ставить стационарные стеллажи (2,5 м² на 1 000), закрытое хранение вместит только 950 тыс. Для 1,44 млн мобильные стеллажи нужны. Хранение редких книг посчитано по стационарным стеллажам.</p>
+  </section>
+ </div>
+
+ <section class="card">
+  <h2>Вне программы</h2>
+  <div class="tbl"><table><thead><tr><th>Что</th><th>Помещения</th><th class="n">По плану, м²</th><th>Норма или расчёт</th><th>Итог</th></tr></thead><tbody><tr><td>Лекционный зал на 150 мест</td><td class="rm">143</td><td class="n">264</td><td class="note">около 213 (зал 180 + аппаратная 33)</td><td class="note">+51 м²</td></tr><tr><td>Вестибюль, тамбур, КПП и гардероб</td><td class="rm">101–103, 146</td><td class="n">937</td><td class="note">270–360 при равномерном потоке, 450–630 при массовом (1 800 чел.)</td><td class="note">+307…+667 м²</td></tr><tr><td>Гардероб на 1 860 мест, 15 рядов</td><td class="rm">146</td><td class="n">238</td><td class="note">за барьером 144–180 м²</td><td class="note">площади хватает; шаг рядов проверить</td></tr><tr><td>Буфет и кофе-пойнт</td><td class="rm">147, 144</td><td class="n">162</td><td class="note">около 1,8 м² на место</td><td class="note">≈ 58 мест с раздачей</td></tr><tr><td>Коридоры 2 этажа</td><td class="rm">202</td><td class="n">968</td><td class="note">—</td><td class="note">21 % этажа</td></tr><tr><td>Коридоры 3 этажа</td><td class="rm">315</td><td class="n">925</td><td class="note">—</td><td class="note">21 % этажа</td></tr></tbody></table></div>
+ </section>
+
+ <section class="card">
+  <h2>Чего нет в экспликации</h2>
+  <ul class="items">
+   <li><span class="tag low">норма</span><div><b>Санузлы, душевые и гардероб персонала</b> отдельно от читательских (СН РК 3.02-07, п. 5.4.2.19). Сейчас у персонала только общие санузлы и «Зона рекреации» 134, 22 м².</div></li>
+   <li><span class="tag low">норма</span><div><b>Комната приёма пищи персонала.</b> Буфет у входа — для читателей и гостей.</div></li>
+   <li><span class="tag mid">нужно</span><div><b>Электрощитовая, кроссовая, серверная</b> — около 30–50 м², в табл. 26 не входят.</div></li>
+   <li><span class="tag mid">нужно</span><div><b>Кабинеты заведующих отделами, склад канцтоваров и мебели</b> — входят в 540 м² служебно-производственных (п. 3.109); сейчас из них занято 260 м².</div></li>
+   <li><span class="tag mid">нужно</span><div><b>Книгоподъёмник</b> от хранилища к абонементу 2 этажа.</div></li>
+   <li><span class="tag mid">нужно</span><div><b>Зал крупноформатных изданий</b> — часть строки «АВ-залы, крупноформатные, редкие книги».</div></li>
+  </ul>
+ </section>
+
+ <p class="src">Источники: Пособие к СНиП 2.08.02-89, табл. 26, пп. 3.106–3.113; СН РК 3.02-07-2014; СП РК 3.02-107. Норма вестибюля с гардеробом и гардероба — СП РК 3.02-107, пп. 4.3.2.3–4.3.2.5, по нашему прежнему расчёту на 1 800 человек. Лекционный зал на 150 мест — наш расчёт 17.11. Площади экспликации — из PDF «Отделочный план» 1–3 этажей от 18.11.2026.</p>
+</div>
