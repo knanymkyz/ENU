@@ -32,6 +32,7 @@ p{margin:0}.lead{max-width:72ch;color:var(--muted)}
 .tbl{overflow-x:auto}
 table{border-collapse:collapse;width:100%;font-size:14px}
 th{font:500 12px/1.3 var(--f-mono);letter-spacing:.03em;color:var(--muted);text-align:left;padding:6px 8px;border-bottom:1px solid var(--rule);vertical-align:bottom}
+td.grp{font-weight:600;font-size:13px;max-width:160px}
 td{padding:7px 8px;border-bottom:1px solid var(--rule);vertical-align:top}
 .n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 .rm{font:13px/1.4 var(--f-mono);color:var(--muted)}
@@ -55,81 +56,63 @@ td.muted{color:var(--muted)}td.up{color:var(--ok);font-weight:600}td.dn{color:va
 <div class="wrap">
  <header>
   <div class="eyebrow">Библиотека ЕНУ · проект 207 · DWG 1–3 этажей, 19.11</div>
-  <h1>Сверка плана с программой</h1>
-  <p class="lead">Основа — ваши DWG 1–3 этажей. Площадь помещения взята по его заливке, назначение — по цвету легенды; для сравнения рядом стоит экспликация PDF от 18.11. Норма — табл. 26 Пособия к СНиП 2.08.02-89 с вашими решениями: фонд 1,8 млн, открытый фонд 20 %, электронный каталог, на 2–3 этажах мобильные стеллажи.</p>
+  <h1>Сверка плана с табл. 26</h1>
+  <p class="lead">Площади взяты из ваших DWG 1–3 этажей: площадь помещения — по его заливке, назначение — по цвету легенды. Норма — табл. 26 Пособия к СНиП 2.08.02-89 для 1 800 читательских мест (15 % от 12 000 читателей) и фонда 1,8 млн ед.</p>
  </header>
 
  <div class="kpis">
-  <div class="kpi"><span>Программа табл. 26</span><b>%%PROG%% %</b><span>в PDF 18.11 было %%PROGP%% %</span></div>
-  <div class="kpi"><span>Читательских мест</span><b>%%SEATS%% из 1 800</b><span>не хватает %%SEATSD%%; в PDF было %%SEATSP%%</span></div>
+  <div class="kpi"><span>Табл. 26 выполнена</span><b>%%PROG%% %</b><span>%%TP%% из %%TN%% м², без превышений</span></div>
+  <div class="kpi"><span>Читательских мест</span><b>%%SEATS%% из 1 800</b><span>не хватает %%SEATSD%%</span></div>
   <div class="kpi"><span>Групповые</span><b>%%SG%% из 360</b><span>все на 1 этаже</span></div>
   <div class="kpi"><span>Фонд</span><b>%%FUND%% млн из 1,8</b><span>закрытый %%CLOSED%% млн, открытый %%OPENK%% тыс.</span></div>
  </div>
 
  <section class="card">
-  <h2>Чего не хватает</h2>
-  <p class="lead" style="margin-bottom:10px">По программе не хватает около %%STOT%% м² — без строк, где недобор принят вашим решением. Строки — от самой большой нехватки к меньшей.</p>
+  <h2>Табл. 26: норма и план</h2>
+  <div class="legend" style="margin-bottom:10px"><span><span class="pill ok">≥ 95 %</span> выполнено</span><span><span class="pill mid">70–95 %</span> частично</span><span><span class="pill low">&lt; 70 %</span> мало</span><span><span class="pill ok over">&gt; 120 %</span> больше нормы</span><span><span class="tag ok">решение</span> площадь меньше нормы по решению — см. ниже</span></div>
   <div class="tbl"><table>
-   <thead><tr><th></th><th>Строка</th><th class="n">Не хватает, м²</th><th class="n">Мест</th><th class="n">Этаж</th><th>Где и почему</th></tr></thead>
-   <tbody>%%SHROW%%</tbody></table></div>
+   <thead><tr><th>Группа</th><th>Помещения по табл. 26</th><th class="n">Расчёт</th><th class="n">Норма, м²</th><th class="n">План, м²</th><th class="n">%</th><th class="n">±, м²</th><th>№ по плану</th><th></th></tr></thead>
+   <tbody>%%T26%%</tbody></table></div>
+  <p class="note2">Основное и компактное хранение по площади меньше нормы, но по вместимости это %%CLOSED%% млн из 1,44 млн: на 2–3 этажах мобильные стеллажи. Со стационарными стеллажами те же площади вместили бы только %%ALL25%% тыс.</p>
  </section>
 
- <div class="cols">
-  <section class="card">
-   <h2>Где взять площадь</h2>
-   <ul class="items">
-    <li><span class="tag mid">1 этаж</span><div><b>Вестибюль с гардеробом — %%VC%% м²</b> при норме 270–630. Излишек 300–660 м² — это 125–275 учебных мест.</div></li>
-    <li><span class="tag mid">1 этаж</span><div><b>Лекционный зал</b> больше расчётного на 51 м² — около 20 учебных мест.</div></li>
-    <li><span class="tag mid">2 этаж</span><div><b>Коридоры — %%C2%% м²</b>, около 16 % этажа. Внутри open space часть проходов можно отнести к залам: норма на место уже включает проходы между столами.</div></li>
-    <li><span class="tag mid">3 этаж</span><div><b>Коридор 315 — %%C3%% м²</b>, около 14 % этажа. Здесь самая большая нехватка — научные залы.</div></li>
-    <li><span class="tag mid">2–3 этаж</span><div><b>Групповые</b> можно поставить в научные и учебные зоны у фасадов: по норме их 360 мест, сейчас только 3 комнаты на 1 этаже.</div></li>
-   </ul>
-  </section>
-  <section class="card">
-   <h2>Что ещё решить</h2>
-   <ul class="items">
-    <li><span class="tag low">важно</span><div><b>Зал редких книг 309 по-прежнему не примыкает к хранению 310.</b> Между ними около 3,4 м — коридор 315, а хранение выходит прямо в него. Нужна стена в стену с дверью из хранения к стойке зала.</div></li>
-    <li><span class="tag low">важно</span><div><b>Абонемент 2 этажа 215</b> — в западном углу, около 55 м от хранилищ 246 и 248. Книгоподъёмника на плане нет.</div></li>
-    <li><span class="tag low">норма</span><div><b>Служебно-производственных %%SPA%% м² из 540.</b> Нет санузлов, душевых и гардероба персонала (СН РК 3.02-07, п. 5.4.2.19), комнаты приёма пищи, кабинетов заведующих, склада, электрощитовой и серверной.</div></li>
-    <li><span class="tag mid">проверить</span><div><b>Служебной лестницы нет:</b> двери хранилищ 2 и 3 этажей выходят в общие коридоры.</div></li>
-    <li><span class="tag mid">проверить</span><div><b>Гардероб: 15 рядов</b> в помещении около 17 × 14 м — шаг около 1,1 м при наших 1,2–1,34 м.</div></li>
-    <li><span class="tag mid">проверить</span><div><b>Хранилище 138 — 597 м²</b> при пределе 600 (СП РК 3.02-107, п. 4.2.1.69).</div></li>
-   </ul>
-  </section>
- </div>
+ <section class="card">
+  <h2>Где площадь взята меньше нормы и почему</h2>
+  <p class="lead" style="margin-bottom:10px">Это сознательные решения — их можно перенести в отчёт как обоснование отступлений от табл. 26.</p>
+  <div class="tbl"><table>
+   <thead><tr><th>Строка табл. 26</th><th class="n">По норме</th><th>По плану</th><th>Причина</th></tr></thead>
+   <tbody>%%DEC%%</tbody></table></div>
+ </section>
 
  <section class="card">
-  <h2>Программа табл. 26</h2>
-  <div class="legend" style="margin-bottom:10px"><span><span class="pill ok">≥ 95 %</span> выполнено</span><span><span class="pill mid">70–95 %</span> частично</span><span><span class="pill low">&lt; 70 %</span> мало</span><span><span class="pill ok over">&gt; 120 %</span> избыток</span></div>
+  <h2>Чего не хватает</h2>
+  <p class="lead" style="margin-bottom:10px">Без строк, где площадь меньше по решению. Всего около %%STOT%% м².</p>
   <div class="tbl"><table>
-   <thead><tr><th>Строка</th><th class="n">Норма, м²</th><th class="n">PDF 18.11</th><th class="n">DWG 19.11</th><th class="n">Изменение</th><th class="n">% нормы</th><th>Помещения</th></tr></thead>
-   <tbody>%%PROW%%</tbody></table></div>
-  <p class="note2">Закрытое хранение — в пересчёте на мобильные стеллажи (1,5 м² на 1 000), как в программе. Если на 2–3 этажах ставить стационарные стеллажи, оно вместит только %%ALL25%% тыс.</p>
+   <thead><tr><th>Строка табл. 26</th><th class="n">Не хватает, м²</th><th class="n">Мест</th><th class="n">Этаж</th><th>Почему</th></tr></thead>
+   <tbody>%%SH%%</tbody></table></div>
  </section>
 
  <div class="cols">
   <section class="card">
    <h2>Читательские места</h2>
-   <div class="tbl"><table><thead><tr><th>Залы</th><th class="n">PDF</th><th class="n">DWG</th><th class="n">Нужно</th><th class="n">Не хватает</th><th class="n">%</th></tr></thead><tbody>%%SROW%%</tbody></table></div>
-   <p class="note2">Места — площадь, делённая на норму на место. Расстановка мебели в зонах сложной формы обычно даёт на 2–3 % меньше.</p>
+   <div class="tbl"><table><thead><tr><th>Залы</th><th class="n">По плану</th><th class="n">Нужно</th><th class="n">Не хватает</th><th class="n">%</th></tr></thead><tbody>%%SROW%%</tbody></table></div>
+   <p class="note2">Места — площадь, делённая на норму на место.</p>
   </section>
   <section class="card">
-   <h2>Фонд</h2>
-   <div class="tbl"><table><thead><tr><th>№</th><th>Помещение</th><th class="n">Этаж</th><th class="n">м²</th><th class="n">м² на 1 000</th><th class="n">тыс. ед.</th></tr></thead><tbody>%%STROW%%</tbody></table></div>
+   <h2>Фонд по вместимости</h2>
+   <div class="tbl"><table><thead><tr><th>№</th><th class="n">Этаж</th><th class="n">м²</th><th class="n">м² на 1 000</th><th class="n">тыс. ед.</th></tr></thead><tbody>%%STROW%%</tbody></table></div>
   </section>
  </div>
 
- <div class="cols">
-  <section class="card">
-   <h2>Что изменилось против PDF 18.11</h2>
-   <div class="tbl"><table><thead><tr><th>№</th><th>Помещение</th><th class="n">PDF</th><th class="n">DWG</th><th class="n">±</th></tr></thead><tbody>%%CHG%%</tbody></table></div>
-   <p class="note2">Подписей помещений в DWG нет: новые помещения названы по цвету заливки. Санузлы, лестницы и шахты не показаны — по заливке они меньше на площадь сантехники и маршей.</p>
-  </section>
-  <section class="card">
-   <h2>Вне программы</h2>
-   <div class="tbl"><table><thead><tr><th>Что</th><th>Помещения</th><th class="n">м²</th><th>Норма или расчёт</th><th>Итог</th></tr></thead><tbody>%%XROW%%</tbody></table></div>
-  </section>
- </div>
+ <section class="card">
+  <h2>Где взять площадь</h2>
+  <ul class="items">
+   <li><span class="tag mid">1 этаж</span><div><b>Вестибюль, тамбур, КПП и гардероб — %%VC%% м²</b> при норме 270–630 (СП РК 3.02-107, п. 4.3.2.3). Излишек 300–660 м² — это 125–275 учебных мест.</div></li>
+   <li><span class="tag mid">1 этаж</span><div><b>Лекционный зал</b> больше расчётного (около 213 м²) на 51 м².</div></li>
+   <li><span class="tag mid">2 этаж</span><div><b>Коридоры — %%C2%% м².</b> <b>3 этаж: коридор 315 — %%C3%% м².</b> В open space норма на место уже включает проходы между столами, поэтому часть этих проходов можно отнести к залам.</div></li>
+   <li><span class="tag mid">2–3 этаж</span><div><b>Групповые</b> — в учебные и научные зоны у фасадов.</div></li>
+  </ul>
+ </section>
 
- <p class="src">Источники: Пособие к СНиП 2.08.02-89, табл. 26, пп. 3.102–3.113; СН РК 3.02-07-2014; СП РК 3.02-107, пп. 4.2.1.69, 4.3.2.3–4.3.2.5. Площади — DWG «Отделочный план» 1–3 этажей (19.11) и экспликация PDF от 18.11.2026.</p>
+ <p class="src">Источники: Пособие к СНиП 2.08.02-89, табл. 26, пп. 3.50, 3.102–3.113; СН РК 3.02-07-2014; СП РК 3.02-107. Площади — DWG «Отделочный план» 1–3 этажей, 19.11.2026. Новые помещения 250, 252 (учебные) и 343, 344 (научные) названы по цвету заливки: подписей в DWG нет.</p>
 </div>
